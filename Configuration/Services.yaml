@@ -1,0 +1,13 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+  SUDHAUS7\Sudhaus7Wizard\:
+    resource: '../Classes/*'
+  SUDHAUS7\Sudhaus7Wizard\Cli\Run:
+    tags:
+      - name: 'console.command'
+        command: 'sudhaus7:wizard'
+        description: 'run wizard tasks'
+        schedulable: true

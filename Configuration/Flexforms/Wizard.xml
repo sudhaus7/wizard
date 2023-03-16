@@ -1,0 +1,22 @@
+<T3DataStructure>
+    <meta>
+        <langDisable>1</langDisable>
+    </meta>
+    <ROOT>
+        <type>array</type>
+        <el>
+
+            <theme>
+                <TCEforms>
+                    <label>Diese Vorlage hat keine weiteren Konfigurationsoptionen - Bitte Quelle/Typ wählen</label>
+                    <config>
+                        <type>none</type>
+                    </config>
+                </TCEforms>
+            </theme>
+
+
+
+        </el>
+    </ROOT>
+</T3DataStructure>

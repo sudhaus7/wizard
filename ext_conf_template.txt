@@ -1,0 +1,5 @@
+# cat=basic//01; type=boolean; label=use the shortname like KG_name
+unifyshortname = 1
+
+# cat=basic//02; type=string; label=Gruppen Prefix
+groupprefix = GBK

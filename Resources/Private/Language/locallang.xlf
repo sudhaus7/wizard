@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<xliff version="1.0">
+    <file source-language="en" datatype="plaintext" original="messages" date="2014-09-12T13:49:12Z">
+        <header>
+            <generator>LFEditor</generator>
+        </header>
+        <body>
+            <trans-unit id="tt_content.sudhaus7wizard_element" xml:space="preserve">
+				<source>News/Event/Project Element</source>
+			</trans-unit>
+			<trans-unit id="tt_content.sudhaus7wizard_element.description" xml:space="preserve">
+				<source>Mark this page as News</source>
+			</trans-unit>
+			<trans-unit id="tt_content.sudhaus7wizard_plugin" xml:space="preserve">
+				<source>News/Event/Project Listing</source>
+			</trans-unit>
+			<trans-unit id="tt_content.sudhaus7wizard_plugin.description" xml:space="preserve">
+				<source>List the News/Event/Project Elements</source>
+			</trans-unit>
+			<trans-unit id="element.flex.type" xml:space="preserve">
+				<source>Type of this page</source>
+			</trans-unit>
+			<trans-unit id="element.flex.type.pleaseselect" xml:space="preserve">
+				<source>-- please select</source>
+			</trans-unit>
+			<trans-unit id="element.flex.type.news" xml:space="preserve">
+				<source>News</source>
+			</trans-unit>
+			<trans-unit id="element.flex.type.event" xml:space="preserve">
+				<source>Event</source>
+			</trans-unit>
+			<trans-unit id="element.flex.type.project" xml:space="preserve">
+				<source>Project</source>
+			</trans-unit>
+			<trans-unit id="element.flex.news.date" xml:space="preserve">
+				<source>Event</source>
+			</trans-unit>
+			<trans-unit id="element.flex.news.from" xml:space="preserve">
+				<source>Date/From</source>
+			</trans-unit>
+			<trans-unit id="element.flex.news.to" xml:space="preserve">
+				<source>To</source>
+			</trans-unit>
+			<trans-unit id="element.flex.showdate" xml:space="preserve">
+				<source>Display Date in Frontend</source>
+			</trans-unit>
+			<trans-unit id="element.flex.showtime" xml:space="preserve">
+				<source>Show Time in Frontend</source>
+			</trans-unit>
+			<trans-unit id="element.flex.highlight" xml:space="preserve">
+				<source>Mark this Page as Highlight/Important</source>
+			</trans-unit>
+			<trans-unit id="element.flex.news.creators" xml:space="preserve">
+				<source>creators/Categories</source>
+			</trans-unit>
+			<trans-unit id="element.flex.news.latlng" xml:space="preserve">
+				<source>Geographical Position</source>
+			</trans-unit>
+			<trans-unit id="element.flex.who" xml:space="preserve">
+				<source>Veranstalter</source>
+			</trans-unit>
+			<trans-unit id="element.flex.place" xml:space="preserve">
+				<source>Ort</source>
+			</trans-unit>
+			<trans-unit id="plugin.creators" xml:space="preserve">
+				<source>if selected, display any Records with any of these creators/Categories</source>
+			</trans-unit>
+			<trans-unit id="plugin.action" xml:space="preserve">
+				<source>Type of Listing</source>
+			</trans-unit>
+			<trans-unit id="plugin.action.list" xml:space="preserve">
+				<source>List/Archive</source>
+			</trans-unit>
+			<trans-unit id="plugin.action.latest" xml:space="preserve">
+				<source>Latest news</source>
+			</trans-unit>
+			<trans-unit id="plugin.action.rss" xml:space="preserve">
+				<source>RSS Feed</source>
+			</trans-unit>
+			<trans-unit id="plugin.max" xml:space="preserve">
+				<source>Show this many news</source>
+			</trans-unit>
+
+			<trans-unit id="plugin.highlights" xml:space="preserve">
+				<source>Only show highlights (disables paging)</source>
+			</trans-unit>
+			<trans-unit id="plugin.ignore" xml:space="preserve">
+                <source>Ignore this many news</source>
+            </trans-unit>
+            <trans-unit id="plugin.onlyIgnoreHighlights" xml:space="preserve">
+                <source>Only ignore highlights</source>
+            </trans-unit>
+			<trans-unit id="plugin.sortby" xml:space="preserve">
+				<source>Sort direction</source>
+			</trans-unit>
+			<trans-unit id="plugin.sortby.asc" xml:space="preserve">
+				<source>Ascending</source>
+			</trans-unit>
+			<trans-unit id="plugin.sortby.desc" xml:space="preserve">
+				<source>Descending</source>
+			</trans-unit>
+			<trans-unit id="plugin.startpage" xml:space="preserve">
+				<source>Search News from this page</source>
+			</trans-unit>
+
+			<trans-unit id="plugin.depth" xml:space="preserve">
+				<source>Recursive Level</source>
+			</trans-unit>
+
+			<trans-unit id="plugin.scope" xml:space="preserve">
+				<source>The Scope of the Listing</source>
+			</trans-unit>
+			<trans-unit id="plugin.scope.all" xml:space="preserve">
+				<source>All Records</source>
+			</trans-unit>
+			<trans-unit id="plugin.scope.past" xml:space="preserve">
+				<source>Only Past Records</source>
+			</trans-unit>
+			<trans-unit id="plugin.scope.future" xml:space="preserve">
+				<source>Only Future Records</source>
+			</trans-unit>
+
+
+
+
+			<trans-unit id="plugin.displaytype" xml:space="preserve">
+				<source>What to Display</source>
+			</trans-unit>
+			<trans-unit id="plugin.displaytype.news" xml:space="preserve">
+				<source>News</source>
+			</trans-unit>
+			<trans-unit id="plugin.displaytype.events" xml:space="preserve">
+				<source>Events</source>
+			</trans-unit>
+			<trans-unit id="plugin.displaytype.projects" xml:space="preserve">
+				<source>Projects</source>
+			</trans-unit>
+			<trans-unit id="plugin.displaytype.newsevents" xml:space="preserve">
+				<source>News + Events</source>
+			</trans-unit>
+			<trans-unit id="tx_sudhaus7wizard_domain_model_creator" xml:space="preserve">
+				<source>Wizard Auftrag</source>
+			</trans-unit>
+			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.projektname" xml:space="preserve">
+				<source>Projektname (z.B. KG Musterhausen (wird nur intern im System verwendet)</source>
+			</trans-unit>
+			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.longname" xml:space="preserve">
+				<source>Name des Baukastens (z.B. Kirchengemeinde Musterhausen, Titel des Baukastens im Header)</source>
+			</trans-unit>
+			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.shortname" xml:space="preserve">
+				<source>Kurzname des Baukastens (z.B. KG_musterhausen - MUSS ein Wort sein und darf nur Zeichen des Alphabetes, Zahlen "_" sind erlaubt. Alle Zeichen vor dem 1. "_" werden vom System auf Gross-, alle nachfolgenden Zeichen auf Kleinbuchstaben umgestellt. Für den Baukastennutzer heißt der Ordner automatisch "Medien Projektname".)</source>
+			</trans-unit>
+			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.domainname" xml:space="preserve">
+				<source>Standarddomain (z.B. www.musterhausen.elk-wue.de - ohne http:// aber mit www. eingeben)</source>
+			</trans-unit>
+			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.contact" xml:space="preserve">
+				<source>Kontakt E-Mail (z.B. info@musterhausen.elk-wue.de)</source>
+			</trans-unit>
+			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.reduser" xml:space="preserve">
+				<source>Benutzername (z.B. kgmusterhausen - wird beim Anmelden verwendet)</source>
+			</trans-unit>
+			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.redpass" xml:space="preserve">
+				<source>Passwort (wird beim Anmelden verwendet)</source>
+			</trans-unit>
+			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.redemail" xml:space="preserve">
+				<source>Email-Adresse (für Nutzerverwaltung)</source>
+			</trans-unit>
+			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.theme" xml:space="preserve">
+				<source>Stil/Farbgebung</source>
+			</trans-unit>
+			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.flexinfo" xml:space="preserve">
+				<source>Weitere Konfiguration</source>
+			</trans-unit>
+			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.status" xml:space="preserve">
+				<source>Status</source>
+			</trans-unit>
+
+        </body>
+    </file>
+</xliff>
