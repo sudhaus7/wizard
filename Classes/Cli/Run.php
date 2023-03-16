@@ -13,28 +13,29 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard\Cli;
 
-use SUDHAUS7\Sudhaus7Wizard\Create;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Repository\CreatorRepository;
+use SUDHAUS7\Sudhaus7Wizard\Services\CreateProcessFactory;
 use SUDHAUS7\Sudhaus7Wizard\Tools;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Mail\MailMessage;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Object\Exception;
-use TYPO3\CMS\Extbase\Object\ObjectManager;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 
 class Run extends Command
 {
-    private ?ObjectManager $objectManager = null;
     private ?CreatorRepository $repository = null;
     private ?PersistenceManager $persistenceManager = null;
+
+    public ?ConsoleLogger $logger = null;
 
     public function mystatus(InputInterface $input, OutputInterface $output): void
     {
@@ -77,25 +78,25 @@ class Run extends Command
         }
     }
 
-    public function create(Creator $o, InputInterface $input, OutputInterface $output, $mapfolder=null): void
+    public function create(Creator $creator, InputInterface $input, OutputInterface $output, $mapfolder=null): void
     {
-        $o->setStatus(15);
-        $this->persistenceManager->update($o);
+        $creator->setStatus(15);
+        $this->persistenceManager->update($creator);
         $this->persistenceManager->persistAll();
-        $this->getInfo($o, $input, $output);
+        $this->getInfo($creator, $input, $output);
         //$output->write(implode("\n",)."\n");
 
-        if (Create::taskFactory($o, $this, $output)->run($mapfolder)) {
+        if (CreateProcessFactory::get($creator, $this->logger)->run($mapfolder)) {
             $output->write("Fertig\n", true);
-            $o->setStatus(20);
+            $creator->setStatus(20);
 
-            $this->persistenceManager->update($o);
+            $this->persistenceManager->update($creator);
             $this->persistenceManager->persistAll();
 
             $user  = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('be_users')->select(
                 [ '*' ],
                 'be_users',
-                ['uid'=>$o->getCruserId()]
+                ['uid'=>$creator->getCruserId()]
             )
             ->fetchAssociative();
 
@@ -105,10 +106,10 @@ class Run extends Command
                 $mail = GeneralUtility::makeInstance(MailMessage::class);
 
                 // Prepare and send the message
-                $mail->setSubject(sprintf('[Wizard] %s ist fertig', $o->getProjektname()))
+                $mail->setSubject(sprintf('[Wizard] %s ist fertig', $creator->getProjektname()))
                     ->setFrom($user['email'])
                     ->setTo($user['email'])
-                    ->text(sprintf('Der neue Baukasten %s wurde angelegt', $o->getProjektname()));
+                    ->text(sprintf('Der neue Baukasten %s wurde angelegt', $creator->getProjektname()));
                 $mail->send();
                 $output->write("E-Mail versendet\n");
             }
@@ -133,9 +134,9 @@ class Run extends Command
      */
     protected function initialize(InputInterface $input, OutputInterface $output)
     {
-        $this->objectManager = GeneralUtility::makeInstance(ObjectManager::class);
-        $this->repository = $this->objectManager->get(CreatorRepository::class);
-        $this->persistenceManager = $this->objectManager->get(PersistenceManager::class);
+        $this->logger = new ConsoleLogger($output);
+        $this->repository = GeneralUtility::makeInstance(CreatorRepository::class);
+        $this->persistenceManager = GeneralUtility::makeInstance(PersistenceManager::class);
     }
 
     /**

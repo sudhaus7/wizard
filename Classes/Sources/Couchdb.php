@@ -13,12 +13,15 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard\Sources;
 
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
 use SUDHAUS7\Sudhaus7Base\Tools\Globals;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use TYPO3\CMS\Core\Core\Environment;
 
-class Couchdb implements SourceInterface
+class Couchdb implements SourceInterface, LoggerAwareInterface
 {
+    use LoggerAwareTrait;
     private array $views = [];
     private array $tree = [];
     private string $credentials = 'admin:sNvbVr2hWh4u4nQZf3nA4W';

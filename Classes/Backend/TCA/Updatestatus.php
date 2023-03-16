@@ -14,7 +14,7 @@
 namespace SUDHAUS7\Sudhaus7Wizard\Backend\TCA;
 
 use SUDHAUS7\Sudhaus7Base\Tools\DB;
-use SUDHAUS7\Sudhaus7Wizard\WizardInterface;
+use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardProcessInterface;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -70,13 +70,13 @@ class Updatestatus
                     $fieldArray['status'] = 5;
                 }
 
-                if ($ret && isset($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['Sudhaus7Wizard']['registeredExtentions'][$row['base']])) {
-                    $class = $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['Sudhaus7Wizard']['registeredExtentions'][$row['base']];
-                    if (in_array('checkConfig', get_class_methods($class))) {
+                if ($ret && isset($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['Sudhaus7Wizard']['registeredTemplateExtentions'][$row['base']])) {
+                    $class = $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['Sudhaus7Wizard']['registeredTemplateExtentions'][$row['base']];
+                    if (!in_array(WizardProcessInterface::class, class_implements($class))) {
                         /**
-                         * @var $class WizardInterface
+                         * @var $class WizardProcessInterface
                          */
-                        $ret = $class::checkConfig($row);
+                        $ret = $class::checkWizardConfig($row);
                     }
                 }
                 if (!$ret) {

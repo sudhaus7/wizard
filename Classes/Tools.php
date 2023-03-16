@@ -13,6 +13,8 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard;
 
+use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardProcessInterface;
+
 class Tools
 {
     /**
@@ -20,7 +22,7 @@ class Tools
      */
     public static function getRegisteredExtentions()
     {
-        return $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['Sudhaus7Wizard']['registeredExtentions'];
+        return $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['Sudhaus7Wizard']['registeredTemplateExtentions'];
     }
 
     /**
@@ -42,13 +44,14 @@ class Tools
         //$extention,$description,$sourcepid,$flex,$addfields='')
         //{
 
-        if (!in_array(WizardInterface::class, class_implements($class))) {
+        if (!in_array(WizardProcessInterface::class, class_implements($class))) {
             return;
         }
 
-        $config = $class::getConfig();
+        /** @var WizardProcessInterface $class */
+        $config = $class::getWizardConfig();
 
-        $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['Sudhaus7Wizard']['registeredExtentions'][$config['extention']] = $class;
+        $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['Sudhaus7Wizard']['registeredTemplateExtentions'][$config['extention']] = $class;
         if (is_array($GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']) && !isset($GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['columns']['flexinfo']['config']['ds'][$config['extention']])) {
             $GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['columns']['base']['config']['items'][] = [
                 $config['description'],

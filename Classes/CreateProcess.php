@@ -13,14 +13,14 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard;
 
+use Psr\Log\LoggerAwareTrait;
 use SUDHAUS7\Sudhaus7Base\Tools\DB;
 use SUDHAUS7\Sudhaus7Base\Tools\Globals;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
-use SUDHAUS7\Sudhaus7Wizard\Sources\Localdatabase;
+use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardProcessInterface;
 use SUDHAUS7\Sudhaus7Wizard\Sources\SourceInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Yaml;
-use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Configuration\FlexForm\FlexFormTools;
 use TYPO3\CMS\Core\Core\Environment;
@@ -29,8 +29,9 @@ use TYPO3\CMS\Core\Crypto\Random;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class Create
+class CreateProcess implements Psr\Log\LoggerAwareInterface
 {
+    use LoggerAwareTrait;
     public array $allwaysIgnoreTables = [];
 
     public array $siteconfig = [
@@ -94,14 +95,13 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     public array $cleanUpTodo = [];
     public string $debugsection = 'Init';
     protected $pObj;
-    protected WizardInterface $template;
+    protected WizardProcessInterface $template;
     protected ?string $templatekey = null;
     protected int $tmplgroup = 0;
     protected int $tmpluser = 0;
 
     protected int $siterootid = 0;
     private array $checkusers = [];
-    private ?OutputInterface $output = null;
 
     public $errorpage = 0;
 
@@ -156,8 +156,10 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $this->finalUser();
         $this->finalYaml();
         $this->source->ping();
+
         $this->template->finalize($this);
         $this->source->ping();
+
         $this->task->setPid($this->pageMap[ $sourcePid ]);
         if (! \is_null($mapfolder)) {
             if ($fp = fopen($mapfolder . '/page.csv', 'w')) {
@@ -179,24 +181,18 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         return true;
     }
 
-    public function out($c, $info = 'DEBUG', string $section = null): void
+    public function out($c, $info = 'DEBUG', string $section = null, array $context = []): void
     {
         if (! \is_null($section)) {
             $this->debugsection = $section;
         }
 
-        if ($this->output !== null) {
-            $verb = match ($info) {
-                'DEBUG2' => $this->output::VERBOSITY_VERY_VERBOSE,
-                'DEBUG' => $this->output::VERBOSITY_VERBOSE,
-                default => $this->output::VERBOSITY_NORMAL,
-            };
+        match ($info) {
+            'DEBUG2' => $this->logger->alert($c.' - '.$this->debugsection,$context),
+            'DEBUG' => $this->logger->debug($c.' - '.$this->debugsection,$context),
+            default => $this->logger->info($c.' - '.$this->debugsection,$context),
+        };
 
-            $this->output->writeln(
-                date('Y-m-d H:i:s') . ' - ' . $info . ' - ' . $this->debugsection . ' - ' . $c,
-                $verb
-            );
-        }
     }
 
     private array $confArr = [];
@@ -386,7 +382,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 
     /**
      * @param $row
-     * @param Create $pObj
+     * @param CreateProcess $pObj
      */
     public function finalContent_pages($row, &$pObj)
     {
@@ -400,24 +396,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         return $row;
     }
 
-    public static function taskFactory(Creator $o, &$pObj, OutputInterface $output): \SUDHAUS7\Sudhaus7Wizard\Create
-    {
-        $tsk              = new Create();
-        $tsk->task        = $o;
-        $tsk->pObj        = $pObj;
-        $tsk->output      = $output;
-        $tsk->templatekey = $o->getBase();
-        $cls              = $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['Sudhaus7Wizard']['registeredExtentions'][ $tsk->templatekey ];
-        $tsk->template    = new $cls();
 
-        $sourceclassname = $o->getSourceclass();
-        if (\class_exists($sourceclassname)) {
-            $sourceclass = new $sourceclassname($o);
-            $tsk->source = $sourceclass instanceof SourceInterface ? $sourceclass : new Localdatabase($o);
-        }
-
-        return $tsk;
-    }
 
     private function createFilemount()
     {
@@ -497,7 +476,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 
     private function createGroup()
     {
-        $tmpl            = $this->template->getTemplateGroup();
+        $tmpl            = $this->template->getTemplateBackendUserGroup();
         $this->tmplgroup = $tmpl['uid'];
         $groupname       = $this->confArr['groupprefix'] . ' ' . $this->task->getProjektname();
         $this->out('Create Group ' . $groupname);
@@ -535,7 +514,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     private function createUser()
     {
         $this->out('Create User ' . $this->task->getReduser());
-        $tmpl           = $this->template->getTemplateUser();
+        $tmpl           = $this->template->getTemplateBackendUser();
         $this->tmpluser = $tmpl['uid'];
         $this->source->ping();
 
@@ -1618,4 +1597,229 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         }
         \file_put_contents(Environment::getPublicPath() . '/fileadmin/bk_form_config.yaml', Yaml::dump($config, 99, 2));
     }
+
+    /**
+     * @return array
+     */
+    public function getAllwaysIgnoreTables(): array {
+        return $this->allwaysIgnoreTables;
+    }
+
+    /**
+     * @param array $allwaysIgnoreTables
+     */
+    public function setAllwaysIgnoreTables( array $allwaysIgnoreTables ): void {
+        $this->allwaysIgnoreTables = $allwaysIgnoreTables;
+    }
+
+    /**
+     * @return array
+     */
+    public function getSiteconfig(): array {
+        return $this->siteconfig;
+    }
+
+    /**
+     * @param array $siteconfig
+     */
+    public function setSiteconfig( array $siteconfig ): void {
+        $this->siteconfig = $siteconfig;
+    }
+
+    /**
+     * @return array
+     */
+    public function getPageMap(): array {
+        return $this->pageMap;
+    }
+
+    /**
+     * @param array $pageMap
+     */
+    public function setPageMap( array $pageMap ): void {
+        $this->pageMap = $pageMap;
+    }
+
+    /**
+     * @return Creator|null
+     */
+    public function getTask(): ?Creator {
+        return $this->task;
+    }
+
+    /**
+     * @param Creator|null $task
+     */
+    public function setTask( ?Creator $task ): void {
+        $this->task = $task;
+    }
+
+    /**
+     * @return SourceInterface
+     */
+    public function getSource(): SourceInterface {
+        return $this->source;
+    }
+
+    /**
+     * @param SourceInterface $source
+     */
+    public function setSource( SourceInterface $source ): void {
+        $this->source = $source;
+    }
+
+    /**
+     * @return array
+     */
+    public function getGroup(): array {
+        return $this->group;
+    }
+
+    /**
+     * @param array $group
+     */
+    public function setGroup( array $group ): void {
+        $this->group = $group;
+    }
+
+    /**
+     * @return array
+     */
+    public function getUser(): array {
+        return $this->user;
+    }
+
+    /**
+     * @param array $user
+     */
+    public function setUser( array $user ): void {
+        $this->user = $user;
+    }
+
+    /**
+     * @return array
+     */
+    public function getFilemount(): array {
+        return $this->filemount;
+    }
+
+    /**
+     * @param array $filemount
+     */
+    public function setFilemount( array $filemount ): void {
+        $this->filemount = $filemount;
+    }
+
+    /**
+     * @return array
+     */
+    public function getContentmap(): array {
+        return $this->contentmap;
+    }
+
+    /**
+     * @param array $contentmap
+     */
+    public function setContentmap( array $contentmap ): void {
+        $this->contentmap = $contentmap;
+    }
+
+    /**
+     * @return array
+     */
+    public function getCleanUpTodo(): array {
+        return $this->cleanUpTodo;
+    }
+
+    /**
+     * @param array $cleanUpTodo
+     */
+    public function setCleanUpTodo( array $cleanUpTodo ): void {
+        $this->cleanUpTodo = $cleanUpTodo;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDebugsection(): string {
+        return $this->debugsection;
+    }
+
+    /**
+     * @param string $debugsection
+     */
+    public function setDebugsection( string $debugsection ): void {
+        $this->debugsection = $debugsection;
+    }
+
+    /**
+     * @return WizardProcessInterface
+     */
+    public function getTemplate(): WizardProcessInterface {
+        return $this->template;
+    }
+
+    /**
+     * @param WizardProcessInterface $template
+     */
+    public function setTemplate( WizardProcessInterface $template ): void {
+        $this->template = $template;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getTemplatekey(): ?string {
+        return $this->templatekey;
+    }
+
+    /**
+     * @param string|null $templatekey
+     */
+    public function setTemplatekey( ?string $templatekey ): void {
+        $this->templatekey = $templatekey;
+    }
+
+    /**
+     * @return int
+     */
+    public function getTmplgroup(): int {
+        return $this->tmplgroup;
+    }
+
+    /**
+     * @param int $tmplgroup
+     */
+    public function setTmplgroup( int $tmplgroup ): void {
+        $this->tmplgroup = $tmplgroup;
+    }
+
+    /**
+     * @return int
+     */
+    public function getTmpluser(): int {
+        return $this->tmpluser;
+    }
+
+    /**
+     * @param int $tmpluser
+     */
+    public function setTmpluser( int $tmpluser ): void {
+        $this->tmpluser = $tmpluser;
+    }
+
+    /**
+     * @return int
+     */
+    public function getSiterootid(): int {
+        return $this->siterootid;
+    }
+
+    /**
+     * @param int $siterootid
+     */
+    public function setSiterootid( int $siterootid ): void {
+        $this->siterootid = $siterootid;
+    }
+
 }

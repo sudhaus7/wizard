@@ -14,6 +14,8 @@
 namespace SUDHAUS7\Sudhaus7Wizard\Sources;
 
 use Doctrine\DBAL\Statement;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
 use SUDHAUS7\Sudhaus7Base\Tools\DB;
 use SUDHAUS7\Sudhaus7Base\Tools\Globals;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
@@ -23,8 +25,9 @@ use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class Localdatabase implements SourceInterface
+class Localdatabase implements SourceInterface, LoggerAwareInterface
 {
+    use LoggerAwareTrait;
     private array $tree = [];
 
     public function __construct(private readonly Creator $creator)
@@ -110,12 +113,10 @@ class Localdatabase implements SourceInterface
      */
     public function handleFile(array $sys_file, $newidentifier)
     {
-        echo 'cp ' . Environment::getPublicPath() . '/' . '/fileadmin' . $sys_file['identifier'] . ' ' . Environment::getPublicPath() . '/' . '/fileadmin' . $newidentifier;
-        echo "\n";
-        echo 'chown www-data:www-data ' . Environment::getPublicPath() . '/' . '/fileadmin' . $newidentifier;
-        echo "\n";
-        echo 'chmod ug+rw ' . Environment::getPublicPath() . '/' . '/fileadmin' . $newidentifier;
-        echo "\n";
+        $this->logger->notice('cp ' . Environment::getPublicPath() . '/' . '/fileadmin' . $sys_file['identifier'] . ' ' . Environment::getPublicPath() . '/' . '/fileadmin' . $newidentifier);
+        $this->logger->notice('chown www-data:www-data ' . Environment::getPublicPath() . '/' . '/fileadmin' . $newidentifier);
+        $this->logger->notice('chmod ug+rw ' . Environment::getPublicPath() . '/' . '/fileadmin' . $newidentifier);
+
         exec('cp ' . Environment::getPublicPath() . '/' . '/fileadmin' . $sys_file['identifier'] . ' ' . Environment::getPublicPath() . '/' . '/fileadmin' . $newidentifier);
 
         exec('chown www-data:www-data ' . Environment::getPublicPath() . '/' . '/fileadmin' . $newidentifier);
