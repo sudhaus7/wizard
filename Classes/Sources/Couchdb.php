@@ -2,15 +2,13 @@
 
 /*
  * This file is part of the TYPO3 project.
- * (c) 2022 B-Factor GmbH
- *          Sudhaus7
+ *
+ * @author Frank Berger <fberger@sudhaus7.de>
  *
  * For the full copyright and license information, please view
  * the LICENSE file that was distributed with this source code.
+ *
  * The TYPO3 project - inspiring people to share!
- * @copyright 2022 B-Factor GmbH https://b-factor.de/
- * @author Frank Berger <fberger@b-factor.de>
- * @author Daniel Simon <dsimon@b-factor.de>
  */
 
 namespace SUDHAUS7\Sudhaus7Wizard\Sources;
@@ -25,10 +23,8 @@ class Couchdb implements SourceInterface
     private array $tree = [];
     private string $credentials = 'admin:sNvbVr2hWh4u4nQZf3nA4W';
 
-    public function __construct(Creator $creator)
+    public function __construct(private readonly Creator $creator)
     {
-        $this->creator = $creator;
-
         $this->couchdb = 'http://tools.sudhaus7.de:32768/' . $creator->getSourcepid() . '/';
         $this->addBaseViews();
         //$this->getUsedTables();
@@ -144,7 +140,7 @@ function(doc) {
         return $rows;
     }
 
-    public function getTree($start)
+    public function getTree($start): array
     {
         if ($start == -1) {
             $map = '
@@ -176,7 +172,7 @@ function(doc) {
         return $this->tree;
     }
 
-    public function ping()
+    public function ping(): void
     {
         //echo "PRE PING";
         try {
@@ -262,14 +258,12 @@ function(doc) {
     }
 
     /**
-     * @param array $sys_file
      * @param string $newidentifier
-     *
      * @return array
      */
     public function handleFile(array $sys_file, $newidentifier)
     {
-        file_put_contents(Environment::getPublicPath() . '/' . '/fileadmin' . $newidentifier, base64_decode($sys_file['medium']));
+        file_put_contents(Environment::getPublicPath() . '/' . '/fileadmin' . $newidentifier, base64_decode((string)$sys_file['medium']));
         echo 'chown www-data:www-data ' . Environment::getPublicPath() . '/' . '/fileadmin' . $newidentifier;
         echo "\n";
         echo 'chmod ug+rw ' . Environment::getPublicPath() . '/' . '/fileadmin' . $newidentifier;
@@ -281,10 +275,10 @@ function(doc) {
         unset($sys_file['uid']);
         unset($sys_file['medium']);
         $sys_file['identifier'] = $newidentifier;
-        $sys_file['identifier_hash'] = sha1($sys_file['identifer']);
-        $sys_file['folder_hash'] = sha1(dirname($sys_file['identifer']));
+        $sys_file['identifier_hash'] = sha1((string)$sys_file['identifer']);
+        $sys_file['folder_hash'] = sha1(dirname((string)$sys_file['identifer']));
         $sys_file['storage'] = 1;
-        $a = explode('.', $sys_file['name']);
+        $a = explode('.', (string)$sys_file['name']);
         $ext = array_pop($a);
         switch (strtolower($ext)) {
             case 'jpg':
@@ -382,15 +376,13 @@ function(doc) {
         */
     }
 
-    private Creator $creator;
-
-    public function pageSort($new)
+    public function pageSort($new): void
     {
         Globals::db()->sql_query('SET @count=16');
         Globals::db()->sql_query('update pages set sorting=@count:=@count+16 where pid=' . $this->creator->getPid() . ' order by doktype desc,title asc');
     }
 
-    private string $couchdb;
+    private readonly string $couchdb;
     public function sourcePid()
     {
         return -1;
@@ -416,7 +408,7 @@ function(doc) {
 
         return $page;
     }
-    public function getTables()
+    public function getTables(): array
     {
         $data = $this->getbyid('_design/application/_view/gettables/?group=true');
         foreach ($data['rows'] as $row) {
@@ -424,8 +416,9 @@ function(doc) {
         }
         return \array_intersect(array_keys($GLOBALS['TCA']), $this->usedTables);
     }
-    public static function cleanRow($table, &$row)
+    public static function cleanRow($table, &$row): void
     {
+        $fields = [];
         $fields = (array)$fields;
         $fields[]='uid';
         $fields[]='pid';
@@ -455,7 +448,7 @@ function(doc) {
             }
         }
     }
-    private function expandwhere($where, $mywhere)
+    private function expandwhere($where, array $mywhere)
     {
         if (!empty($where)) {
             foreach ($where as $key=>$value) {
@@ -469,7 +462,7 @@ function(doc) {
         return $mywhere;
     }
 
-    private function get($id)
+    private function get(string $id)
     {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $this->couchdb . $id);
@@ -487,7 +480,7 @@ function(doc) {
         curl_close($ch);
         return \json_decode($response, true, 512, JSON_THROW_ON_ERROR);
     }
-    private function put($id, $data)
+    private function put(string $id, $data)
     {
         $payload = json_encode($data, JSON_THROW_ON_ERROR);
         $ch = curl_init();
@@ -571,8 +564,9 @@ function(doc) {
         return \json_decode($response, true, 512, JSON_THROW_ON_ERROR);
     }
 
-    private function addView($table, $where)
+    private function addView($table, $where): void
     {
+        $views = [];
         $keys = array_keys($where);
         \natsort($keys);
         $viewname = $table . '_by_' . implode('_', $keys);
@@ -580,14 +574,10 @@ function(doc) {
             $views = $this->getViews();
             if (! isset($views['views'][ $viewname ])) {
                 foreach ($keys as $k => $v) {
-                    switch ($v) {
-                        case 'pid':
-                        case 'uid':
-                            $keys[ $k ] = 'doc.' . $v;
-                            break;
-                        default:
-                            $keys[ $k ] = 'doc.row.' . $v;
-                    }
+                    $keys[ $k ] = match ($v) {
+                        'pid', 'uid' => 'doc.' . $v,
+                        default => 'doc.row.' . $v,
+                    };
                 }
                 $views['views'][ $viewname ] = [
                     'map' => 'function(doc) { var k=' . implode(
@@ -601,7 +591,7 @@ function(doc) {
         }
     }
 
-    private function addBaseViews()
+    private function addBaseViews(): void
     {
         $views = $this->getViews();
         $update = false;
@@ -617,14 +607,14 @@ function(doc) {
         }
         $this->views = array_keys($views['views']);
     }
-    private function getViewname($table, $where)
+    private function getViewname($table, $where): string
     {
         $keys = array_keys($where);
         \natsort($keys);
         return $table . '_by_' . implode('_', $keys);
     }
 
-    private function getViewquery($where)
+    private function getViewquery($where): string
     {
         $keys = array_keys($where);
         \natsort($keys);
@@ -649,13 +639,13 @@ function(doc) {
         return $views;
     }
 
-    private function getViewurl($table, $where)
+    private function getViewurl($table, $where): string
     {
         return '_design/application/_view/' . $this->getViewname($table, $where) . '?keys=' . $this->getViewquery($where);
     }
 
     private array $usedTables = [];
-    private function out($out)
+    private function out(string $out): void
     {
         echo $out,"\n";
     }

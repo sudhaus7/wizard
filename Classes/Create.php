@@ -2,15 +2,13 @@
 
 /*
  * This file is part of the TYPO3 project.
- * (c) 2022 B-Factor GmbH
- *          Sudhaus7
+ *
+ * @author Frank Berger <fberger@sudhaus7.de>
  *
  * For the full copyright and license information, please view
  * the LICENSE file that was distributed with this source code.
+ *
  * The TYPO3 project - inspiring people to share!
- * @copyright 2022 B-Factor GmbH https://b-factor.de/
- * @author Frank Berger <fberger@b-factor.de>
- * @author Daniel Simon <dsimon@b-factor.de>
  */
 
 namespace SUDHAUS7\Sudhaus7Wizard;
@@ -107,7 +105,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 
     public $errorpage = 0;
 
-    public function run($mapfolder = null)
+    public function run($mapfolder = null): bool
     {
         //Globals::db()->store_lastBuiltQuery = true;
         $this->confArr = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('sudhaus7_wizard');
@@ -139,7 +137,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $this->cloneContent();
         $this->source->ping();
         //$this->cleanContent('clean');
-        while (! empty($this->cleanUpTodo)) {
+        while ($this->cleanUpTodo !== []) {
             $this->out('Clone Inlines', 'INFO', 'Clone Inlines');
             $this->cloneInlines();
             $this->source->ping();
@@ -181,27 +179,18 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         return true;
     }
 
-    public function out($c, $info = 'DEBUG', $section = null)
+    public function out($c, $info = 'DEBUG', string $section = null): void
     {
         if (! \is_null($section)) {
             $this->debugsection = $section;
         }
 
         if ($this->output !== null) {
-            switch ($info) {
-                case 'DEBUG2':
-                    $verb = $this->output::VERBOSITY_VERY_VERBOSE;
-
-                    break;
-                case 'DEBUG':
-                    $verb = $this->output::VERBOSITY_VERBOSE;
-
-                    break;
-                default:
-                    $verb = $this->output::VERBOSITY_NORMAL;
-
-                    break;
-            }
+            $verb = match ($info) {
+                'DEBUG2' => $this->output::VERBOSITY_VERY_VERBOSE,
+                'DEBUG' => $this->output::VERBOSITY_VERBOSE,
+                default => $this->output::VERBOSITY_NORMAL,
+            };
 
             $this->output->writeln(
                 date('Y-m-d H:i:s') . ' - ' . $info . ' - ' . $this->debugsection . ' - ' . $c,
@@ -212,7 +201,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 
     private array $confArr = [];
 
-    public function addContentMap($table, $old, $new)
+    public function addContentMap($table, $old, $new): void
     {
         if (! isset($this->contentmap[ $table ])) {
             $this->contentmap[ $table ] = [];
@@ -221,7 +210,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $this->contentmap[ $table ][ $old ] = $new;
     }
 
-    public function addCleanupInline($table, $uid)
+    public function addCleanupInline($table, $uid): void
     {
         if (! isset($this->cleanUpTodo[ $table ])) {
             $this->cleanUpTodo[ $table ] = [];
@@ -229,7 +218,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $this->cleanUpTodo[ $table ][] = $uid;
     }
 
-    public function pageSort()
+    public function pageSort(): void
     {
         $old = $this->source->sourcePid();
         $new = $this->pageMap[ $old ];
@@ -239,7 +228,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     public function translateIDlist($table, $list)
     {
         $ids = GeneralUtility::trimExplode(',', $list);
-        if (empty($ids)) {
+        if ($ids === []) {
             return $list;
         }
         $newlist = [];
@@ -259,9 +248,9 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     public function getTranslateUid($table, $uid)
     {
         $tableprefix = false;
-        if (substr($uid, 0, strlen($table)) == $table) {
+        if (str_starts_with((string)$uid, (string)$table)) {
             $tableprefix = true;
-            $x           = explode('_', $uid);
+            $x           = explode('_', (string)$uid);
             $uid         = array_pop($x);
         }
         if ($table == 'pages') {
@@ -347,9 +336,9 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         return $row;
     }
 
-    public function translateLinkString($s)
+    public function translateLinkString($s): string
     {
-        $s   = trim($s);
+        $s   = trim((string)$s);
         $a   = str_getcsv($s, ' ', 'dasdhasdsalkdjsalk13');
         $id  = $a[0];
         $aID = explode(':', $id);
@@ -365,11 +354,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
             }
         } elseif (in_array('mail', $a) && $a[1] == '-' && $a[2] == 'mail') {
             return implode(' ', $a);
-        } elseif (substr($s, 0, 4) == 'http' || substr($s, 0, 9) == 'fileadmin' || substr(
-            $s,
-            0,
-            10
-        ) == '/fileadmin') {
+        } elseif (str_starts_with($s, 'http') || str_starts_with($s, 'fileadmin') || str_starts_with($s, '/fileadmin')) {
             return implode(' ', $a);
         } else {
             $aID = explode('#', $id);
@@ -415,7 +400,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         return $row;
     }
 
-    public static function taskFactory(Creator $o, &$pObj, OutputInterface $output)
+    public static function taskFactory(Creator $o, &$pObj, OutputInterface $output): \SUDHAUS7\Sudhaus7Wizard\Create
     {
         $tsk              = new Create();
         $tsk->task        = $o;
@@ -428,11 +413,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $sourceclassname = $o->getSourceclass();
         if (\class_exists($sourceclassname)) {
             $sourceclass = new $sourceclassname($o);
-            if ($sourceclass instanceof SourceInterface) {
-                $tsk->source = $sourceclass;
-            } else {
-                $tsk->source = new Localdatabase($o);
-            }
+            $tsk->source = $sourceclass instanceof SourceInterface ? $sourceclass : new Localdatabase($o);
         }
 
         return $tsk;
@@ -626,7 +607,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $this->user  = $tmpl;
     }
 
-    private function buildTree($start)
+    private function buildTree($start): void
     {
         $tree = $this->source->getTree($start);
         foreach ($tree as $uid) {
@@ -636,7 +617,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         }
     }
 
-    private function updateMountpoint($newrootpage)
+    private function updateMountpoint($newrootpage): void
     {
         $this->filemount['relatepage'] = $newrootpage;
 
@@ -713,7 +694,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         return false;
     }
 
-    private function createDomain($pid)
+    private function createDomain($pid): void
     {
         $this->siteconfig['rootPageId'] = $pid;
         $this->siteconfig['base']       = 'https://' . $this->task->getDomainname() . '/';
@@ -842,7 +823,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         }
     }
 
-    private function runTCA($state, $config, $row, $parameters)
+    private function runTCA(string $state, $config, $row, array $parameters)
     {
         foreach ($config as $column => $columnconfig) {
             //$this->out('runTCA '.$state.' '.$parameters['table'].' '.$column);
@@ -871,11 +852,11 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                     exit;
                 }
                 if ($state == 'final') {
-                    $this->out(__FUNCTION__ . ':' . __LINE__ . ' DONE ' . get_class($this->template) . '->' . $func);
+                    $this->out(__FUNCTION__ . ':' . __LINE__ . ' DONE ' . $this->template::class . '->' . $func);
                 }
             }
 
-            $func = 'cloneContent_' . $state . '_columntype_' . strtolower($columnconfig['config']['type']);
+            $func = 'cloneContent_' . $state . '_columntype_' . strtolower((string)$columnconfig['config']['type']);
             if (method_exists($this, $func)) {
                 if ($state == 'final') {
                     //$this->out(__FUNCTION__ . ':' . __LINE__ . ' ' . get_class($this) . '->' . $func);
@@ -902,7 +883,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 
             if (isset($columnconfig['config']['wizards'])) {
                 foreach ($columnconfig['config']['wizards'] as $wizard => $wizardconfig) {
-                    $func = 'cloneContent_' . $state . '_wizards_' . strtolower($wizard);
+                    $func = 'cloneContent_' . $state . '_wizards_' . strtolower((string)$wizard);
 
                     if (method_exists($this, $func)) {
                         if ($state == 'final') {
@@ -937,7 +918,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         return $row;
     }
 
-    private function cloneInlines()
+    private function cloneInlines(): void
     {
         $this->out('Start Inlines Clone , TODO ' . count($this->cleanUpTodo));
         $aSkip = [
@@ -1002,7 +983,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                     unset($update['uid']);
                     unset($update['pid']);
                     $this->debug(__METHOD__ . ':' . __LINE__);
-                    if (! empty($update)) {
+                    if ($update !== []) {
                         $this->source->ping();
                         $this->debug(__METHOD__ . ':' . __LINE__);
                         DB::updateRecord($table, $update, [ 'uid' => $origrow['uid'] ]);
@@ -1012,7 +993,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         }
     }
 
-    private function cleanPages()
+    private function cleanPages(): void
     {
         $this->out('Start Pages Cleanup ');
         //$aSkip = ['pages','sys_domain', 'sys_file_reference', 'be_users', 'be_groups'];
@@ -1055,7 +1036,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                 }
                 unset($update['uid']);
                 unset($update['pid']);
-                if (! empty($update)) {
+                if ($update !== []) {
                     $this->source->ping();
                     $this->out(__FILE__ . ':' . __LINE__ . ' ' . $table . ' update ' . print_r($update, true));
 
@@ -1065,7 +1046,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         }
     }
 
-    private function cleanContent()
+    private function cleanContent(): void
     {
         $this->out('Start Content Cleanup ');
         $aSkip   = [
@@ -1088,7 +1069,6 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $newpids = \array_values($this->pageMap);
         foreach ($GLOBALS['TCA'] as $table => $config) {
             if (! in_array($table, $aSkip)) {
-
                 //foreach ($this->pageMap as $oldpid => $newpid) {
                 $this->source->ping();
                 $this->out('Content Cleanup ' . $table);
@@ -1136,7 +1116,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                     }
                     unset($update['uid']);
                     unset($update['pid']);
-                    if (! empty($update)) {
+                    if ($update !== []) {
                         $this->source->ping();
 
                         $this->debug(__METHOD__ . ':' . __LINE__);
@@ -1147,7 +1127,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         }
     }
 
-    private function finalGroup()
+    private function finalGroup(): void
     {
         $list = $this->translateIDlist('pages', $this->group['db_mountpoints']);
         if ($list != 0) {
@@ -1157,7 +1137,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         }
     }
 
-    private function finalUser()
+    private function finalUser(): void
     {
         $list = $this->translateIDlist('pages', $this->user['db_mountpoints']);
         if ($list == $this->user['db_mountpoints']) {
@@ -1172,7 +1152,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         DB::updateRecord('be_users', [ 'db_mountpoints' => $list ], [ 'uid' => $this->user['uid'] ]);
     }
 
-    private function finalYaml()
+    private function finalYaml(): void
     {
         if (method_exists($this->template, 'finalYaml')) {
             $this->template->finalYaml($this);
@@ -1184,10 +1164,10 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 
         $identifier = '';
         if ($parentofparent !== []) {
-            $identifier =  self::generateslug(trim($parentofparent['slug'], '/')) . '-';
+            $identifier =  self::generateslug(trim((string)$parentofparent['slug'], '/')) . '-';
         }
 
-        $parentslug = self::generateslug(trim($parent['title'], '/'));
+        $parentslug = self::generateslug(trim((string)$parent['title'], '/'));
         GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('pages')
                       ->update(
                           'pages',
@@ -1250,13 +1230,13 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     private function cloneContent_final_column_bodytext($column, $columnconfig, $row, $parameters)
     {
         if (!empty($row['bodytext'])) {
-            preg_match_all('/<link\s+.*>/U', $row['bodytext'], $matches);
+            preg_match_all('/<link\s+.*>/U', (string)$row['bodytext'], $matches);
             if (!empty($matches[0])) {
                 foreach ($matches[0] as $match) {
-                    $row['bodytext'] = str_replace($match, '<link ' . $this->translateLinkString(substr($match, 6, -1)) . '>', $row['bodytext']);
+                    $row['bodytext'] = str_replace($match, '<link ' . $this->translateLinkString(substr((string)$match, 6, -1)) . '>', (string)$row['bodytext']);
                 }
             }
-            $row['bodytext'] = str_replace('%EMAIL%', $this->task->getContact(), $row['bodytext']);
+            $row['bodytext'] = str_replace('%EMAIL%', $this->task->getContact(), (string)$row['bodytext']);
         }
         return $row;
     }
@@ -1269,7 +1249,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
             $this->out('Clean select Column ' . $column);
 
             $table = $parameters['table'];
-            $olduid = $row['t3_origuid'] ? $row['t3_origuid'] : $this->getTranslateUidReverse($table, $row['uid']);
+            $olduid = $row['t3_origuid'] ?: $this->getTranslateUidReverse($table, $row['uid']);
 
             /*
              if (empty($olduid)) {
@@ -1289,7 +1269,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                 $newlist = [];
                 foreach ($list as $tmpolduid) {
                     $tmp = GeneralUtility::trimExplode('_', $tmpolduid, true);
-                    if (count($tmp) > 1) {
+                    if ((is_countable($tmp) ? count($tmp) : 0) > 1) {
                         $reftable = $tmp[0];
                         $olduid = $tmp[1];
                     } else {
@@ -1297,9 +1277,9 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                         $olduid = $tmp[0];
                     }
 
-                    $newlist[] = count($tmp) > 1 ? $reftable . '_' . $this->getTranslateUid($reftable, $olduid) : $this->getTranslateUid($reftable, $olduid);
+                    $newlist[] = (is_countable($tmp) ? count($tmp) : 0) > 1 ? $reftable . '_' . $this->getTranslateUid($reftable, $olduid) : $this->getTranslateUid($reftable, $olduid);
                 }
-                if (!empty($newlist)) {
+                if ($newlist !== []) {
                     $row[$column] = implode(',', $newlist);
                 }
             }
@@ -1307,7 +1287,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         return $row;
     }
 
-    private function fixMMRelation($table, $mmtable, $olduid, $newuid)
+    private function fixMMRelation($table, $mmtable, $olduid, $newuid): void
     {
         $mm = $this->source->getMM($mmtable, $olduid, $table);
         foreach ($mm as $row) {
@@ -1327,7 +1307,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         if ($columnconfig['config']['internal_type'] == 'db') {
             $this->out('Clean Group Column ' . $column);
             $table = $parameters['table'];
-            $olduid = $row['t3_origuid'] ? $row['t3_origuid'] : $this->getTranslateUidReverse($table, $row['uid']);
+            $olduid = $row['t3_origuid'] ?: $this->getTranslateUidReverse($table, $row['uid']);
             /*
              if (empty($olduid)) {
                  throw new \Exception('Reference clean without t3_origuid in table '.$table);
@@ -1355,16 +1335,16 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                 $newlist = [];
                 foreach ($list as $tmpolduid) {
                     $tmp = GeneralUtility::trimExplode('_', $tmpolduid, true);
-                    if (count($tmp) > 1) {
+                    if ((is_countable($tmp) ? count($tmp) : 0) > 1) {
                         $reftable = $tmp[0];
                         $olduid = $tmp[1];
                     } else {
                         $reftable = $columnconfig['config']['allowed'];
                         $olduid = $tmp[0];
                     }
-                    $newlist[] = count($tmp) > 1 ? $reftable . '_' . $this->getTranslateUid($reftable, $olduid) : $this->getTranslateUid($reftable, $olduid);
+                    $newlist[] = (is_countable($tmp) ? count($tmp) : 0) > 1 ? $reftable . '_' . $this->getTranslateUid($reftable, $olduid) : $this->getTranslateUid($reftable, $olduid);
                 }
-                if (!empty($newlist)) {
+                if ($newlist !== []) {
                     $row[$column] = implode(',', $newlist);
                 }
             }
@@ -1453,7 +1433,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                     unset($update['pid']);
 
                     $this->debug(__METHOD__ . ':' . __LINE__ . print_r($update, true));
-                    if (!empty($update)) {
+                    if ($update !== []) {
                         $this->source->ping();
 
                         $this->debug(__METHOD__ . ':' . __LINE__);
@@ -1576,19 +1556,19 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         return $row;
     }
 
-    private function debug($s)
+    private function debug(string $s): void
     {
         $this->out($s, 'DEBUG2');
     }
-    private static function myEnableFields($table)
+    private static function myEnableFields($table): array
     {
         //BackendUtility::BEenableFields($table)
         return [];
     }
 
-    private static function generateslug($str)
+    private static function generateslug($str): ?string
     {
-        $str = strtolower(trim($str));
+        $str = strtolower(trim((string)$str));
 
         $str = preg_replace('~[^\\pL\d]+~u', '_', $str);
         $str = str_replace(
@@ -1625,7 +1605,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         return $flexObj->flexArray2Xml($a, true);
     }
 
-    private function addToFormConfig($path)
+    private function addToFormConfig(string $path): void
     {
         //
 

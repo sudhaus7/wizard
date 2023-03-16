@@ -2,28 +2,27 @@
 
 /*
  * This file is part of the TYPO3 project.
- * (c) 2022 B-Factor GmbH
- *          Sudhaus7
+ *
+ * @author Frank Berger <fberger@sudhaus7.de>
  *
  * For the full copyright and license information, please view
  * the LICENSE file that was distributed with this source code.
+ *
  * The TYPO3 project - inspiring people to share!
- * @copyright 2022 B-Factor GmbH https://b-factor.de/
- * @author Frank Berger <fberger@b-factor.de>
- * @author Daniel Simon <dsimon@b-factor.de>
  */
 
 namespace SUDHAUS7\Sudhaus7Wizard\Backend\TCA;
 
 use SUDHAUS7\Sudhaus7Base\Tools\DB;
 use SUDHAUS7\Sudhaus7Wizard\WizardInterface;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class Updatestatus
 {
-    public function processDatamap_postProcessFieldArray($status, $table, $id, &$fieldArray, &$pObj)
+    public function processDatamap_postProcessFieldArray($status, $table, $id, &$fieldArray, &$pObj): void
     {
-        $globalconf = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class)->get('sudhaus7_wizard');
+        $globalconf = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('sudhaus7_wizard');
         if ($table == 'tx_sudhaus7wizard_domain_model_creator') {
             if ($status == 'new') {
                 $fieldArray['status'] = 0;
@@ -52,16 +51,16 @@ class Updatestatus
 
                 if (!empty($row['shortname'])) {
                     if ($globalconf['unifyshortname']) {
-                        $s = str_replace([' ', '-'], ['_', '_'], $row['shortname']);
+                        $s = str_replace([' ', '-'], ['_', '_'], (string)$row['shortname']);
                         $a = GeneralUtility::trimExplode('_', $s);
-                        if (count($a) == 1) {
+                        if ((is_countable($a) ? count($a) : 0) == 1) {
                             array_unshift($a, 'BK');
                         }
-                        $s = strtoupper(array_shift($a)) . '_';
+                        $s = strtoupper((string)array_shift($a)) . '_';
                         $s .= strtolower(implode('_', $a));
                         $fieldArray['shortname'] = $s;
                     } else {
-                        $fieldArray['shortname'] = strtolower($row['shortname']);
+                        $fieldArray['shortname'] = strtolower((string)$row['shortname']);
                     }
                 }
 

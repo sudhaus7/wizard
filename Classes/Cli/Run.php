@@ -2,15 +2,13 @@
 
 /*
  * This file is part of the TYPO3 project.
- * (c) 2022 B-Factor GmbH
- *          Sudhaus7
+ *
+ * @author Frank Berger <fberger@sudhaus7.de>
  *
  * For the full copyright and license information, please view
  * the LICENSE file that was distributed with this source code.
+ *
  * The TYPO3 project - inspiring people to share!
- * @copyright 2022 B-Factor GmbH https://b-factor.de/
- * @author Frank Berger <fberger@b-factor.de>
- * @author Daniel Simon <dsimon@b-factor.de>
  */
 
 namespace SUDHAUS7\Sudhaus7Wizard\Cli;
@@ -28,6 +26,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Mail\MailMessage;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Object\Exception;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 
@@ -37,7 +36,7 @@ class Run extends Command
     private ?CreatorRepository $repository = null;
     private ?PersistenceManager $persistenceManager = null;
 
-    public function mystatus(InputInterface $input, OutputInterface $output)
+    public function mystatus(InputInterface $input, OutputInterface $output): void
     {
         //$this->mylist($input, $output);
         $output->writeln([
@@ -48,7 +47,7 @@ class Run extends Command
         ], $output::VERBOSITY_NORMAL);
     }
 
-    public function mylist(InputInterface $input, OutputInterface $output)
+    public function mylist(InputInterface $input, OutputInterface $output): void
     {
         $table = new Table($output);
         $table->setHeaderTitle('Todo List');
@@ -62,7 +61,7 @@ class Run extends Command
         $table->render();
     }
 
-    public function getInfo(Creator $o, InputInterface $input, OutputInterface $output)
+    public function getInfo(Creator $o, InputInterface $input, OutputInterface $output): void
     {
         $output->write(sprintf("Generiere Baukasten %s\n", $o->getLongname()));
         $output->write("Vorlage:\t" . $o->getBase() . "\n");
@@ -74,11 +73,11 @@ class Run extends Command
 
         $a = $o->getFlexinfo();
         foreach ($a['data']['sDEF']['lDEF'] as $k => $v) {
-            $output->write(sprintf("%s:\t%s\n", ucfirst($k), $v['vDEF']));
+            $output->write(sprintf("%s:\t%s\n", ucfirst((string)$k), $v['vDEF']));
         }
     }
 
-    public function create(Creator $o, InputInterface $input, OutputInterface $output, $mapfolder=null)
+    public function create(Creator $o, InputInterface $input, OutputInterface $output, $mapfolder=null): void
     {
         $o->setStatus(15);
         $this->persistenceManager->update($o);
@@ -130,7 +129,7 @@ class Run extends Command
      * @param InputInterface $input
      * @param OutputInterface $output
      *
-     * @throws \TYPO3\CMS\Extbase\Object\Exception
+     * @throws Exception
      */
     protected function initialize(InputInterface $input, OutputInterface $output)
     {
@@ -153,53 +152,52 @@ class Run extends Command
         }
 
         switch ($input->getArgument('mode')) {
-
-        case 'info':
-            if ($input->getOption('id')) {
-                if ($input->getOption('force')) {
-                    $this->forceVisible($input->getOption('id'));
+            case 'info':
+                if ($input->getOption('id')) {
+                    if ($input->getOption('force')) {
+                        $this->forceVisible($input->getOption('id'));
+                    }
+                    $o = $this->repository->findByIdentifier($input->getOption('id'));
+                    if ($o) {
+                        $this->getInfo($o, $input, $output);
+                    }
+                } else {
+                    $o = $this->repository->findNext();
+                    if ($o) {
+                        $this->getInfo($o, $input, $output);
+                    }
                 }
-                $o = $this->repository->findByIdentifier($input->getOption('id'));
-                if ($o) {
-                    $this->getInfo($o, $input, $output);
+                break;
+            case 'single':
+                if ($input->getOption('id')) {
+                    if ($input->getOption('force')) {
+                        $this->forceVisible($input->getOption('id'));
+                    }
+                    $o = $this->repository->findByIdentifier($input->getOption('id'));
+                    if ($o) {
+                        $this->create($o, $input, $output, $mapfolder);
+                    }
                 }
-            } else {
+                return 0;
+            case 'status':
+                $this->mystatus($input, $output);
+                return 0;
+            case 'list':
+                $this->mylist($input, $output);
+                return 0;
+            case 'next':
                 $o = $this->repository->findNext();
-                if ($o) {
-                    $this->getInfo($o, $input, $output);
-                }
-            }
-            break;
-        case 'single':
-            if ($input->getOption('id')) {
-                if ($input->getOption('force')) {
-                    $this->forceVisible($input->getOption('id'));
-                }
-                $o = $this->repository->findByIdentifier($input->getOption('id'));
                 if ($o) {
                     $this->create($o, $input, $output, $mapfolder);
                 }
-            }
-            return 0;
-        case 'status':
-            $this->mystatus($input, $output);
-            return 0;
-        case 'list':
-            $this->mylist($input, $output);
-            return 0;
-        case 'next':
-            $o = $this->repository->findNext();
-            if ($o) {
-                $this->create($o, $input, $output, $mapfolder);
-            }
-            return 0;
-        default:
-            break;
+                return 0;
+            default:
+                break;
         }
         return 1;
     }
 
-    private function forceVisible(int $id)
+    private function forceVisible(int $id): void
     {
         GeneralUtility::makeInstance(ConnectionPool::class)
                       ->getConnectionForTable('tx_sudhaus7wizard_domain_model_creator')

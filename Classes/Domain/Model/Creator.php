@@ -2,15 +2,13 @@
 
 /*
  * This file is part of the TYPO3 project.
- * (c) 2022 B-Factor GmbH
- *          Sudhaus7
+ *
+ * @author Frank Berger <fberger@sudhaus7.de>
  *
  * For the full copyright and license information, please view
  * the LICENSE file that was distributed with this source code.
+ *
  * The TYPO3 project - inspiring people to share!
- * @copyright 2022 B-Factor GmbH https://b-factor.de/
- * @author Frank Berger <fberger@b-factor.de>
- * @author Daniel Simon <dsimon@b-factor.de>
  */
 
 namespace SUDHAUS7\Sudhaus7Wizard\Domain\Model;
@@ -61,9 +59,9 @@ class Creator extends AbstractEntity
     /**
      * T3verLabel
      *
-     * @return string t3ver_label
+     * @return string|null t3ver_label
      */
-    public function getT3verLabel()
+    public function getT3verLabel(): ?string
     {
         return $this->t3ver_label;
     }
@@ -71,10 +69,9 @@ class Creator extends AbstractEntity
     /**
      * T3verLabel
      *
-     * @param string $t3ver_label
      * @return $this
      */
-    public function setT3verLabel($t3ver_label)
+    public function setT3verLabel(?string $t3ver_label)
     {
         $this->t3ver_label = $t3ver_label;
         return $this;
@@ -83,9 +80,9 @@ class Creator extends AbstractEntity
     /**
      * Hidden
      *
-     * @return int hidden
+     * @return int|null hidden
      */
-    public function getHidden()
+    public function getHidden(): ?int
     {
         return $this->hidden;
     }
@@ -93,10 +90,9 @@ class Creator extends AbstractEntity
     /**
      * Hidden
      *
-     * @param int $hidden
      * @return $this
      */
-    public function setHidden($hidden)
+    public function setHidden(?int $hidden)
     {
         $this->hidden = $hidden;
         return $this;
@@ -105,9 +101,9 @@ class Creator extends AbstractEntity
     /**
      * Sourcepid
      *
-     * @return string sourcepid
+     * @return string|null sourcepid
      */
-    public function getSourcepid()
+    public function getSourcepid(): ?string
     {
         return $this->sourcepid;
     }
@@ -115,10 +111,9 @@ class Creator extends AbstractEntity
     /**
      * Sourcepid
      *
-     * @param string $sourcepid
      * @return $this
      */
-    public function setSourcepid($sourcepid)
+    public function setSourcepid(?string $sourcepid)
     {
         $this->sourcepid = $sourcepid;
         return $this;
@@ -127,9 +122,9 @@ class Creator extends AbstractEntity
     /**
      * Base
      *
-     * @return string base
+     * @return string|null base
      */
-    public function getBase()
+    public function getBase(): ?string
     {
         return $this->base;
     }
@@ -137,10 +132,9 @@ class Creator extends AbstractEntity
     /**
      * Base
      *
-     * @param string $base
      * @return $this
      */
-    public function setBase($base)
+    public function setBase(?string $base)
     {
         $this->base = $base;
         return $this;
@@ -149,9 +143,9 @@ class Creator extends AbstractEntity
     /**
      * Projektname
      *
-     * @return string projektname
+     * @return string|null projektname
      */
-    public function getProjektname()
+    public function getProjektname(): ?string
     {
         return $this->projektname;
     }
@@ -159,10 +153,9 @@ class Creator extends AbstractEntity
     /**
      * Projektname
      *
-     * @param string $projektname
      * @return $this
      */
-    public function setProjektname($projektname)
+    public function setProjektname(?string $projektname)
     {
         $this->projektname = $projektname;
         return $this;
@@ -171,9 +164,9 @@ class Creator extends AbstractEntity
     /**
      * Longname
      *
-     * @return string longname
+     * @return string|null longname
      */
-    public function getLongname()
+    public function getLongname(): ?string
     {
         return $this->longname;
     }
@@ -181,10 +174,9 @@ class Creator extends AbstractEntity
     /**
      * Longname
      *
-     * @param string $longname
      * @return $this
      */
-    public function setLongname($longname)
+    public function setLongname(?string $longname)
     {
         $this->longname = $longname;
         return $this;
@@ -193,9 +185,9 @@ class Creator extends AbstractEntity
     /**
      * Shortname
      *
-     * @return string shortname
+     * @return string|null shortname
      */
-    public function getShortname()
+    public function getShortname(): ?string
     {
         return $this->shortname;
     }
@@ -203,10 +195,9 @@ class Creator extends AbstractEntity
     /**
      * Shortname
      *
-     * @param string $shortname
      * @return $this
      */
-    public function setShortname($shortname)
+    public function setShortname(?string $shortname)
     {
         $this->shortname = $shortname;
         return $this;
@@ -215,9 +206,9 @@ class Creator extends AbstractEntity
     /**
      * Domainname
      *
-     * @return string domainname
+     * @return string|null domainname
      */
-    public function getDomainname()
+    public function getDomainname(): ?string
     {
         return $this->domainname;
     }
@@ -225,10 +216,9 @@ class Creator extends AbstractEntity
     /**
      * Domainname
      *
-     * @param string $domainname
      * @return $this
      */
-    public function setDomainname($domainname)
+    public function setDomainname(?string $domainname)
     {
         $this->domainname = $domainname;
         return $this;
@@ -237,9 +227,9 @@ class Creator extends AbstractEntity
     /**
      * Contact
      *
-     * @return string contact
+     * @return string|null contact
      */
-    public function getContact()
+    public function getContact(): ?string
     {
         return $this->contact;
     }
@@ -247,10 +237,9 @@ class Creator extends AbstractEntity
     /**
      * Contact
      *
-     * @param string $contact
      * @return $this
      */
-    public function setContact($contact)
+    public function setContact(?string $contact)
     {
         $this->contact = $contact;
         return $this;
@@ -259,9 +248,9 @@ class Creator extends AbstractEntity
     /**
      * Reduser
      *
-     * @return string reduser
+     * @return string|null reduser
      */
-    public function getReduser()
+    public function getReduser(): ?string
     {
         return $this->reduser;
     }
@@ -269,10 +258,9 @@ class Creator extends AbstractEntity
     /**
      * Reduser
      *
-     * @param string $reduser
      * @return $this
      */
-    public function setReduser($reduser)
+    public function setReduser(?string $reduser)
     {
         $this->reduser = $reduser;
         return $this;
@@ -281,9 +269,9 @@ class Creator extends AbstractEntity
     /**
      * Redemail
      *
-     * @return string redemail
+     * @return string|null redemail
      */
-    public function getRedemail()
+    public function getRedemail(): ?string
     {
         return $this->redemail;
     }
@@ -291,10 +279,9 @@ class Creator extends AbstractEntity
     /**
      * Redemail
      *
-     * @param string $redemail
      * @return $this
      */
-    public function setRedemail($redemail)
+    public function setRedemail(?string $redemail)
     {
         $this->redemail = $redemail;
         return $this;
@@ -303,9 +290,9 @@ class Creator extends AbstractEntity
     /**
      * Redpass
      *
-     * @return string redpass
+     * @return string|null redpass
      */
-    public function getRedpass()
+    public function getRedpass(): ?string
     {
         return $this->redpass;
     }
@@ -313,10 +300,9 @@ class Creator extends AbstractEntity
     /**
      * Redpass
      *
-     * @param string $redpass
      * @return $this
      */
-    public function setRedpass($redpass)
+    public function setRedpass(?string $redpass)
     {
         $this->redpass = $redpass;
         return $this;
@@ -327,7 +313,7 @@ class Creator extends AbstractEntity
      *
      * @return string status
      */
-    public function getStatus()
+    public function getStatus(): string
     {
         return $this->status;
     }
@@ -338,7 +324,7 @@ class Creator extends AbstractEntity
      * @param mixed $status
      * @return $this
      */
-    public function setStatus($status)
+    public function setStatus(string $status)
     {
         $this->status = $status;
         return $this;
@@ -361,7 +347,7 @@ class Creator extends AbstractEntity
      */
     public function getFlexinfo()
     {
-        if ($this->flexinfo === null && isset($GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['types'][$this->base]) && strpos($GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['types'][$this->base]['showitem'], 'flexinfo')) {
+        if ($this->flexinfo === null && isset($GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['types'][$this->base]) && strpos((string)$GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['types'][$this->base]['showitem'], 'flexinfo')) {
             $row = DB::getRecord('tx_sudhaus7wizard_domain_model_creator', $this->getUid());
             $this->flexinfo = $row['flexinfo'];
         }
@@ -390,9 +376,9 @@ class Creator extends AbstractEntity
     /**
      * Email
      *
-     * @return string email
+     * @return string|null email
      */
-    public function getEmail()
+    public function getEmail(): ?string
     {
         return $this->email;
     }
@@ -400,10 +386,9 @@ class Creator extends AbstractEntity
     /**
      * Email
      *
-     * @param string $email
      * @return $this
      */
-    public function setEmail($email)
+    public function setEmail(?string $email)
     {
         $this->email = $email;
         return $this;
@@ -424,16 +409,16 @@ class Creator extends AbstractEntity
      *
      * @param string $cruserId
      */
-    public function setCruserId($cruserId)
+    public function setCruserId($cruserId): void
     {
         $this->cruserId = $cruserId;
     }
     /**
      * Sourceclass
      *
-     * @return string sourcepid
+     * @return string|null sourcepid
      */
-    public function getSourceclass()
+    public function getSourceclass(): ?string
     {
         return $this->sourceclass;
     }
@@ -443,7 +428,7 @@ class Creator extends AbstractEntity
      *
      * @return $this
      */
-    public function setSourceclass($sourceclass)
+    public function setSourceclass(?string $sourceclass)
     {
         $this->sourceclass = $sourceclass;
         return $this;
@@ -451,9 +436,9 @@ class Creator extends AbstractEntity
     /**
      * Status
      *
-     * @return array status
+     * @return array<int, mixed[]> status
      */
-    public static function getStatusTca()
+    public static function getStatusTca(): array
     {
         $a = [];
         foreach (self::$statusList as $k => $v) {

@@ -2,15 +2,13 @@
 
 /*
  * This file is part of the TYPO3 project.
- * (c) 2022 B-Factor GmbH
- *          Sudhaus7
+ *
+ * @author Frank Berger <fberger@sudhaus7.de>
  *
  * For the full copyright and license information, please view
  * the LICENSE file that was distributed with this source code.
+ *
  * The TYPO3 project - inspiring people to share!
- * @copyright 2022 B-Factor GmbH https://b-factor.de/
- * @author Frank Berger <fberger@b-factor.de>
- * @author Daniel Simon <dsimon@b-factor.de>
  */
 
 namespace SUDHAUS7\Sudhaus7Wizard\Sources;
@@ -27,15 +25,13 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class Localdatabase implements SourceInterface
 {
-    private Creator $creator;
     private array $tree = [];
 
-    public function __construct(Creator $creator)
+    public function __construct(private readonly Creator $creator)
     {
-        $this->creator = $creator;
     }
 
-    public function getTree($start)
+    public function getTree($start): array
     {
         /** @var QueryBuilder $query */
         $query = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('pages');
@@ -60,7 +56,7 @@ class Localdatabase implements SourceInterface
         return $this->tree;
     }
 
-    public function ping()
+    public function ping(): void
     {
         $db = Globals::db();
         if (!$db->isConnected()) {
@@ -91,7 +87,7 @@ class Localdatabase implements SourceInterface
 
         if (isset($columnconfig['config']['foreign_table_where'])) {
             $tmp = $columnconfig['config']['foreign_table_where'];
-            $tmp = str_replace('###CURRENT_PID###', $pid, $tmp);
+            $tmp = str_replace('###CURRENT_PID###', $pid, (string)$tmp);
             $tmp = str_replace('###THIS_UID###', $uid, $tmp);
             foreach (array_keys($GLOBALS['TCA'][$columnconfig['config']['foreign_table']]['columns']) as $key) {
                 $tmp = str_replace('###REC_FIELD_' . $key . '###', $oldrow[$key], $tmp);
@@ -109,9 +105,7 @@ class Localdatabase implements SourceInterface
     }
 
     /**
-     * @param array $sys_file
      * @param string $newidentifier
-     *
      * @return array
      */
     public function handleFile(array $sys_file, $newidentifier)
@@ -129,8 +123,8 @@ class Localdatabase implements SourceInterface
         $sys_file_metadata = DB::getRecord('sys_file_metadata', $sys_file['uid'], 'file');
         unset($sys_file['uid']);
         $sys_file['identifier'] = $newidentifier;
-        $sys_file['identifier_hash'] = sha1($sys_file['identifer']);
-        $sys_file['folder_hash'] = sha1(dirname($sys_file['identifer']));
+        $sys_file['identifier_hash'] = sha1((string)$sys_file['identifer']);
+        $sys_file['folder_hash'] = sha1(dirname((string)$sys_file['identifer']));
 
         [$affected,$uid] = DB::insertRecord('sys_file', $sys_file);
 
@@ -162,7 +156,7 @@ class Localdatabase implements SourceInterface
         return $ret ?? [];
     }
 
-    public function pageSort($new)
+    public function pageSort($new): void
     {
         $page = DB::getRecord('pages', $new);
         $query = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('pages');
@@ -171,12 +165,12 @@ class Localdatabase implements SourceInterface
         $query->executeStatement('update pages set sorting=@count:=@count+16 where pid=' . $page['pid'] . ' order by doktype desc,title asc');
     }
 
-    public function sourcePid()
+    public function sourcePid(): ?string
     {
         return $this->creator->getSourcepid();
     }
 
-    public function getTables()
+    public function getTables(): array
     {
         return array_keys($GLOBALS['TCA']);
     }
