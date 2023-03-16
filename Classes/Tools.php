@@ -41,9 +41,6 @@ class Tools
      */
     public static function registerExtention($class): void
     {
-        //$extention,$description,$sourcepid,$flex,$addfields='')
-        //{
-
         if (!in_array(WizardProcessInterface::class, class_implements($class))) {
             return;
         }
@@ -51,19 +48,47 @@ class Tools
         /** @var WizardProcessInterface $class */
         $config = $class::getWizardConfig();
 
-        $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['Sudhaus7Wizard']['registeredTemplateExtentions'][$config['extention']] = $class;
-        if (is_array($GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']) && !isset($GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['columns']['flexinfo']['config']['ds'][$config['extention']])) {
+        $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['Sudhaus7Wizard']['registeredTemplateExtentions'][$config->getExtension()] = $class;
+        if (is_array($GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']) && !isset($GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['columns']['flexinfo']['config']['ds'][$config->getExtension()])) {
             $GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['columns']['base']['config']['items'][] = [
-                $config['description'],
-                $config['extention'],
+                $config->getDescription(),
+                $config->getExtension(),
             ];
-            $GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['columns']['flexinfo']['config']['ds'][$config['extention']] = $config['flexinfo'];
-            $GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['types'][$config['extention']] = [
+            $GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['columns']['flexinfo']['config']['ds'][$config->getExtension()] = $config->getFlexinfoFile();
+            $GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['types'][$config->getExtension()] = [
                 'showitem' => '
                 status,base,sourceclass,sourcepid,projektname,longname,shortname,domainname,contact,email,--div--;Benutzer,reduser,redpass,redemail,--div--;Template Konfigurationen,flexinfo
-            ' . $config['addfields'],
+            ' . $config->getAddFields(),
             ];
-            $GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['columns']['sourcepid']['config']['default'] = $config['sourcepid'];
+            $GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['columns']['sourcepid']['config']['default'] = $config->getSourcePid();
         }
+    }
+
+    public static function generateslug($str): ?string
+    {
+        $str = mb_strtolower(trim((string)$str));
+        $str = str_replace(
+            [
+                'ß',
+                'ä',
+                'ü',
+                'ö',
+            ],
+            [
+                'ss',
+                'ae',
+                'ue',
+                'oe',
+            ],
+            $str
+        );
+        // Trim incl. dashes
+        $str = trim($str, '-');
+        if (function_exists('iconv')) {
+            $str = iconv('utf-8', 'us-ascii//TRANSLIT', $str);
+        }
+        $str = preg_replace('/[^a-z0-9-]/', '-', $str);
+
+        return preg_replace('/-+/', '-', $str);
     }
 }

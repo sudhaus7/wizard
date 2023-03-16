@@ -13,74 +13,45 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard;
 
+use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
-use SUDHAUS7\Sudhaus7Base\Tools\DB;
-use SUDHAUS7\Sudhaus7Base\Tools\Globals;
+
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
+use SUDHAUS7\Sudhaus7Wizard\Events\AfterClonedTreeInsertEvent;
+use SUDHAUS7\Sudhaus7Wizard\Events\AfterContentCloneEvent;
+use SUDHAUS7\Sudhaus7Wizard\Events\BeforeClonedTreeInsertEvent;
+use SUDHAUS7\Sudhaus7Wizard\Events\BeforeContentCloneEvent;
+use SUDHAUS7\Sudhaus7Wizard\Events\CreateBackendUserEvent;
+use SUDHAUS7\Sudhaus7Wizard\Events\CreateBackendUserGroupEvent;
+use SUDHAUS7\Sudhaus7Wizard\Events\CreateFilemountEvent;
+use SUDHAUS7\Sudhaus7Wizard\Events\FinalContentEvent;
+use SUDHAUS7\Sudhaus7Wizard\Events\ModifyCloneContentSkipTableEvent;
+use SUDHAUS7\Sudhaus7Wizard\Events\TCA\Column;
+use SUDHAUS7\Sudhaus7Wizard\Events\TCA\ColumnType;
+use SUDHAUS7\Sudhaus7Wizard\Events\TCA\Inlines;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardProcessInterface;
 use SUDHAUS7\Sudhaus7Wizard\Sources\SourceInterface;
-use Symfony\Component\Console\Output\OutputInterface;
+use SUDHAUS7\Sudhaus7Wizard\Traits\DbTrait;
 use Symfony\Component\Yaml\Yaml;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Configuration\FlexForm\FlexFormTools;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Crypto\PasswordHashing\PasswordHashFactory;
 use TYPO3\CMS\Core\Crypto\Random;
 use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class CreateProcess implements Psr\Log\LoggerAwareInterface
+class CreateProcess implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
+    use DbTrait;
     public array $allwaysIgnoreTables = [];
 
-    public array $siteconfig = [
-        'base'          => 'domainname',
-        'baseVariants'  => [],
-        'errorHandling' =>
-            [
-                0 =>
-                    [
-                        'errorCode'          => 404,
-                        'errorHandler'       => 'Page',
-                        'errorContentSource' => 't3://page?uid=2347',
-                    ],
-            ],
-        'languages'     =>
-            [
-                0 =>
-                    [
-                        'title'           => 'Deutsch',
-                        'enabled'         => true,
-                        'base'            => '/',
-                        'typo3Language'   => 'de',
-                        'locale'          => 'de_DE.utf8',
-                        'iso-639-1'       => 'de',
-                        'navigationTitle' => 'Deutsch',
-                        'hreflang'        => 'de-DE',
-                        'direction'       => 'ltr',
-                        'flag'            => 'de',
-                        'languageId'      => '0',
-                    ],
-            ],
-        'rootPageId'    => 0,
-        'routes'        =>
-            [
-                0 =>
-                    [
-                        'route'   => 'robots.txt',
-                        'type'    => 'staticText',
-                        'content' => 'User-agent: *
-Disallow: /typo3/
-Disallow: /typo3_src/
-Allow: /typo3/sysext/frontend/Resources/Public/*
-',
-                    ],
-            ],
-        'imports'=>[
-            0 => ['resource'=>'EXT:solr_evm/Configuration/Routes/Solr.yaml'],
-        ],
-    ];
+    public array $siteconfig = [];
 
     public array $pageMap = [];
     public ?Creator $task = null;
@@ -107,6 +78,10 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 
     public function run($mapfolder = null): bool
     {
+        if ($this->logger === null) {
+            $this->setLogger(new NullLogger());
+        }
+
         //Globals::db()->store_lastBuiltQuery = true;
         $this->confArr = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('sudhaus7_wizard');
 
@@ -137,11 +112,13 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $this->cloneContent();
         $this->source->ping();
         //$this->cleanContent('clean');
+
         while ($this->cleanUpTodo !== []) {
             $this->out('Clone Inlines', 'INFO', 'Clone Inlines');
             $this->cloneInlines();
             $this->source->ping();
         }
+
         $this->out('Clean Pages', 'INFO', 'Clean Pages');
         $this->cleanPages();
         $this->source->ping();
@@ -188,11 +165,10 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         }
 
         match ($info) {
-            'DEBUG2' => $this->logger->alert($c.' - '.$this->debugsection,$context),
-            'DEBUG' => $this->logger->debug($c.' - '.$this->debugsection,$context),
-            default => $this->logger->info($c.' - '.$this->debugsection,$context),
+            'DEBUG2' => $this->logger->alert($c . ' - ' . $this->debugsection, $context),
+            'DEBUG' => $this->logger->debug($c . ' - ' . $this->debugsection, $context),
+            default => $this->logger->info($c . ' - ' . $this->debugsection, $context),
         };
-
     }
 
     private array $confArr = [];
@@ -396,36 +372,10 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         return $row;
     }
 
-
-
     private function createFilemount()
     {
         $shortname = $this->task->getShortname();
-        $shortname = str_replace(
-            [
-                'ß',
-                'ä',
-                'ü',
-                'ö',
-                'Ä',
-                'Ü',
-                'Ö',
-                ' ',
-                '-',
-            ],
-            [
-                'ss',
-                'ae',
-                'ue',
-                'oe',
-                'ae',
-                'ue',
-                'oe',
-                '_',
-                '_',
-            ],
-            $shortname
-        );
+        $shortname = Tools::generateslug($shortname);
 
         $dir = $this->template->getMediaBaseDir() . $shortname . '/';
 
@@ -434,7 +384,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $this->out('Create Filemount 1 ' . $name);
         $this->source->ping();
 
-        $test = DB::getRecord('sys_filemounts', $name, 'title');
+        $test = BackendUtility::getRecord('sys_filemounts', $name, 'title');
         if (! empty($test)) {
             $this->filemount = $test;
             return;
@@ -460,12 +410,13 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
             'pid'   => 0,
         ];
 
-        if (method_exists($this->template, 'createFilemount')) {
-            $tmpl = $this->template->createFilemount($tmpl, $this);
-        }
+        $event =  new CreateFilemountEvent($tmpl, $this);
+        GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+        $tmpl = $event->getRow();
+
         $this->source->ping();
 
-        [ $rows, $newuid ] = DB::insertRecord('sys_filemounts', $tmpl);
+        [ $rows, $newuid ] = self::insertRecord('sys_filemounts', $tmpl);
         if (! $rows) {
             throw new \Exception('Failed to insert', 1_616_680_146);
         }
@@ -482,7 +433,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $this->out('Create Group ' . $groupname);
         $this->source->ping();
 
-        $test = DB::getRecord('be_groups', $groupname, 'title');
+        $test = BackendUtility::getRecord('be_groups', $groupname, 'title');
 
         if (! empty($test)) {
             $this->group = $test;
@@ -497,12 +448,14 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $tmpl['file_mountpoints'] = implode(',', $tmp);
         $tmpl['crdate']           = time();
         $tmpl['tstamp']           = time();
-        if (method_exists($this->template, 'createGroup')) {
-            $tmpl = $this->template->createGroup($tmpl, $this);
-        }
+
+        $event = new CreateBackendUserGroupEvent($tmpl, $this);
+        GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+        $tmpl = $event->getRecord();
+
         $this->source->ping();
 
-        [ $rows, $newuid ] = DB::insertRecord('be_groups', $tmpl);
+        [ $rows, $newuid ] = self::insertRecord('be_groups', $tmpl);
 
         if (!$rows) {
             throw new \Exception('cant create group', 1_616_680_548);
@@ -518,7 +471,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $this->tmpluser = $tmpl['uid'];
         $this->source->ping();
 
-        $test = DB::getRecord('be_users', $this->task->getReduser(), 'username');
+        $test = BackendUtility::getRecord('be_users', $this->task->getReduser(), 'username');
 
         if (! empty($test)) {
             $groups = GeneralUtility::trimExplode(',', $test['usergroup'], true);
@@ -535,7 +488,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
             $test['tstamp']           = time();
             $this->source->ping();
 
-            DB::updateRecord('be_users', [
+            self::updateRecord('be_users', [
                 'file_mountpoints' => $test['file_mountpoints'],
                 'usergroup'        => $test['usergroup'],
                 'tstamp'           => time(),
@@ -572,12 +525,12 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
             }
         }
         $tmpl['usergroup'] = implode(',', $groups);
-        if (method_exists($this->template, 'createUser')) {
-            $tmpl = $this->template->createUser($tmpl, $this);
-        }
+        $event = new CreateBackendUserEvent($tmpl, $this);
+        GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+        $tmpl = $event->getRecord();
         $this->source->ping();
 
-        [ $rows, $newuid ] = DB::insertRecord('be_users', $tmpl);
+        [ $rows, $newuid ] = self::insertRecord('be_users', $tmpl);
 
         if (! $rows) {
             throw new \Exception('could not create user', 1_616_683_642);
@@ -600,7 +553,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     {
         $this->filemount['relatepage'] = $newrootpage;
 
-        DB::updateRecord('sys_filemounts', [ 'relatepage' => $newrootpage ], [ 'uid' => $this->filemount['uid'] ]);
+        self::updateRecord('sys_filemounts', [ 'relatepage' => $newrootpage ], [ 'uid' => $this->filemount['uid'] ]);
     }
 
     private function cloneTree()
@@ -633,14 +586,15 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
             if (method_exists($this->source, 'cloneTreePreInsert')) {
                 $page = $this->source->cloneTreePreInsert($old, $page, $this);
             }
-            if (method_exists($this->template, 'cloneTreePreInsert')) {
-                $page = $this->template->cloneTreePreInsert($old, $page, $this);
-            }
+
+            $event = new BeforeClonedTreeInsertEvent($old, $page, $this);
+            GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+            $page = $event->getRecord();
 
             $this->source->ping();
 
             if ((int)$page['pid'] > 0) {
-                [ $rowsaffected, $newpageid ] = DB::insertRecord('pages', $page);
+                [ $rowsaffected, $newpageid ] = self::insertRecord('pages', $page);
 
                 if (! $rowsaffected) {
                     throw new \Exception('Create page failed', 1_616_685_103);
@@ -653,9 +607,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                 $this->updateMountpoint($this->pageMap[ $old ]);
                 $this->siterootid = $this->pageMap[ $old ];
             }
-            if (method_exists($this->template, 'cloneTreePostInsert')) {
-                $this->template->cloneTreePostInsert($old, $this->pageMap[ $old ], $page, $this);
-            }
+            GeneralUtility::makeInstance(EventDispatcher::class)->dispatch(new AfterClonedTreeInsertEvent($old, $page, $this));
         }
         $this->out('Clone Tree End');
     }
@@ -664,7 +616,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     {
         if (! isset($this->checkusers[ $uid ])) {
             $this->source->ping();
-            $this->checkusers[ $uid ] = DB::getRecord('be_users', $uid);
+            $this->checkusers[ $uid ] = BackendUtility::getRecord('be_users', $uid);
         }
         if (is_array($this->checkusers[ $uid ])) {
             return $this->checkusers[ $uid ]['admin'];
@@ -687,7 +639,8 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     {
         $runTables = $this->source->getTables();
         $this->out('Start Clone Content');
-        $aSkip = [
+
+        $event = new ModifyCloneContentSkipTableEvent([
             'pages',
             'sys_domain',
             'sys_file_reference',
@@ -696,7 +649,10 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
             'tx_sudhaus7wizard_domain_model_creator',
             'sys_file',
             'sys_action',
-        ];
+        ], $this);
+        GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+        $aSkip = $event->getRecord();
+
         $aSkip = array_merge($aSkip, $this->allwaysIgnoreTables);
         foreach ($runTables as $table) {
             $config = $GLOBALS['TCA'][ $table ];
@@ -715,23 +671,9 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                             $row['t3_origuid'] = $olduid;
                         }
 
-                        $func = 'cloneContent_pre_' . $table;
-
-                        if (method_exists($this->source, $func)) {
-                            $row = $this->source->$func($olduid, $oldpid, $row, $this);
-                        }
-
-                        if (method_exists($this->template, $func)) {
-                            $row = $this->template->$func($olduid, $oldpid, $row, $this);
-                        }
-
-                        if (method_exists($this, $func)) {
-                            $row = $this->$func($olduid, $oldpid, $row, $this);
-                        }
-
-                        if ($table == 'sys_file_reference') {
-                            //print_r(__METHOD__.':'.__LINE__.print_r($row, true));
-                        }
+                        $event = new BeforeContentCloneEvent($table, $olduid, $oldpid, $row, $this);
+                        GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+                        $row = $event->getRecord();
 
                         $row = $this->runTCA('pre', $config['columns'], $row, [
                             'table'  => $table,
@@ -741,13 +683,9 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                             'pObj'   => $this,
                         ]);
 
-                        if ($table == 'sys_file_reference') {
-                            //print_r(__METHOD__.':'.__LINE__.print_r($row, true));
-                        }
-
                         $this->source->ping();
                         if ($row) {
-                            [ $rowsaffected, $newuid ] = DB::insertRecord($table, $row);
+                            [ $rowsaffected, $newuid ] = self::insertRecord($table, $row);
 
                             if (! $rowsaffected) {
                                 throw new \Exception(sprintf(
@@ -758,7 +696,9 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                             }
 
                             $this->out('Insert ' . $table . ' olduid ' . $olduid . ' oldpid ' . $oldpid . ' newuid ' . $newuid . ' newpid ' . $newpid);
+
                             $this->addContentMap($table, $olduid, $newuid);
+
                             $this->addCleanupInline($table, $newuid);
                             $row = $this->runTCA('post', $config['columns'], $row, [
                                 'table'  => $table,
@@ -769,21 +709,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                                 'pObj'   => $this,
                             ]);
 
-                            $func = 'cloneContent_post_' . $table;
-                            if (method_exists($this, $func)) {
-                                $this->out('calling func ' . $func . ' on this');
-                                $row = $this->$func($olduid, $oldpid, $newuid, $row, $this);
-                            }
-                            if (method_exists($this->template, $func)) {
-                                $this->out('calling func ' . $func . ' on template');
-                                $this->template->$func($olduid, $oldpid, $newuid, $row, $this);
-                            }
-
-                            if (method_exists($this->source, $func)) {
-                                $this->debug(__METHOD__ . ':' . __LINE__);
-                                $this->source->$func($olduid, $oldpid, $newuid, $row, $this);
-                                $this->debug(__METHOD__ . ':' . __LINE__);
-                            }
+                            GeneralUtility::makeInstance(EventDispatcher::class)->dispatch(new AfterContentCloneEvent($table, $olduid, $oldpid, $newuid, $row, $this));
                         } else {
                             $this->out('ERROR NO ROW ' . print_r([
                                     $table,
@@ -807,93 +733,41 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         foreach ($config as $column => $columnconfig) {
             //$this->out('runTCA '.$state.' '.$parameters['table'].' '.$column);
 
-            $func = 'cloneContent_' . $state . '_column_' . $column;
-            if (method_exists($this, $func)) {
-                if ($state == 'final') {
-                    //$this->out(__FUNCTION__ . ':' . __LINE__ . ' ' . get_class($this) . '->' . $func);
-                }
-                try {
-                    $row = $this->$func($column, $columnconfig, $row, $parameters);
-                } catch (\Exception $e) {
-                    print_r([ $e->getMessage(), $e->getTraceAsString() ]);
-                    exit;
-                }
-            }
-
-            if (method_exists($this->template, $func)) {
-                if ($state == 'final') {
-                    //$this->out(__FUNCTION__ . ':' . __LINE__ . ' CALL ' . get_class($this->template) . '->' . $func);
-                }
-                try {
-                    $row = $this->template->$func($column, $columnconfig, $row, $parameters, $this);
-                } catch (\Exception $e) {
-                    print_r([ $e->getMessage(), $e->getTraceAsString() ]);
-                    exit;
-                }
-                if ($state == 'final') {
-                    $this->out(__FUNCTION__ . ':' . __LINE__ . ' DONE ' . $this->template::class . '->' . $func);
-                }
-            }
-
-            $func = 'cloneContent_' . $state . '_columntype_' . strtolower((string)$columnconfig['config']['type']);
-            if (method_exists($this, $func)) {
-                if ($state == 'final') {
-                    //$this->out(__FUNCTION__ . ':' . __LINE__ . ' ' . get_class($this) . '->' . $func);
-                }
-                try {
-                    $row = $this->$func($column, $columnconfig, $row, $parameters);
-                } catch (\Exception $e) {
-                    print_r([ $e->getMessage(), $e->getTraceAsString() ]);
-                    exit;
-                }
-            }
-
-            if (method_exists($this->template, $func)) {
-                if ($state == 'final') {
-                    //$this->out(__FUNCTION__ . ':' . __LINE__ . ' ' . get_class($this->template) . '->' . $func);
-                }
-                try {
-                    $row = $this->template->$func($column, $columnconfig, $row, $parameters, $this);
-                } catch (\Exception $e) {
-                    print_r([ $e->getMessage(), $e->getTraceAsString() ]);
-                    exit;
-                }
-            }
-
-            if (isset($columnconfig['config']['wizards'])) {
-                foreach ($columnconfig['config']['wizards'] as $wizard => $wizardconfig) {
-                    $func = 'cloneContent_' . $state . '_wizards_' . strtolower((string)$wizard);
-
-                    if (method_exists($this, $func)) {
-                        if ($state == 'final') {
-                            //$this->out(__FUNCTION__ . ':' . __LINE__ . ' ' . get_class($this) . '->' . $func);
-                        }
-                        try {
-                            $row = $this->$func($column, $columnconfig, $row, $parameters, $wizardconfig);
-                        } catch (\Exception $e) {
-                            print_r([ $e->getMessage(), $e->getTraceAsString() ]);
-                            exit;
-                        }
-                    }
-                    if (method_exists($this->template, $func)) {
-                        try {
-                            $row = $this->template->$func(
-                                $column,
-                                $columnconfig,
-                                $row,
-                                $parameters,
-                                $this,
-                                $wizardconfig
-                            );
-                        } catch (\Exception $e) {
-                            print_r([ $e->getMessage(), $e->getTraceAsString() ]);
-                            exit;
-                        }
-                    }
-                }
+            switch($state) {
+                case 'pre':
+                    $event = new Column\BeforeEvent($parameters['table'], $column, $columnconfig, $row, $parameters, $this);
+                    GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+                    $row = $event->getRecord();
+                    $event = new ColumnType\BeforeEvent($parameters['table'], $column, $columnconfig, $row, $parameters, $this);
+                    GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+                    $row = $event->getRecord();
+                    break;
+                case 'post':
+                    $event = new Column\AfterEvent($parameters['table'], $column, $columnconfig, $row, $parameters, $this);
+                    GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+                    $row = $event->getRecord();
+                    $event = new ColumnType\AfterEvent($parameters['table'], $column, $columnconfig, $row, $parameters, $this);
+                    GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+                    $row = $event->getRecord();
+                    break;
+                case 'final':
+                    $event = new Column\FinalEvent($parameters['table'], $column, $columnconfig, $row, $parameters, $this);
+                    GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+                    $row = $event->getRecord();
+                    $event = new ColumnType\FinalEvent($parameters['table'], $column, $columnconfig, $row, $parameters, $this);
+                    GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+                    $row = $event->getRecord();
+                    break;
+                case 'clean':
+                    $event = new Column\CleanEvent($parameters['table'], $column, $columnconfig, $row, $parameters, $this);
+                    GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+                    $row = $event->getRecord();
+                    $event = new ColumnType\CleanEvent($parameters['table'], $column, $columnconfig, $row, $parameters, $this);
+                    GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+                    $row = $event->getRecord();
+                    break;
             }
         }
-
         return $row;
     }
 
@@ -933,25 +807,14 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                     $this->out('Content Cleanup ' . $table . ' ' . $row['uid']);
                     $this->debug(__METHOD__ . ':' . __LINE__);
 
-                    $func = 'cleanContent_' . $table;
-                    if (method_exists($this->template, $func)) {
-                        $this->debug(__METHOD__ . ':' . __LINE__);
-                        $row = $this->template->$func($row, $this);
-                        $this->debug(__METHOD__ . ':' . __LINE__);
-                    }
+                    $event = new Inlines\CleanEvent($table, $row, $this);
+                    GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+                    $row = $event->getRecord();
 
-                    if (method_exists($this, $func)) {
-                        $this->debug(__METHOD__ . ':' . __LINE__);
-                        $row = $this->$func($row, $this);
-                        $this->debug(__METHOD__ . ':' . __LINE__);
-                    }
-
-                    $this->debug(__METHOD__ . ':' . __LINE__);
                     $row = $this->runTCA('clean', $config['columns'], $row, [
                         'table' => $table,
                         'pObj'  => $this,
                     ]);
-
                     $this->debug(__METHOD__ . ':' . __LINE__);
                     $update = [];
                     foreach ($row as $k => $v) {
@@ -965,7 +828,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                     if ($update !== []) {
                         $this->source->ping();
                         $this->debug(__METHOD__ . ':' . __LINE__);
-                        DB::updateRecord($table, $update, [ 'uid' => $origrow['uid'] ]);
+                        self::updateRecord($table, $update, [ 'uid' => $origrow['uid'] ]);
                     }
                 }
             }
@@ -994,19 +857,15 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                 $row = $origrow;
                 $this->out('Page Cleanup ' . $row['title'] . ' ' . $row['uid']);
 
-                $func = 'finalContent_' . $table;
-                if (method_exists($this->template, $func)) {
-                    $row = $this->template->$func($row, $this);
-                }
-
-                if (method_exists($this, $func)) {
-                    $row = $this->$func($row, $this);
-                }
+                $event = new FinalContentEvent($table, $row, $this);
+                GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+                $row = $event->getRecord();
 
                 $row    = $this->runTCA('final', $config['columns'], $row, [
                     'table' => $table,
                     'pObj'  => $this,
                 ]);
+
                 $update = [];
                 foreach ($row as $k => $v) {
                     if ($origrow[ $k ] != $v) {
@@ -1019,7 +878,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                     $this->source->ping();
                     $this->out(__FILE__ . ':' . __LINE__ . ' ' . $table . ' update ' . print_r($update, true));
 
-                    DB::updateRecord($table, $update, [ 'uid' => $origrow['uid'] ]);
+                    self::updateRecord($table, $update, [ 'uid' => $origrow['uid'] ]);
                 }
             }
         }
@@ -1066,19 +925,9 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                     $this->out('Content Cleanup ' . $table . ' ' . $row['uid']);
 
                     $this->debug(__METHOD__ . ':' . __LINE__);
-                    $func = 'finalContent_' . $table;
-                    if (method_exists($this->template, $func)) {
-                        $this->debug(__METHOD__ . ':' . __LINE__ . ':' . $func);
-                        $row = $this->template->$func($row, $this);
-
-                        $this->debug(__METHOD__ . ':' . __LINE__);
-                    }
-
-                    if (method_exists($this, $func)) {
-                        $this->debug(__METHOD__ . ':' . __LINE__ . ':' . $func);
-                        $row = $this->$func($row, $this);
-                        $this->debug(__METHOD__ . ':' . __LINE__);
-                    }
+                    $event = new FinalContentEvent($table, $row, $this);
+                    GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+                    $row = $event->getRecord();
 
                     $this->debug(__METHOD__ . ':' . __LINE__);
                     $row = $this->runTCA('final', $config['columns'], $row, [
@@ -1099,7 +948,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                         $this->source->ping();
 
                         $this->debug(__METHOD__ . ':' . __LINE__);
-                        DB::updateRecord($table, $update, [ 'uid' => $origrow['uid'] ]);
+                        self::updateRecord($table, $update, [ 'uid' => $origrow['uid'] ]);
                     }
                 }
             }
@@ -1112,7 +961,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         if ($list != 0) {
             $this->group['db_mountpoints'] = $list;
             $this->source->ping();
-            DB::updateRecord('be_groups', [ 'db_mountpoints' => $list ], [ 'uid' => $this->group['uid'] ]);
+            self::updateRecord('be_groups', [ 'db_mountpoints' => $list ], [ 'uid' => $this->group['uid'] ]);
         }
     }
 
@@ -1128,7 +977,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         }
         $this->user['db_mountpoints'] = $list;
         $this->source->ping();
-        DB::updateRecord('be_users', [ 'db_mountpoints' => $list ], [ 'uid' => $this->user['uid'] ]);
+        self::updateRecord('be_users', [ 'db_mountpoints' => $list ], [ 'uid' => $this->user['uid'] ]);
     }
 
     private function finalYaml(): void
@@ -1137,16 +986,16 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
             $this->template->finalYaml($this);
         }
 
-        $page = DB::getRecord('pages', $this->siteconfig['rootPageId']);
-        $parent = DB::getRecord('pages', $page['pid']);
-        $parentofparent = DB::getRecord('pages', $parent['pid']);
+        $page = BackendUtility::getRecord('pages', $this->siteconfig['rootPageId']);
+        $parent = BackendUtility::getRecord('pages', $page['pid']);
+        $parentofparent = BackendUtility::getRecord('pages', $parent['pid']);
 
         $identifier = '';
         if ($parentofparent !== []) {
-            $identifier =  self::generateslug(trim((string)$parentofparent['slug'], '/')) . '-';
+            $identifier =  Tools::generateslug(trim((string)$parentofparent['slug'], '/')) . '-';
         }
 
-        $parentslug = self::generateslug(trim((string)$parent['title'], '/'));
+        $parentslug = Tools::generateslug(trim((string)$parent['title'], '/'));
         GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('pages')
                       ->update(
                           'pages',
@@ -1156,7 +1005,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 
         $identifier .= $parentslug;
         if ($identifier == '-microsites') {
-            $identifier = 'microsites-' . self::generateslug($page['title']);
+            $identifier = 'microsites-' . Tools::generateslug($page['title']);
         }
 
         if ($this->errorpage > 0) {
@@ -1277,7 +1126,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
             $row['uid_local'] = $newuid;
             $row['uid_foreign'] = $newforeign;
             $this->source->ping();
-            DB::insertRecord($mmtable, $row);
+            self::insertRecord($mmtable, $row);
         }
     }
 
@@ -1361,7 +1210,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 
                     $this->debug(__METHOD__ . ':' . __LINE__);
 
-                    $test = DB::getRecord($columnconfig['config']['foreign_table'], $this->contentmap[$columnconfig['config']['foreign_table']][$inlineuid]);
+                    $test = BackendUtility::getRecord($columnconfig['config']['foreign_table'], $this->contentmap[$columnconfig['config']['foreign_table']][$inlineuid]);
 
                     $this->debug(__METHOD__ . ':' . __LINE__ . ':' . print_r(['*', $columnconfig['config']['foreign_table'], 'uid=' . $this->contentmap[$columnconfig['config']['foreign_table']][$inlineuid], $test], true));
                 }
@@ -1416,7 +1265,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                         $this->source->ping();
 
                         $this->debug(__METHOD__ . ':' . __LINE__);
-                        DB::updateRecord($columnconfig['config']['foreign_table'], $update, ['uid'=>$orig['uid']]);
+                        self::updateRecord($columnconfig['config']['foreign_table'], $update, ['uid'=>$orig['uid']]);
                     }
                 } else {
                     $inline['t3_origuid'] = $inlineuid;
@@ -1425,28 +1274,12 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 
                     $this->debug(__METHOD__ . ':' . __LINE__);
                     $inline[$columnconfig['config']['foreign_field']] = $newuid;
-                    $func = 'cloneContent_pre_' . $columnconfig['config']['foreign_table'];
 
-                    if (method_exists($this->source, $func)) {
-                        $this->debug(__METHOD__ . ':' . __LINE__);
-                        $inline = $this->source->$func($inlineuid, $oldpid, $inline, $this);
-                        $this->debug(__METHOD__ . ':' . __LINE__);
-                    }
-                    if (method_exists($this->template, $func)) {
-                        $this->debug(__METHOD__ . ':' . __LINE__);
-                        $inline = $this->template->$func($inlineuid, $oldpid, $inline, $this);
-                        $this->debug(__METHOD__ . ':' . __LINE__);
-                    }
-                    if (method_exists($this, $func)) {
-                        $this->debug(__METHOD__ . ':' . __LINE__);
-                        $inline = $this->$func($inlineuid, $oldpid, $inline);
-                        $this->debug(__METHOD__ . ':' . __LINE__);
-                    }
+                    $event = new BeforeContentCloneEvent($columnconfig['config']['foreign_table'], $inlineuid, $oldpid, $inline, $this);
+                    GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+                    $inline = $event->getRecord();
 
                     $this->debug(__METHOD__ . ':' . __LINE__);
-                    if ($columnconfig['config']['foreign_table']=='sys_file_reference') {
-                        print_r(__METHOD__ . ':' . __LINE__ . print_r($inline, true));
-                    }
 
                     $inline = $this->runTCA(
                         'pre',
@@ -1461,14 +1294,10 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                         ]
                     );
 
-                    if ($columnconfig['config']['foreign_table']=='sys_file_reference') {
-                        print_r(__METHOD__ . ':' . __LINE__ . print_r($inline, true));
-                    }
-
                     if ($inline) {
                         $this->source->ping();
 
-                        [$rowaffected,$newinlineuid] = DB::insertRecord($columnconfig['config']['foreign_table'], $inline);
+                        [$rowaffected,$newinlineuid] = self::insertRecord($columnconfig['config']['foreign_table'], $inline);
 
                         if (!$rowaffected) {
                             throw new \Exception(sprintf('error insert to %s with %s', $columnconfig['config']['foreign_table'], json_encode($inline, JSON_THROW_ON_ERROR)), 1_616_700_010);
@@ -1490,47 +1319,13 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                                 'pObj' => $parameters['pObj'],
                             ]
                         );
-                        $func = 'cloneContent_post_' . $columnconfig['config']['foreign_table'];
-                        if (method_exists($this, $func)) {
-                            $row = $this->$func($inlineuid, $oldpid, $newinlineuid, $inline, $parameters['pObj']);
-                        }
-                        if (method_exists($this->template, $func)) {
-                            $this->template->$func($inlineuid, $oldpid, $newinlineuid, $inline, $this);
-                        }
-                        if (method_exists($this->source, $func)) {
-                            $this->debug(__METHOD__ . ':' . __LINE__);
-                            $test = $this->source->$func($test, $this);
 
-                            $this->debug(__METHOD__ . ':' . __LINE__);
-                        }
+                        GeneralUtility::makeInstance(EventDispatcher::class)->dispatch(new AfterContentCloneEvent($columnconfig['config']['foreign_table'], $inlineuid, $oldpid, $newinlineuid, $inline, $this));
                     }
                 }
             }
         } else {
             $this->out('No t3_origuid in Table ' . $table . ' - skipped');
-        }
-        return $row;
-    }
-
-    private function cloneContent_pre_sys_file_reference($olduid, $oldpid, $row)
-    {
-        $sys_file = $this->source->getRow('sys_file', ['uid'=>$row['uid_local']]);
-        $newidentifier = $this->filemount['path'] . $sys_file['name'];
-        $this->source->ping();
-        $test = DB::getRecord('sys_file', $newidentifier, 'identifier');
-        if (!empty($test)) {
-            $this->out('Using File ' . $newidentifier);
-            $row['uid_local'] = $test['uid'];
-            return $row;
-        }
-        $this->out('Create File ' . $newidentifier);
-        try {
-            $new_sys_file = $this->source->handleFile($sys_file, $newidentifier);
-            $this->addContentMap('sys_file', $sys_file['uid'], $new_sys_file['uid']);
-            $row['uid_local'] = $new_sys_file['uid'];
-        } catch (\Exception $e) {
-            print_r([$e->getMessage(), $e->getTraceAsString()]);
-            exit;
         }
         return $row;
     }
@@ -1543,38 +1338,6 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     {
         //BackendUtility::BEenableFields($table)
         return [];
-    }
-
-    private static function generateslug($str): ?string
-    {
-        $str = strtolower(trim((string)$str));
-
-        $str = preg_replace('~[^\\pL\d]+~u', '_', $str);
-        $str = str_replace(
-            [
-                'ß',
-                'ä',
-                'ü',
-                'ö',
-                '-',
-            ],
-            [
-                'ss',
-                'ae',
-                'ue',
-                'oe',
-                '_',
-            ],
-            $str
-        );
-        // Trim incl. dashes
-        $str = trim($str, '-');
-        if (function_exists('iconv')) {
-            $str = iconv('utf-8', 'us-ascii//TRANSLIT', $str);
-        }
-        $str = preg_replace('/[^a-z0-9-]/', '_', $str);
-
-        return preg_replace('/-+/', '_', $str);
     }
 
     private static function array2xml($a)
@@ -1601,225 +1364,261 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     /**
      * @return array
      */
-    public function getAllwaysIgnoreTables(): array {
+    public function getAllwaysIgnoreTables(): array
+    {
         return $this->allwaysIgnoreTables;
     }
 
     /**
      * @param array $allwaysIgnoreTables
      */
-    public function setAllwaysIgnoreTables( array $allwaysIgnoreTables ): void {
+    public function setAllwaysIgnoreTables(array $allwaysIgnoreTables): void
+    {
         $this->allwaysIgnoreTables = $allwaysIgnoreTables;
     }
 
     /**
      * @return array
      */
-    public function getSiteconfig(): array {
+    public function getSiteconfig(): array
+    {
         return $this->siteconfig;
     }
 
     /**
      * @param array $siteconfig
      */
-    public function setSiteconfig( array $siteconfig ): void {
+    public function setSiteconfig(array $siteconfig): void
+    {
         $this->siteconfig = $siteconfig;
     }
 
     /**
      * @return array
      */
-    public function getPageMap(): array {
+    public function getPageMap(): array
+    {
         return $this->pageMap;
     }
 
     /**
      * @param array $pageMap
      */
-    public function setPageMap( array $pageMap ): void {
+    public function setPageMap(array $pageMap): void
+    {
         $this->pageMap = $pageMap;
     }
 
     /**
      * @return Creator|null
      */
-    public function getTask(): ?Creator {
+    public function getTask(): ?Creator
+    {
         return $this->task;
     }
 
     /**
      * @param Creator|null $task
      */
-    public function setTask( ?Creator $task ): void {
+    public function setTask(?Creator $task): void
+    {
         $this->task = $task;
     }
 
     /**
      * @return SourceInterface
      */
-    public function getSource(): SourceInterface {
+    public function getSource(): SourceInterface
+    {
         return $this->source;
     }
 
     /**
      * @param SourceInterface $source
      */
-    public function setSource( SourceInterface $source ): void {
+    public function setSource(SourceInterface $source): void
+    {
         $this->source = $source;
     }
 
     /**
      * @return array
      */
-    public function getGroup(): array {
+    public function getGroup(): array
+    {
         return $this->group;
     }
 
     /**
      * @param array $group
      */
-    public function setGroup( array $group ): void {
+    public function setGroup(array $group): void
+    {
         $this->group = $group;
     }
 
     /**
      * @return array
      */
-    public function getUser(): array {
+    public function getUser(): array
+    {
         return $this->user;
     }
 
     /**
      * @param array $user
      */
-    public function setUser( array $user ): void {
+    public function setUser(array $user): void
+    {
         $this->user = $user;
     }
 
     /**
      * @return array
      */
-    public function getFilemount(): array {
+    public function getFilemount(): array
+    {
         return $this->filemount;
     }
 
     /**
      * @param array $filemount
      */
-    public function setFilemount( array $filemount ): void {
+    public function setFilemount(array $filemount): void
+    {
         $this->filemount = $filemount;
     }
 
     /**
      * @return array
      */
-    public function getContentmap(): array {
+    public function getContentmap(): array
+    {
         return $this->contentmap;
     }
 
     /**
      * @param array $contentmap
      */
-    public function setContentmap( array $contentmap ): void {
+    public function setContentmap(array $contentmap): void
+    {
         $this->contentmap = $contentmap;
     }
 
     /**
      * @return array
      */
-    public function getCleanUpTodo(): array {
+    public function getCleanUpTodo(): array
+    {
         return $this->cleanUpTodo;
     }
 
     /**
      * @param array $cleanUpTodo
      */
-    public function setCleanUpTodo( array $cleanUpTodo ): void {
+    public function setCleanUpTodo(array $cleanUpTodo): void
+    {
         $this->cleanUpTodo = $cleanUpTodo;
     }
 
     /**
      * @return string
      */
-    public function getDebugsection(): string {
+    public function getDebugsection(): string
+    {
         return $this->debugsection;
     }
 
     /**
      * @param string $debugsection
      */
-    public function setDebugsection( string $debugsection ): void {
+    public function setDebugsection(string $debugsection): void
+    {
         $this->debugsection = $debugsection;
     }
 
     /**
      * @return WizardProcessInterface
      */
-    public function getTemplate(): WizardProcessInterface {
+    public function getTemplate(): WizardProcessInterface
+    {
         return $this->template;
     }
 
     /**
      * @param WizardProcessInterface $template
      */
-    public function setTemplate( WizardProcessInterface $template ): void {
+    public function setTemplate(WizardProcessInterface $template): void
+    {
         $this->template = $template;
     }
 
     /**
      * @return string|null
      */
-    public function getTemplatekey(): ?string {
+    public function getTemplatekey(): ?string
+    {
         return $this->templatekey;
     }
 
     /**
      * @param string|null $templatekey
      */
-    public function setTemplatekey( ?string $templatekey ): void {
+    public function setTemplatekey(?string $templatekey): void
+    {
         $this->templatekey = $templatekey;
     }
 
     /**
      * @return int
      */
-    public function getTmplgroup(): int {
+    public function getTmplgroup(): int
+    {
         return $this->tmplgroup;
     }
 
     /**
      * @param int $tmplgroup
      */
-    public function setTmplgroup( int $tmplgroup ): void {
+    public function setTmplgroup(int $tmplgroup): void
+    {
         $this->tmplgroup = $tmplgroup;
     }
 
     /**
      * @return int
      */
-    public function getTmpluser(): int {
+    public function getTmpluser(): int
+    {
         return $this->tmpluser;
     }
 
     /**
      * @param int $tmpluser
      */
-    public function setTmpluser( int $tmpluser ): void {
+    public function setTmpluser(int $tmpluser): void
+    {
         $this->tmpluser = $tmpluser;
     }
 
     /**
      * @return int
      */
-    public function getSiterootid(): int {
+    public function getSiterootid(): int
+    {
         return $this->siterootid;
     }
 
     /**
      * @param int $siterootid
      */
-    public function setSiterootid( int $siterootid ): void {
+    public function setSiterootid(int $siterootid): void
+    {
         $this->siterootid = $siterootid;
     }
 
+    public function getLogger(): LoggerInterface
+    {
+        return $this->logger;
+    }
 }

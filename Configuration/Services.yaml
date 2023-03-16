@@ -11,3 +11,7 @@ services:
         command: 'sudhaus7:wizard'
         description: 'run wizard tasks'
         schedulable: true
+  SUDHAUS7\Sudhaus7Wizard\EventHandlers\PreSysFileReferenceEventHandler:
+    tags:
+      - name: event.listener
+        identifier: 's7wizardBaseHandleSysFileReferences'

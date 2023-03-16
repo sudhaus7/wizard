@@ -13,8 +13,8 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard\Backend\TCA;
 
-use SUDHAUS7\Sudhaus7Base\Tools\DB;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardProcessInterface;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -27,7 +27,7 @@ class Updatestatus
             if ($status == 'new') {
                 $fieldArray['status'] = 0;
             } else {
-                $row = DB::getRecord($table, $id);
+                $row = BackendUtility::getRecord($table, $id);
 
                 foreach ($fieldArray as $k => $v) {
                     $row[$k] = $v;
@@ -64,7 +64,7 @@ class Updatestatus
                     }
                 }
 
-                $sourcePage = DB::getRecord('pages', $row['sourcepid']);
+                $sourcePage = BackendUtility::getRecord('pages', $row['sourcepid']);
                 // disallowed to copy pages (ext URL, be User Area, spacer, sysfolder, bin)
                 if (is_array($sourcePage) && in_array($sourcePage['doktype'], [3, 6, 199, 254, 255])) {
                     $fieldArray['status'] = 5;

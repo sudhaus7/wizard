@@ -39,6 +39,7 @@ class CreateProcessFactory
             $tsk->source->setLogger($logger);
         }
 
+        $tsk->setSiteconfig($tsk->source->getSiteConfig($creator->getSourcepid()));
         return $tsk;
     }
 }

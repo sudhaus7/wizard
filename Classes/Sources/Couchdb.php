@@ -15,16 +15,58 @@ namespace SUDHAUS7\Sudhaus7Wizard\Sources;
 
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
-use SUDHAUS7\Sudhaus7Base\Tools\Globals;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
+use SUDHAUS7\Sudhaus7Wizard\Traits\DbTrait;
 use TYPO3\CMS\Core\Core\Environment;
+use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class Couchdb implements SourceInterface, LoggerAwareInterface
 {
     use LoggerAwareTrait;
+    use DbTrait;
     private array $views = [];
     private array $tree = [];
     private string $credentials = 'admin:sNvbVr2hWh4u4nQZf3nA4W';
+    public array $siteconfig = [
+        'base'          => 'domainname',
+        'baseVariants'  => [],
+        'errorHandling' => [],
+        'languages'     =>
+            [
+                0 =>
+                    [
+                        'title'           => 'Default',
+                        'enabled'         => true,
+                        'base'            => '/',
+                        'typo3Language'   => 'en',
+                        'locale'          => 'enUS.UTF-8',
+                        'iso-639-1'       => 'en',
+                        'navigationTitle' => 'English',
+                        'hreflang'        => 'en-US',
+                        'direction'       => 'ltr',
+                        'flag'            => 'en',
+                        'languageId'      => '0',
+                    ],
+            ],
+        'rootPageId'    => 0,
+        'routes'        =>
+            [
+                0 =>
+                    [
+                        'route'   => 'robots.txt',
+                        'type'    => 'staticText',
+                        'content' => 'User-agent: *
+Disallow: /typo3/
+Disallow: /typo3_src/
+Allow: /typo3/sysext/frontend/Resources/Public/*
+',
+                    ],
+            ],
+        'imports'=>[
+
+        ],
+    ];
 
     public function __construct(private readonly Creator $creator)
     {
@@ -32,6 +74,11 @@ class Couchdb implements SourceInterface, LoggerAwareInterface
         $this->addBaseViews();
         //$this->getUsedTables();
         //exit;
+    }
+
+    public function getSiteConfig(mixed $id): array
+    {
+        return $this->siteconfig;
     }
 
     private array $maps = [
@@ -178,12 +225,12 @@ function(doc) {
     public function ping(): void
     {
         //echo "PRE PING";
-        try {
-            Globals::db()->isConnected();
-        } catch (\Exception $e) {
-            print_r($e);
-            exit;
-        }
+        //try {
+        //    Globals::db()->isConnected();
+        //} catch (\Exception $e) {
+        //   print_r($e);
+        //  exit;
+        //}
 
         //echo "POST PING";
     }
@@ -318,13 +365,12 @@ function(doc) {
         unset($sys_file['sha1sum']);
 
         $this->ping();
-        Globals::db()->exec_INSERTquery('sys_file', $sys_file);
-        $uid = Globals::db()->sql_insert_id();
+        [$rows,$uid] = self::insertRecord('sys_file', $sys_file);
 
         if ($type == 2) {
             [$width, $height, $type, $attr] = \getimagesize(Environment::getPublicPath() . '/' . '/fileadmin' . $newidentifier);
 
-            Globals::db()->exec_INSERTquery('sys_file_metadata', [
+            self::insertRecord('sys_file_metadata', [
                 'pid'=>0,
                 'file'=>$uid,
                 'width'=>$width,
@@ -332,11 +378,6 @@ function(doc) {
             ]);
         }
 
-        /* if (!empty($sys_file_metadata)) {
-             unset($sys_file_metadata['uid']);
-             $sys_file_metadata['file'] = $uid;
-             Globals::db()->exec_INSERTquery('sys_file_metadata', $sys_file_metadata);
-         }*/
         $sys_file['uid'] = $uid;
         return $sys_file;
     }
@@ -381,8 +422,9 @@ function(doc) {
 
     public function pageSort($new): void
     {
-        Globals::db()->sql_query('SET @count=16');
-        Globals::db()->sql_query('update pages set sorting=@count:=@count+16 where pid=' . $this->creator->getPid() . ' order by doktype desc,title asc');
+        $db = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('pages');
+        $db->executeQuery('SET @count=16');
+        $db->executeQuery('update pages set sorting=@count:=@count+16 where pid=' . $this->creator->getPid() . ' order by doktype desc,title asc');
     }
 
     private readonly string $couchdb;

@@ -13,25 +13,77 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard\Sources;
 
-use Doctrine\DBAL\Statement;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
-use SUDHAUS7\Sudhaus7Base\Tools\DB;
-use SUDHAUS7\Sudhaus7Base\Tools\Globals;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
+use SUDHAUS7\Sudhaus7Wizard\Traits\DbTrait;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
+use TYPO3\CMS\Core\Exception\SiteNotFoundException;
+use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class Localdatabase implements SourceInterface, LoggerAwareInterface
 {
     use LoggerAwareTrait;
+    use DbTrait;
     private array $tree = [];
+    public array $siteconfig = [
+        'base'          => 'domainname',
+        'baseVariants'  => [],
+        'errorHandling' => [],
+        'languages'     =>
+            [
+                0 =>
+                    [
+                        'title'           => 'Default',
+                        'enabled'         => true,
+                        'base'            => '/',
+                        'typo3Language'   => 'en',
+                        'locale'          => 'enUS.UTF-8',
+                        'iso-639-1'       => 'en',
+                        'navigationTitle' => 'English',
+                        'hreflang'        => 'en-US',
+                        'direction'       => 'ltr',
+                        'flag'            => 'en',
+                        'languageId'      => '0',
+                    ],
+            ],
+        'rootPageId'    => 0,
+        'routes'        =>
+            [
+                0 =>
+                    [
+                        'route'   => 'robots.txt',
+                        'type'    => 'staticText',
+                        'content' => 'User-agent: *
+Disallow: /typo3/
+Disallow: /typo3_src/
+Allow: /typo3/sysext/frontend/Resources/Public/*
+',
+                    ],
+            ],
+        'imports'=>[
 
+        ],
+    ];
     public function __construct(private readonly Creator $creator)
     {
+    }
+
+    public function getSiteConfig(mixed $id): array
+    {
+        $siteFinder = GeneralUtility::makeInstance(SiteFinder::class);
+        try {
+            $site = $siteFinder->getSiteByPageId((int)$id);
+            return $site->getConfiguration();
+        } catch (SiteNotFoundException $e) {
+            // no harm done
+        }
+        return $this->siteconfig;
     }
 
     public function getTree($start): array
@@ -41,7 +93,6 @@ class Localdatabase implements SourceInterface, LoggerAwareInterface
         $query->getRestrictions()->removeAll();
         $query->getRestrictions()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
 
-        /** @var Statement $stmt */
         $stmt = $query->select('uid')
                       ->from('pages')
                       ->where(
@@ -61,7 +112,7 @@ class Localdatabase implements SourceInterface, LoggerAwareInterface
 
     public function ping(): void
     {
-        $db = Globals::db();
+        $db = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionByName('Default');
         if (!$db->isConnected()) {
             $db->connect();
         }
@@ -121,18 +172,18 @@ class Localdatabase implements SourceInterface, LoggerAwareInterface
 
         exec('chown www-data:www-data ' . Environment::getPublicPath() . '/' . '/fileadmin' . $newidentifier);
         exec('chmod ug+rw ' . Environment::getPublicPath() . '/' . '/fileadmin' . $newidentifier);
-        $sys_file_metadata = DB::getRecord('sys_file_metadata', $sys_file['uid'], 'file');
+        $sys_file_metadata = BackendUtility::getRecord('sys_file_metadata', $sys_file['uid'], 'file');
         unset($sys_file['uid']);
         $sys_file['identifier'] = $newidentifier;
         $sys_file['identifier_hash'] = sha1((string)$sys_file['identifer']);
         $sys_file['folder_hash'] = sha1(dirname((string)$sys_file['identifer']));
 
-        [$affected,$uid] = DB::insertRecord('sys_file', $sys_file);
+        [$affected,$uid] = self::insertRecord('sys_file', $sys_file);
 
         if (!empty($sys_file_metadata)) {
             unset($sys_file_metadata['uid']);
             $sys_file_metadata['file'] = $uid;
-            DB::insertRecord('sys_file_metadata', $sys_file_metadata);
+            self::insertRecord('sys_file_metadata', $sys_file_metadata);
         }
         $sys_file['uid'] = $uid;
         return $sys_file;
@@ -159,11 +210,11 @@ class Localdatabase implements SourceInterface, LoggerAwareInterface
 
     public function pageSort($new): void
     {
-        $page = DB::getRecord('pages', $new);
+        $page = BackendUtility::getRecord('pages', $new);
         $query = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('pages');
 
-        $query->executeStatement('SET @count=16');
-        $query->executeStatement('update pages set sorting=@count:=@count+16 where pid=' . $page['pid'] . ' order by doktype desc,title asc');
+        $query->executeQuery('SET @count=16');
+        $query->executeQuery('update pages set sorting=@count:=@count+16 where pid=' . $page['pid'] . ' order by doktype desc,title asc');
     }
 
     public function sourcePid(): ?string

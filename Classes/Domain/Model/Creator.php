@@ -15,7 +15,7 @@ namespace SUDHAUS7\Sudhaus7Wizard\Domain\Model;
 
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
-use SUDHAUS7\Sudhaus7Base\Tools\DB;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\FlexForm\FlexFormTools;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
@@ -351,7 +351,7 @@ class Creator extends AbstractEntity implements LoggerAwareInterface
     public function getFlexinfo()
     {
         if ($this->flexinfo === null && isset($GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['types'][$this->base]) && strpos((string)$GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['types'][$this->base]['showitem'], 'flexinfo')) {
-            $row = DB::getRecord('tx_sudhaus7wizard_domain_model_creator', $this->getUid());
+            $row = BackendUtility::getRecord('tx_sudhaus7wizard_domain_model_creator', $this->getUid());
             $this->flexinfo = $row['flexinfo'];
         }
 
