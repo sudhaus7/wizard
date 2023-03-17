@@ -14,6 +14,8 @@
 namespace SUDHAUS7\Sudhaus7Wizard;
 
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardProcessInterface;
+use TYPO3\CMS\Core\Configuration\FlexForm\FlexFormTools;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class Tools
 {
@@ -90,5 +92,12 @@ class Tools
         $str = preg_replace('/[^a-z0-9-]/', '-', $str);
 
         return preg_replace('/-+/', '-', $str);
+    }
+
+    public static function array2xml($a)
+    {
+        /** @var $flexObj FlexFormTools */
+        $flexObj = GeneralUtility::makeInstance(FlexFormTools::class);
+        return $flexObj->flexArray2Xml($a, true);
     }
 }

@@ -23,24 +23,26 @@ use SUDHAUS7\Sudhaus7Wizard\Events\AfterClonedTreeInsertEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\AfterContentCloneEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\BeforeClonedTreeInsertEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\BeforeContentCloneEvent;
+use SUDHAUS7\Sudhaus7Wizard\Events\BeforeSiteConfigWriteEvent;
+use SUDHAUS7\Sudhaus7Wizard\Events\CleanContentEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\CreateBackendUserEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\CreateBackendUserGroupEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\CreateFilemountEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\FinalContentEvent;
+use SUDHAUS7\Sudhaus7Wizard\Events\GenerateSiteIdentifierEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\ModifyCloneContentSkipTableEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\TCA\Column;
 use SUDHAUS7\Sudhaus7Wizard\Events\TCA\ColumnType;
 use SUDHAUS7\Sudhaus7Wizard\Events\TCA\Inlines;
+use SUDHAUS7\Sudhaus7Wizard\Events\TtContent\FinalContentByCtypeEvent;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardProcessInterface;
 use SUDHAUS7\Sudhaus7Wizard\Sources\SourceInterface;
 use SUDHAUS7\Sudhaus7Wizard\Traits\DbTrait;
 use Symfony\Component\Yaml\Yaml;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
-use TYPO3\CMS\Core\Configuration\FlexForm\FlexFormTools;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Crypto\PasswordHashing\PasswordHashFactory;
-use TYPO3\CMS\Core\Crypto\Random;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -239,73 +241,9 @@ class CreateProcess implements LoggerAwareInterface
 
     public function finalContent_tt_content($row)
     {
-        $func = 'finalContent_tt_content_' . $row['CType'];
-        $this->debug(__METHOD__ . ':' . __LINE__ . ':' . $func);
-        if ($row['CType'] == 'list') {
-            $func .= '_' . $row['list_type'];
-        }
-
-        $this->debug(__METHOD__ . ':' . __LINE__ . ':' . $func);
-        if (method_exists($this->template, $func)) {
-            $this->debug(__METHOD__ . ':' . __LINE__ . ':' . $func);
-            $row = $this->template->$func($row, $this);
-            $this->debug(__METHOD__ . ':' . __LINE__ . ':' . $func);
-        }
-
-        if (method_exists($this, $func)) {
-            $this->debug(__METHOD__ . ':' . __LINE__ . ':' . $func);
-            $row = $this->$func($row, $this);
-            $this->debug(__METHOD__ . ':' . __LINE__ . ':' . $func);
-        }
-
-        $this->debug(__METHOD__ . ':' . __LINE__ . ':' . $func);
-
-        return $row;
-    }
-
-    public function finalContent_tt_content_form_formframework($row)
-    {
-        if (!empty($row['pi_flexform'])) {
-            $flex = GeneralUtility::xml2array($row['pi_flexform']);
-
-            /** @var Random $rnd */
-            $rnd = GeneralUtility::makeInstance(Random::class);
-            foreach ($flex['data'] as $key=>$config) {
-                if ($key !== 'sDEF') {
-                    foreach ($config as $subconfig) {
-                        if (isset($subconfig['settings.finishers.Redirect.pageUid'])) {
-                            $flex['data'][$key]['lDEF']['settings.finishers.Redirect.pageUid']['vDEF'] = $this->pageMap[(int)$flex['data'][$key]['lDEF']['settings.finishers.Redirect.pageUid']['vDEF']];
-                        }
-                        if (isset($subconfig['settings.finishers.EmailToReceiver.recipients'])) {
-                            $flex['data'][$key]['lDEF']['settings.finishers.EmailToReceiver.recipients']['el'] = [
-                                $rnd->generateRandomBytes(22)=>[
-                                    '_arrayContainer'=>[
-                                        'el'=>[
-                                            'email'=>[
-                                                'vDEF'=>$this->task->getContact(),
-                                            ],
-                                            'name'=>[
-                                                'vDEF'=>$this->task->getLongname(),
-                                            ],
-                                        ],
-                                        '_TOGGLE'=>0,
-                                    ],
-                                ],
-                            ];
-                            $flex['data'][$key]['lDEF']['settings.finishers.EmailToReceiver.senderName']['vDEF'] = 'Baukasten ' . $this->task->getLongname();
-                            $flex['data'][$key]['lDEF']['settings.finishers.EmailToReceiver.title']['vDEF'] = 'Aus Ihrem Baukasten ' . $this->task->getLongname();
-                        }
-                    }
-                }
-            }
-
-            $flex['data']['sDEF']['lDEF']['settings.persistenceIdentifier']['vDEF']='1:/mediapool/Formulare/Allgemeines-Formular.form.yaml';
-            $flex['data']['sDEF']['lDEF']['settings.overrideFinishers']['vDEF']=1;
-            //$flex['data']['sDEF']['lDEF']['settings.overrideFinishers']['vDEV']=1;
-
-            $row['pi_flexform'] = self::array2xml($flex);
-        }
-        return $row;
+        $event = new FinalContentByCtypeEvent($row['CType'], $row['CType']==='list' ? $row['list_type'] : null, $row, $this);
+        GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+        return $event->getRecord();
     }
 
     public function translateLinkString($s): string
@@ -691,7 +629,7 @@ class CreateProcess implements LoggerAwareInterface
                                 throw new \Exception(sprintf(
                                     'cannot insert into %s payload %s',
                                     $table,
-                                    json_encode($row, JSON_THROW_ON_ERROR)
+                                    json_encode($row)
                                 ), 1_616_695_930);
                             }
 
@@ -732,13 +670,14 @@ class CreateProcess implements LoggerAwareInterface
     {
         foreach ($config as $column => $columnconfig) {
             //$this->out('runTCA '.$state.' '.$parameters['table'].' '.$column);
-
+            $columntype = strtolower($columnconfig['config']['type']);
             switch($state) {
                 case 'pre':
                     $event = new Column\BeforeEvent($parameters['table'], $column, $columnconfig, $row, $parameters, $this);
                     GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
                     $row = $event->getRecord();
-                    $event = new ColumnType\BeforeEvent($parameters['table'], $column, $columnconfig, $row, $parameters, $this);
+
+                    $event = new ColumnType\BeforeEvent($parameters['table'], $column, $columntype, $columnconfig, $row, $parameters, $this);
                     GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
                     $row = $event->getRecord();
                     break;
@@ -746,23 +685,47 @@ class CreateProcess implements LoggerAwareInterface
                     $event = new Column\AfterEvent($parameters['table'], $column, $columnconfig, $row, $parameters, $this);
                     GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
                     $row = $event->getRecord();
-                    $event = new ColumnType\AfterEvent($parameters['table'], $column, $columnconfig, $row, $parameters, $this);
+
+                    $event = new ColumnType\AfterEvent($parameters['table'], $column, $columntype, $columnconfig, $row, $parameters, $this);
                     GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
                     $row = $event->getRecord();
                     break;
                 case 'final':
+
+                    match ($column) {
+                        'bodytext' => $row=$this->cloneContent_final_column_bodytext($column, $columnconfig, $row, $parameters),
+                    };
+
                     $event = new Column\FinalEvent($parameters['table'], $column, $columnconfig, $row, $parameters, $this);
                     GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
                     $row = $event->getRecord();
-                    $event = new ColumnType\FinalEvent($parameters['table'], $column, $columnconfig, $row, $parameters, $this);
+
+                    match ($columntype) {
+                        'group'=>$row=$this->cloneContent_final_columntype_group($column, $columnconfig, $row, $parameters),
+                        'select'=>$row=$this->cloneContent_final_columntype_select($column, $columnconfig, $row, $parameters),
+                    };
+
+                    $event = new ColumnType\FinalEvent($parameters['table'], $column, $columntype, $columnconfig, $row, $parameters, $this);
                     GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
                     $row = $event->getRecord();
+
+                    if (isset($columnconfig['config']['wizards'])) {
+                        foreach ($columnconfig['config']['wizards'] as $wizard => $wizardconfig) {
+                            $row = $this->cloneContent_final_wizards_link($wizard, $wizard, $row, $parameters);
+                        }
+                    }
+
                     break;
                 case 'clean':
                     $event = new Column\CleanEvent($parameters['table'], $column, $columnconfig, $row, $parameters, $this);
                     GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
                     $row = $event->getRecord();
-                    $event = new ColumnType\CleanEvent($parameters['table'], $column, $columnconfig, $row, $parameters, $this);
+
+                    match ($columntype) {
+                        'inline'=>$row = $this->cloneContent_clean_columntype_inline($column, $columnconfig, $row, $parameters),
+                    };
+
+                    $event = new ColumnType\CleanEvent($parameters['table'], $column, $columntype, $columnconfig, $row, $parameters, $this);
                     GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
                     $row = $event->getRecord();
                     break;
@@ -857,6 +820,8 @@ class CreateProcess implements LoggerAwareInterface
                 $row = $origrow;
                 $this->out('Page Cleanup ' . $row['title'] . ' ' . $row['uid']);
 
+                $row = $this->finalContent_pages($row, $this);
+
                 $event = new FinalContentEvent($table, $row, $this);
                 GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
                 $row = $event->getRecord();
@@ -924,6 +889,10 @@ class CreateProcess implements LoggerAwareInterface
                     $row = $origrow;
                     $this->out('Content Cleanup ' . $table . ' ' . $row['uid']);
 
+                    if ($table === 'tt_content') {
+                        $row = $this->finalContent_tt_content($row);
+                    }
+
                     $this->debug(__METHOD__ . ':' . __LINE__);
                     $event = new FinalContentEvent($table, $row, $this);
                     GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
@@ -982,10 +951,17 @@ class CreateProcess implements LoggerAwareInterface
 
     private function finalYaml(): void
     {
-        if (method_exists($this->template, 'finalYaml')) {
-            $this->template->finalYaml($this);
+        $path = Environment::getProjectPath();
+        try {
+            GeneralUtility::mkdir_deep($path . '/config/sites');
+        } catch (\Exception $e) {
         }
 
+        $event = new GenerateSiteIdentifierEvent($this->siteconfig, $path, $this);
+        GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+        $identifier = $event->getIdentifier();
+
+        /*
         $page = BackendUtility::getRecord('pages', $this->siteconfig['rootPageId']);
         $parent = BackendUtility::getRecord('pages', $page['pid']);
         $parentofparent = BackendUtility::getRecord('pages', $parent['pid']);
@@ -1008,41 +984,30 @@ class CreateProcess implements LoggerAwareInterface
             $identifier = 'microsites-' . Tools::generateslug($page['title']);
         }
 
+        */
+
+        if (empty($identifier)) {
+            $identifier = Tools::generateslug($this->getTask()->getShortname() ?? $this->getTask()->getProjektname());
+
+            if (is_dir($path . '/config/sites/' . $identifier)) {
+                $identifier = Tools::generateslug($this->getTask()->getLongname() ?? $this->getTask()->getDomainname());
+            }
+        }
+
         if ($this->errorpage > 0) {
             $this->siteconfig['errorHandling'][0]['errorContentSource'] = 't3://page?uid=' . $this->errorpage;
         }
 
-        $path = Environment::getProjectPath();
-        @mkdir($path . '/config');
-        @mkdir($path . '/config/sites');
-        @mkdir($path . '/config/sites/' . $identifier);
+        GeneralUtility::mkdir($path . '/config/sites/' . $identifier);
+
+        $event = new BeforeSiteConfigWriteEvent($this->siteconfig, $this);
+        GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+        $this->siteconfig = $event->getSiteconfig();
+
         file_put_contents(
             $path . '/config/sites/' . $identifier . '/config.yaml',
             Yaml::dump($this->siteconfig, 99, 2)
         );
-    }
-
-    private function cloneContent_final_columntype_flex($column, $columnconfig, $row, $parameters)
-    {
-        $table = $parameters['table'];
-        $func = 'cloneContent_final_columntype_flex_' . $table . '_' . $column;
-        if ($table == 'tt_content') {
-            $func .= '_' . $row['CType'];
-
-            if ($row['CType'] == 'list') {
-                $func .= '_' . $row['list_type'];
-            }
-        }
-        if (method_exists($this->source, $func)) {
-            $row = $this->source->$func($row, $this);
-        }
-        if (method_exists($this->template, $func)) {
-            $row = $this->template->$func($row, $this);
-        }
-        if (method_exists($this, $func)) {
-            $row = $this->$func($row, $this);
-        }
-        return $row;
     }
 
     //private function cloneContent_final_column_header_link($column, $columnconfig, $row, $parameters)
@@ -1115,7 +1080,7 @@ class CreateProcess implements LoggerAwareInterface
         return $row;
     }
 
-    private function fixMMRelation($table, $mmtable, $olduid, $newuid): void
+    public function fixMMRelation($table, $mmtable, $olduid, $newuid): void
     {
         $mm = $this->source->getMM($mmtable, $olduid, $table);
         foreach ($mm as $row) {
@@ -1219,25 +1184,9 @@ class CreateProcess implements LoggerAwareInterface
                 if ($test) {
                     $orig = $test;
 
-                    $this->debug(__METHOD__ . ':' . __LINE__);
-                    $func = 'cleanContent_' . $columnconfig['config']['foreign_table'];
-                    if (method_exists($this->source, $func)) {
-                        $this->debug(__METHOD__ . ':' . __LINE__);
-                        $test = $this->source->$func($test, $this);
-                        $this->debug(__METHOD__ . ':' . __LINE__);
-                    }
-                    if (method_exists($this->template, $func)) {
-                        $this->debug(__METHOD__ . ':' . __LINE__);
-                        $test = $this->template->$func($test, $this);
-
-                        $this->debug(__METHOD__ . ':' . __LINE__);
-                    }
-                    if (method_exists($this, $func)) {
-                        $this->debug(__METHOD__ . ':' . __LINE__);
-                        $test = $this->$func($test, $this);
-
-                        $this->debug(__METHOD__ . ':' . __LINE__);
-                    }
+                    $event = new CleanContentEvent($columnconfig['config']['foreign_table'], $test, $this);
+                    GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+                    $test = $event->getRecord();
 
                     $this->debug(__METHOD__ . ':' . __LINE__ . print_r($test, true));
                     $test = $this->runTCA(
@@ -1300,7 +1249,7 @@ class CreateProcess implements LoggerAwareInterface
                         [$rowaffected,$newinlineuid] = self::insertRecord($columnconfig['config']['foreign_table'], $inline);
 
                         if (!$rowaffected) {
-                            throw new \Exception(sprintf('error insert to %s with %s', $columnconfig['config']['foreign_table'], json_encode($inline, JSON_THROW_ON_ERROR)), 1_616_700_010);
+                            throw new \Exception(sprintf('error insert to %s with %s', $columnconfig['config']['foreign_table'], json_encode($inline)), 1_616_700_010);
                         }
 
                         $this->addContentMap($columnconfig['config']['foreign_table'], $inlineuid, $newinlineuid);
@@ -1338,13 +1287,6 @@ class CreateProcess implements LoggerAwareInterface
     {
         //BackendUtility::BEenableFields($table)
         return [];
-    }
-
-    private static function array2xml($a)
-    {
-        /** @var $flexObj FlexFormTools */
-        $flexObj = GeneralUtility::makeInstance(FlexFormTools::class);
-        return $flexObj->flexArray2Xml($a, true);
     }
 
     private function addToFormConfig(string $path): void

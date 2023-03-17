@@ -34,7 +34,8 @@
     "helhum/typo3-console": "*",
     "typo3/coding-standards": "^0.5",
     "ssch/typo3-rector": "^1.1",
-    "georgringer/news": "^11.0"
+    "georgringer/news": "^11.0",
+    "typo3/cms-introduction": "^4.4"
   },
   "autoload": {
     "psr-4": {

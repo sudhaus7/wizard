@@ -27,6 +27,7 @@ class BeforeEvent
      * @var string the TCA column
      */
     protected string $column;
+    protected string $columntype;
     /**
      * @var array the TCA Config
      */
@@ -47,11 +48,12 @@ class BeforeEvent
      */
     protected array $parameters;
     protected CreateProcess $create_process;
-    public function __construct(string $table, string $column, array $columnConfig, array $record, array $parameters, CreateProcess $create_process)
+    public function __construct(string $table, string $column, string $columntype, array $columnConfig, array $record, array $parameters, CreateProcess $create_process)
     {
-        $this->table = $table;
+        $this->table      = $table;
         $this->column = $column;
-        $this->record = $record;
+        $this->columntype = $columntype;
+        $this->record     = $record;
         $this->parameters = $parameters;
         $this->create_process = $create_process;
         $this->columnConfig = $columnConfig;
@@ -68,9 +70,9 @@ class BeforeEvent
     /**
      * @return string
      */
-    public function getColumn(): string
+    public function getColumntype(): string
     {
-        return $this->column;
+        return $this->columntype;
     }
 
     /**
@@ -111,5 +113,12 @@ class BeforeEvent
     public function setRecord(array $record): void
     {
         $this->record = $record;
+    }
+    /**
+     * @return string
+     */
+    public function getColumn(): string
+    {
+        return $this->column;
     }
 }

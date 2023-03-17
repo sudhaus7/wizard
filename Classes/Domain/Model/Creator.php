@@ -15,8 +15,8 @@ namespace SUDHAUS7\Sudhaus7Wizard\Domain\Model;
 
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
+use SUDHAUS7\Sudhaus7Wizard\Tools;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
-use TYPO3\CMS\Core\Configuration\FlexForm\FlexFormTools;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
@@ -366,14 +366,8 @@ class Creator extends AbstractEntity implements LoggerAwareInterface
      */
     public function setFlexinfo($flexinfo)
     {
-        $this->flexinfo = self::array2xml($flexinfo);
+        $this->flexinfo = Tools::array2xml($flexinfo);
         return $this;
-    }
-    private static function array2xml($a)
-    {
-        /** @var $flexObj FlexFormTools */
-        $flexObj = GeneralUtility::makeInstance(FlexFormTools::class);
-        return $flexObj->flexArray2Xml($a, true);
     }
 
     /**
