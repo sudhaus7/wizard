@@ -19,6 +19,12 @@
       "role": "Developer"
     }
   ],
+	"repositories": [
+		{
+			"type": "path",
+			"url": "TestFixture/*"
+		}
+	],
   "require": {
     "php": "7.4.*||8.0.*||8.1.*||8.2.*",
     "typo3/cms-core": "11.5.*"
@@ -36,13 +42,20 @@
     "typo3/coding-standards": "^0.5",
     "ssch/typo3-rector": "^1.1",
     "georgringer/news": "^11.0",
-    "typo3/cms-introduction": "^4.4"
+    "typo3/cms-introduction": "^4.4",
+	  "sudhaus7/template": "@dev"
   },
-  "autoload": {
-    "psr-4": {
-      "SUDHAUS7\\Sudhaus7Wizard\\": "Classes/"
-    }
-  },
+	"autoload": {
+		"psr-4": {
+			"SUDHAUS7\\Sudhaus7Wizard\\": "Classes/"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"SUDHAUS7\\Sudhaus7Wizard\\Tests\\Unit\\": "Tests/Unit/",
+			"SUDHAUS7\\Sudhaus7Wizard\\Tests\\Functional\\": "Tests/Functional/"
+		}
+	},
   "extra": {
     "typo3/cms": {
       "extension-key": "sudhaus7_wizard",

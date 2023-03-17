@@ -1,0 +1,62 @@
+<T3DataStructure>
+    <meta>
+        <langDisable>1</langDisable>
+    </meta>
+    <ROOT>
+        <type>array</type>
+        <el>
+            <primary>
+                <TCEforms>
+                    <label>Primary Color</label>
+                    <config>
+                        <type>input</type>
+                        <renderType>colorpicker</renderType>
+                        <default>#0288D1</default>
+                    </config>
+                </TCEforms>
+            </primary>
+
+            <secondary>
+                <TCEforms>
+                    <label>secondary Color</label>
+                    <config>
+                        <type>input</type>
+                        <renderType>colorpicker</renderType>
+                        <default>#FFEB3B</default>
+                    </config>
+                </TCEforms>
+            </secondary>
+            <breadcrumb>
+                <TCEforms>
+                    <label>breadcrumb Color</label>
+                    <config>
+                        <type>input</type>
+                        <renderType>colorpicker</renderType>
+                        <default>#FFEB3B</default>
+                    </config>
+                </TCEforms>
+            </breadcrumb>
+            <preloader>
+                <TCEforms>
+                    <label>preloader Color</label>
+                    <config>
+                        <type>input</type>
+                        <renderType>colorpicker</renderType>
+                        <default>#F2F2F2</default>
+                    </config>
+                </TCEforms>
+            </preloader>
+            <footer>
+                <TCEforms>
+                    <label>footer Color</label>
+                    <config>
+                        <type>input</type>
+                        <renderType>colorpicker</renderType>
+                        <default>#0288D1</default>
+                    </config>
+                </TCEforms>
+            </footer>
+
+        </el>
+    </ROOT>
+</T3DataStructure>

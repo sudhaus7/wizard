@@ -108,6 +108,9 @@ class Creator extends AbstractEntity implements LoggerAwareInterface
      */
     public function getSourcepid(): ?string
     {
+        if (\str_starts_with((string)$this->getSourcepid(), 't3://')) {
+            return (string)GeneralUtility::trimExplode('=', $this->sourcepid)[1];
+        }
         return $this->sourcepid;
     }
 

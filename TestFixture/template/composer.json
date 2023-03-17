@@ -1,0 +1,30 @@
+{
+	"name": "sudhaus7/template",
+	"description": "config for the wizard for the sitepackage template",
+	"type": "typo3-cms-extension",
+	"license": "MIT",
+	"config": {
+		"platform": {
+			"php": "8.1.5"
+		},
+		"allow-plugins": {
+			"typo3/cms-composer-installers": true,
+			"typo3/class-alias-loader": true,
+			"php-http/discovery": true
+		}
+	},
+	"require": {
+		"georgringer/news": "^11.0",
+		"typo3/cms-introduction": "^4.4"
+	},
+	"autoload": {
+		"psr-4": {
+			"SUDHAUS7\\Sudhaus7Template\\": "Classes/"
+		}
+	},
+	"extra": {
+		"typo3/cms": {
+			"extension-key": "template"
+		}
+	}
+}
