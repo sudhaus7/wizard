@@ -139,6 +139,7 @@ class CreateProcess implements LoggerAwareInterface
         $this->source->ping();
 
         $this->template->finalize($this);
+
         $this->source->ping();
 
         $this->task->setPid($this->pageMap[ $sourcePid ]);

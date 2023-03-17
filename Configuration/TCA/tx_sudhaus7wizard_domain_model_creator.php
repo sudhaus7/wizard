@@ -34,7 +34,7 @@ return [
         'iconfile' => 'EXT:sudhaus7_wizard/Resources/Public/Icons/icon.svg',
     ],
     'types' => [
-        '1' => ['showitem' => 'base,sourceclass,flexinfo'],
+        '1' => ['showitem' => 'base'],
     ],
     'palettes' => [
         //'1' => Array('showitem' => 'hidden,sys_language_uid,t3ver_label,l10n_parent'),
