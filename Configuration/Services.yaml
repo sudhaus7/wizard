@@ -15,3 +15,7 @@ services:
     tags:
       - name: event.listener
         identifier: 's7wizardBaseHandleSysFileReferences'
+  SUDHAUS7\Sudhaus7Wizard\EventHandlers\FinalTTContentFormFrameworkListener:
+    tags:
+      - name: event.listener
+        identifier: 's7wizardBaseFinalTTContentFormFrameworkListener'

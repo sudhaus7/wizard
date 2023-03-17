@@ -35,7 +35,7 @@ class FinalTTContentFormFrameworkListener
                     if ($key !== 'sDEF') {
                         foreach ($config as $subconfig) {
                             if (isset($subconfig['settings.finishers.Redirect.pageUid'])) {
-                                $flex['data'][$key]['lDEF']['settings.finishers.Redirect.pageUid']['vDEF'] = $this->pageMap[(int)$flex['data'][$key]['lDEF']['settings.finishers.Redirect.pageUid']['vDEF']];
+                                $flex['data'][$key]['lDEF']['settings.finishers.Redirect.pageUid']['vDEF'] = $event->getCreateProcess()->getPageMap()[(int)$flex['data'][$key]['lDEF']['settings.finishers.Redirect.pageUid']['vDEF']];
                             }
                             if (isset($subconfig['settings.finishers.EmailToReceiver.recipients'])) {
                                 $flex['data'][$key]['lDEF']['settings.finishers.EmailToReceiver.recipients']['el'] = [
@@ -43,18 +43,18 @@ class FinalTTContentFormFrameworkListener
                                         '_arrayContainer'=>[
                                             'el'=>[
                                                 'email'=>[
-                                                    'vDEF'=>$this->task->getContact(),
+                                                    'vDEF'=>$event->getCreateProcess()->getTask()->getContact(),
                                                 ],
                                                 'name'=>[
-                                                    'vDEF'=>$this->task->getLongname(),
+                                                    'vDEF'=>$event->getCreateProcess()->getTask()->getLongname(),
                                                 ],
                                             ],
                                             '_TOGGLE'=>0,
                                         ],
                                     ],
                                 ];
-                                $flex['data'][$key]['lDEF']['settings.finishers.EmailToReceiver.senderName']['vDEF'] = 'Baukasten ' . $this->task->getLongname();
-                                $flex['data'][$key]['lDEF']['settings.finishers.EmailToReceiver.title']['vDEF'] = 'Aus Ihrem Baukasten ' . $this->task->getLongname();
+                                $flex['data'][$key]['lDEF']['settings.finishers.EmailToReceiver.senderName']['vDEF'] = 'Baukasten ' . $event->getCreateProcess()->getTask()->getLongname();
+                                $flex['data'][$key]['lDEF']['settings.finishers.EmailToReceiver.title']['vDEF'] = 'Aus Ihrem Baukasten ' . $event->getCreateProcess()->getTask()->getLongname();
                             }
                         }
                     }

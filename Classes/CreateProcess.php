@@ -30,7 +30,9 @@ use SUDHAUS7\Sudhaus7Wizard\Events\CreateBackendUserGroupEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\CreateFilemountEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\FinalContentEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\GenerateSiteIdentifierEvent;
+use SUDHAUS7\Sudhaus7Wizard\Events\ModifyCleanContentSkipListEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\ModifyCloneContentSkipTableEvent;
+use SUDHAUS7\Sudhaus7Wizard\Events\ModifyCloneInlinesSkipTablesEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\TCA\Column;
 use SUDHAUS7\Sudhaus7Wizard\Events\TCA\ColumnType;
 use SUDHAUS7\Sudhaus7Wizard\Events\TCA\Inlines;
@@ -87,47 +89,47 @@ class CreateProcess implements LoggerAwareInterface
         //Globals::db()->store_lastBuiltQuery = true;
         $this->confArr = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('sudhaus7_wizard');
 
-        $this->out('Start', 'INFO', 'Start');
+        $this->log('Start', 'INFO', 'Start');
 
         $this->createFilemount();
         $this->createGroup();
         $this->createUser();
-        $this->out(__FUNCTION__ . ':' . __LINE__);
+        $this->log(__FUNCTION__ . ':' . __LINE__);
         $sourcePid = $this->source->sourcePid();
-        $this->out(__FUNCTION__ . ':' . __LINE__);
+        $this->log(__FUNCTION__ . ':' . __LINE__);
 
         $sourcePage = $this->source->getRow('pages', [ 'uid' => $sourcePid ]);
-        $this->out(__FUNCTION__ . ':' . __LINE__);
-        $this->out('Quelle: ' . $sourcePage['title']);
+        $this->log(__FUNCTION__ . ':' . __LINE__);
+        $this->log('Quelle: ' . $sourcePage['title']);
         if ($sourcePid > 0) {
             $this->pageMap[ $sourcePid ] = 0;
         }
 
-        $this->out('Building Tree', 'INFO', 'Build TREE');
+        $this->log('Building Tree', 'INFO', 'Build TREE');
         $this->buildTree($sourcePid);
 
         $this->source->ping();
-        $this->out('Clone Tree', 'INFO', 'Clone TREE');
+        $this->log('Clone Tree', 'INFO', 'Clone TREE');
         $this->cloneTree();
         $this->source->ping();
-        $this->out('Clone Content', 'INFO', 'Clone Content');
+        $this->log('Clone Content', 'INFO', 'Clone Content');
         $this->cloneContent();
         $this->source->ping();
         //$this->cleanContent('clean');
 
         while ($this->cleanUpTodo !== []) {
-            $this->out('Clone Inlines', 'INFO', 'Clone Inlines');
+            $this->log('Clone Inlines', 'INFO', 'Clone Inlines');
             $this->cloneInlines();
             $this->source->ping();
         }
 
-        $this->out('Clean Pages', 'INFO', 'Clean Pages');
+        $this->log('Clean Pages', 'INFO', 'Clean Pages');
         $this->cleanPages();
         $this->source->ping();
-        $this->out('Clean Content', 'INFO', 'Clean Content');
+        $this->log('Clean Content', 'INFO', 'Clean Content');
         $this->cleanContent();
         $this->source->ping();
-        $this->out('About to finish', 'INFO', 'Finish');
+        $this->log('About to finish', 'INFO', 'Finish');
         $this->pageSort();
         $this->source->ping();
         $this->finalGroup();
@@ -160,7 +162,7 @@ class CreateProcess implements LoggerAwareInterface
         return true;
     }
 
-    public function out($c, $info = 'DEBUG', string $section = null, array $context = []): void
+    public function log($c, $info = 'DEBUG', string $section = null, array $context = []): void
     {
         if (! \is_null($section)) {
             $this->debugsection = $section;
@@ -319,7 +321,7 @@ class CreateProcess implements LoggerAwareInterface
 
         $name = 'Medien ' . $this->task->getProjektname();
 
-        $this->out('Create Filemount 1 ' . $name);
+        $this->log('Create Filemount 1 ' . $name);
         $this->source->ping();
 
         $test = BackendUtility::getRecord('sys_filemounts', $name, 'title');
@@ -327,19 +329,19 @@ class CreateProcess implements LoggerAwareInterface
             $this->filemount = $test;
             return;
         }
-        $this->out('Create Filemount ' . 'mkdir -p ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
+        $this->log('Create Filemount ' . 'mkdir -p ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
         exec('mkdir -p ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
-        $this->out('Create Filemount ' . 'mkdir -p ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir . '/Formulare');
+        $this->log('Create Filemount ' . 'mkdir -p ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir . '/Formulare');
         exec('mkdir -p ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir . 'Formulare');
 
-        $this->out('Adding Formulare Folder to config');
+        $this->log('Adding Formulare Folder to config');
         $this->addToFormConfig($dir . '/Formulare');
 
-        $this->out('Create Filemount ' . 'chown -R www-data ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
+        $this->log('Create Filemount ' . 'chown -R www-data ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
         exec('chown -R www-data ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
-        $this->out('Create Filemount ' . 'chgrp -R www-data ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
+        $this->log('Create Filemount ' . 'chgrp -R www-data ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
         exec('chgrp -R www-data ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
-        $this->out('Create Filemount ' . 'chmod -R ug+rw ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
+        $this->log('Create Filemount ' . 'chmod -R ug+rw ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
         exec('chmod -R ug+rw ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
         $tmpl = [
             'title' => $name,
@@ -368,7 +370,7 @@ class CreateProcess implements LoggerAwareInterface
         $tmpl            = $this->template->getTemplateBackendUserGroup();
         $this->tmplgroup = $tmpl['uid'];
         $groupname       = $this->confArr['groupprefix'] . ' ' . $this->task->getProjektname();
-        $this->out('Create Group ' . $groupname);
+        $this->log('Create Group ' . $groupname);
         $this->source->ping();
 
         $test = BackendUtility::getRecord('be_groups', $groupname, 'title');
@@ -404,7 +406,7 @@ class CreateProcess implements LoggerAwareInterface
 
     private function createUser()
     {
-        $this->out('Create User ' . $this->task->getReduser());
+        $this->log('Create User ' . $this->task->getReduser());
         $tmpl           = $this->template->getTemplateBackendUser();
         $this->tmpluser = $tmpl['uid'];
         $this->source->ping();
@@ -496,12 +498,12 @@ class CreateProcess implements LoggerAwareInterface
 
     private function cloneTree()
     {
-        $this->out('Clone Tree Start');
+        $this->log('Clone Tree Start');
         $sourcePid = (int)$this->source->sourcePid();
         foreach (array_keys($this->pageMap) as $old) {
             $page = $this->source->getRow('pages', [ 'uid' => $old ]);
 
-            $this->out('Cloning Page ' . $page['title']);
+            $this->log('Cloning Page ' . $page['title']);
             unset($page['uid']);
             $page['t3_origuid'] = $old;
 
@@ -547,7 +549,7 @@ class CreateProcess implements LoggerAwareInterface
             }
             GeneralUtility::makeInstance(EventDispatcher::class)->dispatch(new AfterClonedTreeInsertEvent($old, $page, $this));
         }
-        $this->out('Clone Tree End');
+        $this->log('Clone Tree End');
     }
 
     private function isAdmin($uid)
@@ -567,16 +569,12 @@ class CreateProcess implements LoggerAwareInterface
     {
         $this->siteconfig['rootPageId'] = $pid;
         $this->siteconfig['base']       = 'https://' . $this->task->getDomainname() . '/';
-
-        if (method_exists($this->template, 'createDomain')) {
-            $this->template->createDomain($pid, $this);
-        }
     }
 
     private function cloneContent()
     {
         $runTables = $this->source->getTables();
-        $this->out('Start Clone Content');
+        $this->log('Start Clone Content');
 
         $event = new ModifyCloneContentSkipTableEvent([
             'pages',
@@ -589,7 +587,7 @@ class CreateProcess implements LoggerAwareInterface
             'sys_action',
         ], $this);
         GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
-        $aSkip = $event->getRecord();
+        $aSkip = $event->getSkipList();
 
         $aSkip = array_merge($aSkip, $this->allwaysIgnoreTables);
         foreach ($runTables as $table) {
@@ -600,7 +598,7 @@ class CreateProcess implements LoggerAwareInterface
                     $where['pid'] = $oldpid;
                     $rows         = $this->source->getRows($table, $where);
                     foreach ($rows as $row) {
-                        $this->out('Content Clone ' . $table . ' ' . $row['uid']);
+                        $this->log('Content Clone ' . $table . ' ' . $row['uid']);
 
                         $olduid = $row['uid'];
                         unset($row['uid']);
@@ -633,7 +631,7 @@ class CreateProcess implements LoggerAwareInterface
                                 ), 1_616_695_930);
                             }
 
-                            $this->out('Insert ' . $table . ' olduid ' . $olduid . ' oldpid ' . $oldpid . ' newuid ' . $newuid . ' newpid ' . $newpid);
+                            $this->log('Insert ' . $table . ' olduid ' . $olduid . ' oldpid ' . $oldpid . ' newuid ' . $newuid . ' newpid ' . $newpid);
 
                             $this->addContentMap($table, $olduid, $newuid);
 
@@ -649,7 +647,7 @@ class CreateProcess implements LoggerAwareInterface
 
                             GeneralUtility::makeInstance(EventDispatcher::class)->dispatch(new AfterContentCloneEvent($table, $olduid, $oldpid, $newuid, $row, $this));
                         } else {
-                            $this->out('ERROR NO ROW ' . print_r([
+                            $this->log('ERROR NO ROW ' . print_r([
                                     $table,
                                     [
                                         'table'  => $table,
@@ -736,15 +734,17 @@ class CreateProcess implements LoggerAwareInterface
 
     private function cloneInlines(): void
     {
-        $this->out('Start Inlines Clone , TODO ' . count($this->cleanUpTodo));
-        $aSkip = [
+        $this->log('Start Inlines Clone , TODO ' . count($this->cleanUpTodo));
+        $event = new ModifyCloneInlinesSkipTablesEvent([
             'sys_domain',
             'sys_file_reference',
             'be_users',
             'be_groups',
             'tx_sudhaus7wizard_domain_model_creator',
-        ];
-        $aSkip = array_merge($aSkip, $this->allwaysIgnoreTables);
+        ], $this);
+        GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+
+        $aSkip = array_merge($event->getSkipList(), $this->allwaysIgnoreTables);
         $map   = $this->cleanUpTodo;
         print_r([ 'cleanupTodo' => $this->cleanUpTodo ]);
         $this->cleanUpTodo = [];
@@ -767,7 +767,7 @@ class CreateProcess implements LoggerAwareInterface
                 while ($origrow = $stmt->fetchAssociative()) {
                     $row = $origrow;
                     $this->debug(__METHOD__ . ':' . __LINE__);
-                    $this->out('Content Cleanup ' . $table . ' ' . $row['uid']);
+                    $this->log('Content Cleanup ' . $table . ' ' . $row['uid']);
                     $this->debug(__METHOD__ . ':' . __LINE__);
 
                     $event = new Inlines\CleanEvent($table, $row, $this);
@@ -800,7 +800,7 @@ class CreateProcess implements LoggerAwareInterface
 
     private function cleanPages(): void
     {
-        $this->out('Start Pages Cleanup ');
+        $this->log('Start Pages Cleanup ');
         //$aSkip = ['pages','sys_domain', 'sys_file_reference', 'be_users', 'be_groups'];
         //foreach ($GLOBALS['TCA'] as $table => $config) {
         $table  = 'pages';
@@ -818,7 +818,7 @@ class CreateProcess implements LoggerAwareInterface
 
             while ($origrow = $res->fetchAssociative()) {
                 $row = $origrow;
-                $this->out('Page Cleanup ' . $row['title'] . ' ' . $row['uid']);
+                $this->log('Page Cleanup ' . $row['title'] . ' ' . $row['uid']);
 
                 $row = $this->finalContent_pages($row, $this);
 
@@ -841,7 +841,7 @@ class CreateProcess implements LoggerAwareInterface
                 unset($update['pid']);
                 if ($update !== []) {
                     $this->source->ping();
-                    $this->out(__FILE__ . ':' . __LINE__ . ' ' . $table . ' update ' . print_r($update, true));
+                    $this->log(__FILE__ . ':' . __LINE__ . ' ' . $table . ' update ' . print_r($update, true));
 
                     self::updateRecord($table, $update, [ 'uid' => $origrow['uid'] ]);
                 }
@@ -851,8 +851,9 @@ class CreateProcess implements LoggerAwareInterface
 
     private function cleanContent(): void
     {
-        $this->out('Start Content Cleanup ');
-        $aSkip   = [
+        $this->log('Start Content Cleanup ');
+
+        $event = new ModifyCleanContentSkipListEvent([
             'pages',
             'sys_domain',
             'sys_action',
@@ -867,14 +868,16 @@ class CreateProcess implements LoggerAwareInterface
             'sys_redirect',
             'sys_filemounts',
             'tx_sudhaus7wizard_domain_model_creator',
-        ];
-        $aSkip   = array_merge($aSkip, $this->allwaysIgnoreTables);
+        ], $this);
+        GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+
+        $aSkip   = array_merge($event->getSkipList(), $this->allwaysIgnoreTables);
         $newpids = \array_values($this->pageMap);
         foreach ($GLOBALS['TCA'] as $table => $config) {
             if (! in_array($table, $aSkip)) {
                 //foreach ($this->pageMap as $oldpid => $newpid) {
                 $this->source->ping();
-                $this->out('Content Cleanup ' . $table);
+                $this->log('Content Cleanup ' . $table);
 
                 $query = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
 
@@ -887,7 +890,7 @@ class CreateProcess implements LoggerAwareInterface
 
                 while ($origrow = $stmt->fetchAssociative()) {
                     $row = $origrow;
-                    $this->out('Content Cleanup ' . $table . ' ' . $row['uid']);
+                    $this->log('Content Cleanup ' . $table . ' ' . $row['uid']);
 
                     if ($table === 'tt_content') {
                         $row = $this->finalContent_tt_content($row);
@@ -1039,7 +1042,7 @@ class CreateProcess implements LoggerAwareInterface
         $skipTables = [];
         //$skipColumns = ['l18n_parent'];
         if (isset($columnconfig['config']['foreign_table']) && !in_array($columnconfig['config']['foreign_table'], $skipTables)) {
-            $this->out('Clean select Column ' . $column);
+            $this->log('Clean select Column ' . $column);
 
             $table = $parameters['table'];
             $olduid = $row['t3_origuid'] ?: $this->getTranslateUidReverse($table, $row['uid']);
@@ -1098,7 +1101,7 @@ class CreateProcess implements LoggerAwareInterface
     private function cloneContent_final_columntype_group($column, $columnconfig, $row, $parameters)
     {
         if ($columnconfig['config']['internal_type'] == 'db') {
-            $this->out('Clean Group Column ' . $column);
+            $this->log('Clean Group Column ' . $column);
             $table = $parameters['table'];
             $olduid = $row['t3_origuid'] ?: $this->getTranslateUidReverse($table, $row['uid']);
             /*
@@ -1274,14 +1277,14 @@ class CreateProcess implements LoggerAwareInterface
                 }
             }
         } else {
-            $this->out('No t3_origuid in Table ' . $table . ' - skipped');
+            $this->log('No t3_origuid in Table ' . $table . ' - skipped');
         }
         return $row;
     }
 
     private function debug(string $s): void
     {
-        $this->out($s, 'DEBUG2');
+        $this->log($s, 'DEBUG2');
     }
     private static function myEnableFields($table): array
     {

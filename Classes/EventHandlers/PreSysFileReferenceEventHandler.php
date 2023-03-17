@@ -29,11 +29,11 @@ class PreSysFileReferenceEventHandler
 
             $test = BackendUtility::getRecord('sys_file', $newidentifier, 'identifier');
             if (!empty($test)) {
-                $event->getCreateProcess()->out('Using File ' . $newidentifier);
+                $event->getCreateProcess()->log('Using File ' . $newidentifier);
                 $row['uid_local'] = $test['uid'];
                 $event->setRecord($row);
             }
-            $event->getCreateProcess()->out('Create File ' . $newidentifier);
+            $event->getCreateProcess()->log('Create File ' . $newidentifier);
             try {
                 $new_sys_file = $event->getCreateProcess()->getSource()->handleFile($sys_file, $newidentifier);
                 $event->getCreateProcess()->addContentMap('sys_file', $sys_file['uid'], $new_sys_file['uid']);
