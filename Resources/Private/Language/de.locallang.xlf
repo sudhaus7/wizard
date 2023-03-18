@@ -1,59 +1,73 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <xliff version="1.0">
-    <file target-language="en" datatype="plaintext" original="messages" date="2014-09-12T13:49:12Z">
-        <header>
-            <generator>LFEditor</generator>
-        </header>
-        <body>
+	<file target-language="de" datatype="plaintext" original="messages" date="2023-03-18T13:49:12Z">
+		<header>
+			<generator>LFEditor</generator>
+		</header>
+		<body>
 			<trans-unit id="tx_sudhaus7wizard_domain_model_creator" xml:space="preserve">
 				<source>Site Wizard Task</source>
+				<target>Site Wizard Auftrag</target>
+
 			</trans-unit>
 			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.projektname" xml:space="preserve">
 				<source>Project name/Customer (System Internal Description)</source>
+				<target>Projektname / Kunde (wird intern im System verwendet)</target>
 			</trans-unit>
 			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.longname" xml:space="preserve">
 				<source>Name of the Website (e.q. Our little Farm - the website title)</source>
+				<target>Name des Auftritts (z.b. Unsere kleine Farm - Titel des Auftritts)</target>
 			</trans-unit>
 			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.shortname" xml:space="preserve">
 				<source>Short name of the Site (e.q CUSTOMER_our_little_farm - must be one word, and only characters of the alphabet, numbers and the character "_" are allowed. All characters before the first _ will be converted to uppercase, all following characters will be converted to lowercase. Is for example being used as the name of the folder in fileadmin)</source>
+				<target>Kurzname des Auftritts (z.B. KUNDE_unsere_kleine_farm - MUSS ein Wort sein und nur Zeichen des Alphabetes, Zahlen "_" sind erlaubt. Alle Zeichen vor dem 1. "_" werden vom System auf Gross-, alle nachfolgenden Zeichen auf Kleinbuchstaben umgestellt. Wird z.b. als Ordner Name im fileadmin verwendet.)</target>
 			</trans-unit>
 			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.domainname" xml:space="preserve">
 				<source>Domain/Address (e.q. www.our-little-farm.com - withouht http:// or https://)</source>
+				<target>Domain/Adresse (z.B. www.unsere-kleine-farm.de - ohne http:// oder https://)</target>
 			</trans-unit>
 			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.contact" xml:space="preserve">
-				<source>Contact E-Mail (e.q. info@our-little-farm.com)</source>
+				<target>Contact E-Mail (e.q. info@our-little-farm.com)</target>
+				<target>Kontakt E-Mail (z.B. info@unsere-kleine-farm.de)</target>
 			</trans-unit>
 			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.reduser" xml:space="preserve">
-				<source>Editor username (z.B. ourlittlefarm - used for the backend login)</source>
+				<target>Editor username (z.B. ourlittlefarm - used for the backend login)</target>
+				<target>Redakteur Benutzername (z.B. unserekleinefarm - wird beim Anmelden verwendet)</target>
 			</trans-unit>
 			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.redpass" xml:space="preserve">
 				<source>Password (used for the login)</source>
+				<target>Passwort (wird beim Anmelden verwendet)</target>
 			</trans-unit>
 			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.redemail" xml:space="preserve">
 				<source>Editor e-mail-address</source>
+				<target>Redaktuer Email-Adresse</target>
 			</trans-unit>
 			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.theme" xml:space="preserve">
 				<source>Style/Colortheme</source>
+				<target>Stil/Farbgebung</target>
 			</trans-unit>
 			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.flexinfo" xml:space="preserve">
-				<source>Theme specific configuration</source>
+				<target>Theme specific configuration</target>
+				<target>Weitere Konfiguration</target>
 			</trans-unit>
 			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.status" xml:space="preserve">
 				<source>Status</source>
-			</trans-unit>
-			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.source" xml:space="preserve">
-				<source>Source Tree</source>
-			</trans-unit>
-			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.sourcetype" xml:space="preserve">
-				<source>Source Type</source>
-			</trans-unit>
-			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.sourcetype.localdb" xml:space="preserve">
-				<source>System/Local Database</source>
-			</trans-unit>
-			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.base" xml:space="preserve">
-				<source>Template/Sitepackage</source>
+				<target>Status</target>
 			</trans-unit>
 
-        </body>
-    </file>
+			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.source" xml:space="preserve">
+				<target>Quellseite</target>
+			</trans-unit>
+			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.sourcetype" xml:space="preserve">
+				<target>Art der Quelle</target>
+			</trans-unit>
+			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.sourcetype.localdb" xml:space="preserve">
+				<target>System/Lokale Datenbank</target>
+			</trans-unit>
+
+			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.base" xml:space="preserve">
+				<target>Template/Vorlage</target>
+			</trans-unit>
+		</body>
+	</file>
 </xliff>

@@ -59,7 +59,7 @@ return [
 
         'sourcepid' => [
             'displayCond' => 'FIELD:status:<:10',
-            'label' => 'Quellseite',
+            'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.source',
             'config' => [
                 'eval'=>'trim',
                 'type' => 'input',
@@ -73,7 +73,7 @@ return [
         ],
 
         'base'=>[
-            'label'=>'Quelle/Typ',
+            'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.base',
 
             'displayCond' => 'FIELD:status:<:10',
             'config'=>[
@@ -88,7 +88,7 @@ return [
         ],
 
         'sourceclass'=>[
-            'label'=>'Quelle Mechanismus',
+            'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.sourcetype',
             'exclude' => 1,
             'displayCond' => 'FIELD:status:<:10',
             'config'=>[
@@ -96,8 +96,8 @@ return [
                 'renderType' => 'selectSingle',
                 'default'=>'\\' . \SUDHAUS7\Sudhaus7Wizard\Sources\Localdatabase::class,
                 'items'=> [
-                    ['Lokale Datenbank', '\\' . \SUDHAUS7\Sudhaus7Wizard\Sources\Localdatabase::class],
-                    ['Umzugs-service', '\\' . \SUDHAUS7\Sudhaus7Wizard\Sources\Couchdb::class],
+                    ['LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.sourcetype.localdb', '\\' . \SUDHAUS7\Sudhaus7Wizard\Sources\Localdatabase::class],
+                    //['Umzugs-service', '\\' . \SUDHAUS7\Sudhaus7Wizard\Sources\Couchdb::class],
                 ],
             ],
         ],
