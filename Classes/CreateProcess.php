@@ -337,19 +337,22 @@ class CreateProcess implements LoggerAwareInterface
             return;
         }
         $this->log('Create Filemount ' . 'mkdir -p ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
-        exec('mkdir -p ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
-        $this->log('Create Filemount ' . 'mkdir -p ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir . '/Formulare');
-        exec('mkdir -p ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir . 'Formulare');
+        GeneralUtility::mkdir_deep(Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
 
-        $this->log('Adding Formulare Folder to config');
-        $this->addToFormConfig($dir . '/Formulare');
+        //@TODO businesslogik - move to template
+        //$this->log('Create Filemount ' . 'mkdir -p ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir . '/Formulare');
+        //exec('mkdir -p ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir . 'Formulare');
 
-        $this->log('Create Filemount ' . 'chown -R www-data ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
-        exec('chown -R www-data ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
-        $this->log('Create Filemount ' . 'chgrp -R www-data ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
-        exec('chgrp -R www-data ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
-        $this->log('Create Filemount ' . 'chmod -R ug+rw ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
-        exec('chmod -R ug+rw ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
+        //@TODO move to template
+        //$this->log('Adding Formulare Folder to config');
+        //$this->addToFormConfig($dir . '/Formulare');
+
+        //$this->log('Create Filemount ' . 'chown -R www-data ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
+        //exec('chown -R www-data ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
+        //$this->log('Create Filemount ' . 'chgrp -R www-data ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
+        //exec('chgrp -R www-data ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
+        //$this->log('Create Filemount ' . 'chmod -R ug+rw ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
+        //exec('chmod -R ug+rw ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
         $tmpl = [
             'title' => $name,
             'path'  => $dir,
@@ -697,17 +700,20 @@ class CreateProcess implements LoggerAwareInterface
                     break;
                 case 'final':
 
-                    match ($column) {
-                        'bodytext' => $row=$this->cloneContent_final_column_bodytext($column, $columnconfig, $row, $parameters),
+                    $row = match ($column) {
+                        'bodytext' => $this->cloneContent_final_column_bodytext($column, $columnconfig, $row, $parameters),
+                        // no break
+                        default=>$row
                     };
 
                     $event = new Column\FinalEvent($parameters['table'], $column, $columnconfig, $row, $parameters, $this);
                     $this->eventDispatcher->dispatch($event);
                     $row = $event->getRecord();
 
-                    match ($columntype) {
-                        'group'=>$row=$this->cloneContent_final_columntype_group($column, $columnconfig, $row, $parameters),
-                        'select'=>$row=$this->cloneContent_final_columntype_select($column, $columnconfig, $row, $parameters),
+                    $row = match ($columntype) {
+                        'group'=>$this->cloneContent_final_columntype_group($column, $columnconfig, $row, $parameters),
+                        'select'=>$this->cloneContent_final_columntype_select($column, $columnconfig, $row, $parameters),
+                        default=>$row
                     };
 
                     $event = new ColumnType\FinalEvent($parameters['table'], $column, $columntype, $columnconfig, $row, $parameters, $this);
@@ -726,8 +732,10 @@ class CreateProcess implements LoggerAwareInterface
                     $this->eventDispatcher->dispatch($event);
                     $row = $event->getRecord();
 
-                    match ($columntype) {
-                        'inline'=>$row = $this->cloneContent_clean_columntype_inline($column, $columnconfig, $row, $parameters),
+                    $row = match ($columntype) {
+                        'inline'=>$this->cloneContent_clean_columntype_inline($column, $columnconfig, $row, $parameters),
+                        // no break
+                        default=>$row
                     };
 
                     $event = new ColumnType\CleanEvent($parameters['table'], $column, $columntype, $columnconfig, $row, $parameters, $this);

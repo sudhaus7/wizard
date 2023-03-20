@@ -5,3 +5,7 @@ services:
     public: false
   SUDHAUS7\Sudhaus7Template\:
     resource: '../Classes/*'
+  SUDHAUS7\Sudhaus7Template\Wizard\Listeners\SysTemplateListener:
+    tags:
+      - name: event.listener
+        identifier: 'sudhaus7template_SysTemplateListener'

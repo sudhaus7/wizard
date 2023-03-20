@@ -70,8 +70,12 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 
         ],
     ];
-    public function __construct(private readonly Creator $creator)
+
+    private Creator $creator;
+
+    public function __construct(Creator $creator)
     {
+        $this->creator = $creator;
     }
 
     public function getSiteConfig(mixed $id): array
@@ -82,6 +86,9 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
             return $site->getConfiguration();
         } catch (SiteNotFoundException $e) {
             // no harm done
+            $x = 1;
+        } catch (\Exception $e) {
+            $x =1;
         }
         return $this->siteconfig;
     }

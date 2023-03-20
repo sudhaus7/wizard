@@ -34,12 +34,12 @@ class CreateProcessFactory
         $tsk->setTemplate(GeneralUtility::makeInstance($cls));
         $sourceclassname = $creator->getSourceclass();
         if (\class_exists($sourceclassname)) {
-            $sourceclass = GeneralUtility::makeInstance($sourceclassname, $creator);
+            $sourceclass = GeneralUtility::makeInstance(ltrim($sourceclassname, '\\'), $creator);
             $tsk->source = $sourceclass instanceof SourceInterface ? $sourceclass : GeneralUtility::makeInstance(Localdatabase::class, $creator);
             $tsk->source->setLogger($logger);
         }
-
-        $tsk->setSiteconfig($tsk->source->getSiteConfig((int)$creator->getSourcepid()));
+        $pid = $creator->getSourcepid();
+        $tsk->setSiteconfig($tsk->source->getSiteConfig($pid));
         return $tsk;
     }
 }
