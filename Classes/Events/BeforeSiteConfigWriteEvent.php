@@ -14,23 +14,18 @@
 namespace SUDHAUS7\Sudhaus7Wizard\Events;
 
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
+use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventInterface;
+use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
 
-class BeforeSiteConfigWriteEvent
+class BeforeSiteConfigWriteEvent implements WizardEventInterface
 {
+    use EventTrait;
     protected CreateProcess $create_process;
     protected array $siteconfig;
     public function __construct(array $siteconfig, CreateProcess $create_process)
     {
         $this->create_process = $create_process;
         $this->siteconfig = $siteconfig;
-    }
-
-    /**
-     * @return CreateProcess
-     */
-    public function getCreateProcess(): CreateProcess
-    {
-        return $this->create_process;
     }
 
     /**

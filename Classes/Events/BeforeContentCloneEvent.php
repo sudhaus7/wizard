@@ -19,16 +19,18 @@ use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
+use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventInterface;
+use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
 
-class BeforeContentCloneEvent implements LoggerAwareInterface
+class BeforeContentCloneEvent implements LoggerAwareInterface, WizardEventInterface
 {
     use LoggerAwareTrait;
+    use EventTrait;
     protected string $table;
     protected int $olduid;
     protected int $oldpid;
 
     protected array $record;
-    protected CreateProcess $create_process;
     public function __construct(string $table, int $olduid, int $oldpid, array $record, CreateProcess $create_process)
     {
         $this->table = $table;
@@ -53,14 +55,6 @@ class BeforeContentCloneEvent implements LoggerAwareInterface
     public function setRecord(array $record): void
     {
         $this->record = $record;
-    }
-
-    /**
-     * @return CreateProcess
-     */
-    public function getCreateProcess(): CreateProcess
-    {
-        return $this->create_process;
     }
 
     /**

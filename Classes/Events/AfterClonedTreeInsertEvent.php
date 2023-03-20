@@ -19,17 +19,19 @@ use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
+use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventInterface;
+use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
 
-class AfterClonedTreeInsertEvent implements LoggerAwareInterface
+class AfterClonedTreeInsertEvent implements LoggerAwareInterface, WizardEventInterface
 {
     use LoggerAwareTrait;
+    use EventTrait;
 
     protected string|int $oldid;
     /**
      * @var array the page Record
      */
     protected array $record;
-    protected CreateProcess $create_process;
     public function __construct(string|int $oldid, array $record, CreateProcess $create_process)
     {
         $this->create_process = $create_process;
@@ -54,13 +56,6 @@ class AfterClonedTreeInsertEvent implements LoggerAwareInterface
         return $this->record;
     }
 
-    /**
-     * @return CreateProcess
-     */
-    public function getCreateProcess(): CreateProcess
-    {
-        return $this->create_process;
-    }
     public function getLogger(): LoggerInterface
     {
         return $this->logger;

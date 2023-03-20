@@ -2,7 +2,7 @@
 
 echo "php-cs-fixer pre commit hook start"
 
-PHP_CS_FIXER="vendor/bin/php-cs-fixer"
+PHP_CS_FIXER=".Build/bin/php-cs-fixer"
 HAS_PHP_CS_FIXER=false
 
 if [ -x $PHP_CS_FIXER ]; then

@@ -41,7 +41,7 @@ class Tools
     /**
      * @param $class
      */
-    public static function registerExtention($class): void
+    public static function registerWizardProcess($class): void
     {
         if (!in_array(WizardProcessInterface::class, class_implements($class))) {
             return;

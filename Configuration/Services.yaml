@@ -5,6 +5,8 @@ services:
     public: false
   SUDHAUS7\Sudhaus7Wizard\:
     resource: '../Classes/*'
+  SUDHAUS7\Sudhaus7Wizard\CreateProcess:
+    public: true
   SUDHAUS7\Sudhaus7Wizard\Cli\Run:
     tags:
       - name: 'console.command'

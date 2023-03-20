@@ -16,12 +16,15 @@ declare(strict_types=1);
 namespace SUDHAUS7\Sudhaus7Wizard\Events\TCA\Inlines;
 
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
+use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventInterface;
+use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
 
-class CleanEvent
+class CleanEvent implements WizardEventInterface
 {
+    use EventTrait;
+
     protected string $tablename;
     protected array $record;
-    protected CreateProcess $create_process;
     public function __construct(string $tablename, array $record, CreateProcess $create_process)
     {
         $this->record = $record;
@@ -43,14 +46,6 @@ class CleanEvent
     public function getRecord(): array
     {
         return $this->record;
-    }
-
-    /**
-     * @return CreateProcess
-     */
-    public function getCreateProcess(): CreateProcess
-    {
-        return $this->create_process;
     }
 
     /**

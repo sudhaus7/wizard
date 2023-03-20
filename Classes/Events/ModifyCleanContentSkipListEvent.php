@@ -16,14 +16,17 @@ declare(strict_types=1);
 namespace SUDHAUS7\Sudhaus7Wizard\Events;
 
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
+use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventInterface;
+use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
 
-class ModifyCleanContentSkipListEvent
+class ModifyCleanContentSkipListEvent implements WizardEventInterface
 {
+    use EventTrait;
+
     /**
      * @var array|string[]
      */
     protected array $skipList;
-    protected CreateProcess $create_process;
 
     /**
      * @param string[] $skipList
@@ -49,13 +52,5 @@ class ModifyCleanContentSkipListEvent
     public function setSkipList(array $skipList): void
     {
         $this->skipList = $skipList;
-    }
-
-    /**
-     * @return CreateProcess
-     */
-    public function getCreateProcess(): CreateProcess
-    {
-        return $this->create_process;
     }
 }

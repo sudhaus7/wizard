@@ -14,12 +14,14 @@
 namespace SUDHAUS7\Sudhaus7Wizard\Events;
 
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
+use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventInterface;
+use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
 
-class FinalContentEvent
+class FinalContentEvent implements WizardEventInterface
 {
+    use EventTrait;
     protected string $tablename;
     protected array $record;
-    protected CreateProcess $create_process;
     public function __construct(string $tablename, array $record, CreateProcess $create_process)
     {
         $this->record = $record;
@@ -41,14 +43,6 @@ class FinalContentEvent
     public function getRecord(): array
     {
         return $this->record;
-    }
-
-    /**
-     * @return CreateProcess
-     */
-    public function getCreateProcess(): CreateProcess
-    {
-        return $this->create_process;
     }
 
     /**

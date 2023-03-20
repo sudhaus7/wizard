@@ -19,16 +19,18 @@ use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
+use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventInterface;
+use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
 
-class ModifyCloneContentSkipTableEvent implements LoggerAwareInterface
+class ModifyCloneContentSkipTableEvent implements LoggerAwareInterface, WizardEventInterface
 {
     use LoggerAwareTrait;
+    use EventTrait;
 
     /**
      * @var array|string[]
      */
     protected array $skipList;
-    protected CreateProcess $create_process;
 
     /**
      * @param string[] $skipList
@@ -57,13 +59,6 @@ class ModifyCloneContentSkipTableEvent implements LoggerAwareInterface
         $this->skipList = $skipList;
     }
 
-    /**
-     * @return CreateProcess
-     */
-    public function getCreateProcess(): CreateProcess
-    {
-        return $this->create_process;
-    }
     public function getLogger(): LoggerInterface
     {
         return $this->logger;

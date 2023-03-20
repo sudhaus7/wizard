@@ -16,9 +16,12 @@ declare(strict_types=1);
 namespace SUDHAUS7\Sudhaus7Wizard\Events\TCA\Column;
 
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
+use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventInterface;
+use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
 
-class BeforeEvent
+class BeforeEvent implements WizardEventInterface
 {
+    use EventTrait;
     /**
      * @var string the tablename
      */
@@ -46,7 +49,6 @@ class BeforeEvent
         ]
      */
     protected array $parameters;
-    protected CreateProcess $create_process;
     public function __construct(string $table, string $column, array $columnConfig, array $record, array $parameters, CreateProcess $create_process)
     {
         $this->table = $table;
@@ -95,14 +97,6 @@ class BeforeEvent
     public function getParameters(): array
     {
         return $this->parameters;
-    }
-
-    /**
-     * @return CreateProcess
-     */
-    public function getCreateProcess(): CreateProcess
-    {
-        return $this->create_process;
     }
 
     /**

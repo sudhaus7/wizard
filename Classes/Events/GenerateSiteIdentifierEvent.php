@@ -14,10 +14,12 @@
 namespace SUDHAUS7\Sudhaus7Wizard\Events;
 
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
+use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventInterface;
+use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
 
-class GenerateSiteIdentifierEvent
+class GenerateSiteIdentifierEvent implements WizardEventInterface
 {
-    protected CreateProcess $create_process;
+    use EventTrait;
     protected array $siteconfig;
     protected string $identifier;
     protected string $basepath;
@@ -27,14 +29,6 @@ class GenerateSiteIdentifierEvent
         $this->siteconfig = $siteconfig;
         $this->basepath = $basepath;
         $this->identifier = '';
-    }
-
-    /**
-     * @return CreateProcess
-     */
-    public function getCreateProcess(): CreateProcess
-    {
-        return $this->create_process;
     }
 
     /**

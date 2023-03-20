@@ -12,5 +12,5 @@
  */
 
 if (\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded('sudhaus7_wizard')) {
-    \SUDHAUS7\Sudhaus7Wizard\Tools::registerExtention(\SUDHAUS7\Sudhaus7Template\Wizard\WizardProcess::class);
+    \SUDHAUS7\Sudhaus7Wizard\Tools::registerWizardProcess(\SUDHAUS7\Sudhaus7Template\Wizard\WizardProcess::class);
 }

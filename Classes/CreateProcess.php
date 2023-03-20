@@ -13,6 +13,7 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard;
 
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 
@@ -46,11 +47,16 @@ use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Crypto\PasswordHashing\PasswordHashFactory;
 use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class CreateProcess implements LoggerAwareInterface
 {
+    private EventDispatcherInterface $eventDispatcher;
+
+    public function injectEventDispatcher(EventDispatcherInterface $eventDispatcher): void
+    {
+        $this->eventDispatcher = $eventDispatcher;
+    }
     use LoggerAwareTrait;
     use DbTrait;
     public array $allwaysIgnoreTables = [];
@@ -127,7 +133,7 @@ class CreateProcess implements LoggerAwareInterface
         $this->cleanPages();
         $this->source->ping();
         $this->log('Clean Content', 'INFO', 'Clean Content');
-        $this->cleanContent();
+        $this->finalContent();
         $this->source->ping();
         $this->log('About to finish', 'INFO', 'Finish');
         $this->pageSort();
@@ -245,7 +251,7 @@ class CreateProcess implements LoggerAwareInterface
     public function finalContent_tt_content($row)
     {
         $event = new FinalContentByCtypeEvent($row['CType'], $row['CType']==='list' ? $row['list_type'] : null, $row, $this);
-        GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+        $this->eventDispatcher->dispatch($event);
         return $event->getRecord();
     }
 
@@ -352,7 +358,7 @@ class CreateProcess implements LoggerAwareInterface
         ];
 
         $event =  new CreateFilemountEvent($tmpl, $this);
-        GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+        $this->eventDispatcher->dispatch($event);
         $tmpl = $event->getRow();
 
         $this->source->ping();
@@ -391,7 +397,7 @@ class CreateProcess implements LoggerAwareInterface
         $tmpl['tstamp']           = time();
 
         $event = new CreateBackendUserGroupEvent($tmpl, $this);
-        GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+        $this->eventDispatcher->dispatch($event);
         $tmpl = $event->getRecord();
 
         $this->source->ping();
@@ -467,7 +473,7 @@ class CreateProcess implements LoggerAwareInterface
         }
         $tmpl['usergroup'] = implode(',', $groups);
         $event = new CreateBackendUserEvent($tmpl, $this);
-        GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+        $this->eventDispatcher->dispatch($event);
         $tmpl = $event->getRecord();
         $this->source->ping();
 
@@ -529,7 +535,7 @@ class CreateProcess implements LoggerAwareInterface
             }
 
             $event = new BeforeClonedTreeInsertEvent($old, $page, $this);
-            GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+            $this->eventDispatcher->dispatch($event);
             $page = $event->getRecord();
 
             $this->source->ping();
@@ -548,7 +554,7 @@ class CreateProcess implements LoggerAwareInterface
                 $this->updateMountpoint($this->pageMap[ $old ]);
                 $this->siterootid = $this->pageMap[ $old ];
             }
-            GeneralUtility::makeInstance(EventDispatcher::class)->dispatch(new AfterClonedTreeInsertEvent($old, $page, $this));
+            $this->eventDispatcher->dispatch(new AfterClonedTreeInsertEvent($old, $page, $this));
         }
         $this->log('Clone Tree End');
     }
@@ -587,7 +593,7 @@ class CreateProcess implements LoggerAwareInterface
             'sys_file',
             'sys_action',
         ], $this);
-        GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+        $this->eventDispatcher->dispatch($event);
         $aSkip = $event->getSkipList();
 
         $aSkip = array_merge($aSkip, $this->allwaysIgnoreTables);
@@ -609,7 +615,7 @@ class CreateProcess implements LoggerAwareInterface
                         }
 
                         $event = new BeforeContentCloneEvent($table, $olduid, $oldpid, $row, $this);
-                        GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+                        $this->eventDispatcher->dispatch($event);
                         $row = $event->getRecord();
 
                         $row = $this->runTCA('pre', $config['columns'], $row, [
@@ -646,7 +652,7 @@ class CreateProcess implements LoggerAwareInterface
                                 'pObj'   => $this,
                             ]);
 
-                            GeneralUtility::makeInstance(EventDispatcher::class)->dispatch(new AfterContentCloneEvent($table, $olduid, $oldpid, $newuid, $row, $this));
+                            $this->eventDispatcher->dispatch(new AfterContentCloneEvent($table, $olduid, $oldpid, $newuid, $row, $this));
                         } else {
                             $this->log('ERROR NO ROW ' . print_r([
                                     $table,
@@ -673,20 +679,20 @@ class CreateProcess implements LoggerAwareInterface
             switch($state) {
                 case 'pre':
                     $event = new Column\BeforeEvent($parameters['table'], $column, $columnconfig, $row, $parameters, $this);
-                    GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+                    $this->eventDispatcher->dispatch($event);
                     $row = $event->getRecord();
 
                     $event = new ColumnType\BeforeEvent($parameters['table'], $column, $columntype, $columnconfig, $row, $parameters, $this);
-                    GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+                    $this->eventDispatcher->dispatch($event);
                     $row = $event->getRecord();
                     break;
                 case 'post':
                     $event = new Column\AfterEvent($parameters['table'], $column, $columnconfig, $row, $parameters, $this);
-                    GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+                    $this->eventDispatcher->dispatch($event);
                     $row = $event->getRecord();
 
                     $event = new ColumnType\AfterEvent($parameters['table'], $column, $columntype, $columnconfig, $row, $parameters, $this);
-                    GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+                    $this->eventDispatcher->dispatch($event);
                     $row = $event->getRecord();
                     break;
                 case 'final':
@@ -696,7 +702,7 @@ class CreateProcess implements LoggerAwareInterface
                     };
 
                     $event = new Column\FinalEvent($parameters['table'], $column, $columnconfig, $row, $parameters, $this);
-                    GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+                    $this->eventDispatcher->dispatch($event);
                     $row = $event->getRecord();
 
                     match ($columntype) {
@@ -705,7 +711,7 @@ class CreateProcess implements LoggerAwareInterface
                     };
 
                     $event = new ColumnType\FinalEvent($parameters['table'], $column, $columntype, $columnconfig, $row, $parameters, $this);
-                    GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+                    $this->eventDispatcher->dispatch($event);
                     $row = $event->getRecord();
 
                     if (isset($columnconfig['config']['wizards'])) {
@@ -717,7 +723,7 @@ class CreateProcess implements LoggerAwareInterface
                     break;
                 case 'clean':
                     $event = new Column\CleanEvent($parameters['table'], $column, $columnconfig, $row, $parameters, $this);
-                    GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+                    $this->eventDispatcher->dispatch($event);
                     $row = $event->getRecord();
 
                     match ($columntype) {
@@ -725,7 +731,7 @@ class CreateProcess implements LoggerAwareInterface
                     };
 
                     $event = new ColumnType\CleanEvent($parameters['table'], $column, $columntype, $columnconfig, $row, $parameters, $this);
-                    GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+                    $this->eventDispatcher->dispatch($event);
                     $row = $event->getRecord();
                     break;
             }
@@ -743,7 +749,7 @@ class CreateProcess implements LoggerAwareInterface
             'be_groups',
             'tx_sudhaus7wizard_domain_model_creator',
         ], $this);
-        GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+        $this->eventDispatcher->dispatch($event);
 
         $aSkip = array_merge($event->getSkipList(), $this->allwaysIgnoreTables);
         $map   = $this->cleanUpTodo;
@@ -772,7 +778,7 @@ class CreateProcess implements LoggerAwareInterface
                     $this->debug(__METHOD__ . ':' . __LINE__);
 
                     $event = new Inlines\CleanEvent($table, $row, $this);
-                    GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+                    $this->eventDispatcher->dispatch($event);
                     $row = $event->getRecord();
 
                     $row = $this->runTCA('clean', $config['columns'], $row, [
@@ -824,7 +830,7 @@ class CreateProcess implements LoggerAwareInterface
                 $row = $this->finalContent_pages($row, $this);
 
                 $event = new FinalContentEvent($table, $row, $this);
-                GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+                $this->eventDispatcher->dispatch($event);
                 $row = $event->getRecord();
 
                 $row    = $this->runTCA('final', $config['columns'], $row, [
@@ -850,7 +856,7 @@ class CreateProcess implements LoggerAwareInterface
         }
     }
 
-    private function cleanContent(): void
+    private function finalContent(): void
     {
         $this->log('Start Content Cleanup ');
 
@@ -870,7 +876,7 @@ class CreateProcess implements LoggerAwareInterface
             'sys_filemounts',
             'tx_sudhaus7wizard_domain_model_creator',
         ], $this);
-        GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+        $this->eventDispatcher->dispatch($event);
 
         $aSkip   = array_merge($event->getSkipList(), $this->allwaysIgnoreTables);
         $newpids = \array_values($this->pageMap);
@@ -899,7 +905,7 @@ class CreateProcess implements LoggerAwareInterface
 
                     $this->debug(__METHOD__ . ':' . __LINE__);
                     $event = new FinalContentEvent($table, $row, $this);
-                    GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+                    $this->eventDispatcher->dispatch($event);
                     $row = $event->getRecord();
 
                     $this->debug(__METHOD__ . ':' . __LINE__);
@@ -962,7 +968,7 @@ class CreateProcess implements LoggerAwareInterface
         }
 
         $event = new GenerateSiteIdentifierEvent($this->siteconfig, $path, $this);
-        GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+        $this->eventDispatcher->dispatch($event);
         $identifier = $event->getIdentifier();
 
         /*
@@ -1005,7 +1011,7 @@ class CreateProcess implements LoggerAwareInterface
         GeneralUtility::mkdir($path . '/config/sites/' . $identifier);
 
         $event = new BeforeSiteConfigWriteEvent($this->siteconfig, $this);
-        GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+        $this->eventDispatcher->dispatch($event);
         $this->siteconfig = $event->getSiteconfig();
 
         file_put_contents(
@@ -1189,7 +1195,7 @@ class CreateProcess implements LoggerAwareInterface
                     $orig = $test;
 
                     $event = new CleanContentEvent($columnconfig['config']['foreign_table'], $test, $this);
-                    GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+                    $this->eventDispatcher->dispatch($event);
                     $test = $event->getRecord();
 
                     $this->debug(__METHOD__ . ':' . __LINE__ . print_r($test, true));
@@ -1229,7 +1235,7 @@ class CreateProcess implements LoggerAwareInterface
                     $inline[$columnconfig['config']['foreign_field']] = $newuid;
 
                     $event = new BeforeContentCloneEvent($columnconfig['config']['foreign_table'], $inlineuid, $oldpid, $inline, $this);
-                    GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+                    $this->eventDispatcher->dispatch($event);
                     $inline = $event->getRecord();
 
                     $this->debug(__METHOD__ . ':' . __LINE__);
@@ -1273,7 +1279,7 @@ class CreateProcess implements LoggerAwareInterface
                             ]
                         );
 
-                        GeneralUtility::makeInstance(EventDispatcher::class)->dispatch(new AfterContentCloneEvent($columnconfig['config']['foreign_table'], $inlineuid, $oldpid, $newinlineuid, $inline, $this));
+                        $this->eventDispatcher->dispatch(new AfterContentCloneEvent($columnconfig['config']['foreign_table'], $inlineuid, $oldpid, $newinlineuid, $inline, $this));
                     }
                 }
             }

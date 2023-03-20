@@ -19,13 +19,15 @@ use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
+use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventInterface;
+use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
 
-class CreateFilemountEvent implements LoggerAwareInterface
+class CreateFilemountEvent implements LoggerAwareInterface, WizardEventInterface
 {
     use LoggerAwareTrait;
+    use EventTrait;
 
     protected array $row;
-    protected CreateProcess $create_process;
     public function __construct(array $row, CreateProcess $create_process)
     {
         $this->row = $row;
@@ -49,13 +51,6 @@ class CreateFilemountEvent implements LoggerAwareInterface
         $this->row = $row;
     }
 
-    /**
-     * @return CreateProcess
-     */
-    public function getCreateProcess(): CreateProcess
-    {
-        return $this->create_process;
-    }
     public function getLogger(): LoggerInterface
     {
         return $this->logger;
