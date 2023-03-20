@@ -27,7 +27,7 @@ class WizardConfig implements WizardTemplateConfigInterface
         return 'Introduction Package';
     }
 
-    public function getSourcePid(): int
+    public function getSourcePid(): int|string
     {
         return 1;
     }

@@ -26,7 +26,7 @@
 		}
 	],
   "require": {
-    "php": "7.4.*||8.0.*||8.1.*||8.2.*",
+    "php": "8.0.*||8.1.*||8.2.*",
     "typo3/cms-core": "11.5.*"
   },
   "require-dev": {
@@ -43,7 +43,8 @@
     "ssch/typo3-rector": "^1.1",
     "georgringer/news": "^11.0",
     "typo3/cms-introduction": "^4.4",
-	  "sudhaus7/template": "@dev"
+	  "sudhaus7/template": "@dev",
+    "typo3/testing-framework": "^6.16"
   },
 	"autoload": {
 		"psr-4": {

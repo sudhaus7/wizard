@@ -66,6 +66,7 @@ class Updatestatus
 
                 $sourcePage = BackendUtility::getRecord('pages', $row['sourcepid']);
                 // disallowed to copy pages (ext URL, be User Area, spacer, sysfolder, bin)
+                // @TODO make dynamic
                 if (is_array($sourcePage) && in_array($sourcePage['doktype'], [3, 6, 199, 254, 255])) {
                     $fieldArray['status'] = 5;
                 }

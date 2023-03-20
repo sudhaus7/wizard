@@ -61,7 +61,7 @@ return [
             'displayCond' => 'FIELD:status:<:10',
             'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.source',
             'config' => [
-                'eval'=>'trim',
+                'eval'=>'trim,required',
                 'type' => 'input',
                 'softref'=>'typo3link',
                 'default' => '',

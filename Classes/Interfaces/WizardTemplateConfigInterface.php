@@ -31,9 +31,9 @@ interface WizardTemplateConfigInterface
 
     /**
      * Returns the page ID of the page branch to clone
-     * @return int
+     * @return int|string
      */
-    public function getSourcePid(): int;
+    public function getSourcePid(): int|string;
 
     /**
      * Returns the Path to a Wizard flexform File for additional Template specific Config options
