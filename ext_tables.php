@@ -13,10 +13,11 @@ declare(strict_types=1);
  * The TYPO3 project - inspiring people to share!
  */
 
+use SUDHAUS7\Sudhaus7Wizard\Backend\TCA\Updatestatus;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 
-$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass'][] = SUDHAUS7\Sudhaus7Wizard\Backend\TCA\Updatestatus::class;
-$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processCmdmapClass'][]  = SUDHAUS7\Sudhaus7Wizard\Backend\TCA\Updatestatus::class;
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass'][] = Updatestatus::class;
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processCmdmapClass'][]  = Updatestatus::class;
 
 ExtensionManagementUtility::addToInsertRecords('tx_sudhaus7wizard_domain_model_creator');
 ExtensionManagementUtility::allowTableOnStandardPages('tx_sudhaus7wizard_domain_model_creator');
