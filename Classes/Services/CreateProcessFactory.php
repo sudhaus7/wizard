@@ -24,7 +24,7 @@ class CreateProcessFactory
 {
     public static function get(Creator $creator, ?LoggerInterface $logger = null): CreateProcess
     {
-        $tsk              = new CreateProcess();
+        $tsk              = GeneralUtility::makeInstance(CreateProcess::class);
         if ($logger instanceof LoggerInterface) {
             $tsk->setLogger($logger);
         }
@@ -34,8 +34,9 @@ class CreateProcessFactory
         $tsk->setTemplate(GeneralUtility::makeInstance($cls));
         $sourceclassname = $creator->getSourceclass();
         if (\class_exists($sourceclassname)) {
-            $sourceclass = GeneralUtility::makeInstance(ltrim($sourceclassname, '\\'), $creator);
-            $tsk->source = $sourceclass instanceof SourceInterface ? $sourceclass : GeneralUtility::makeInstance(Localdatabase::class, $creator);
+            $sourceclass = GeneralUtility::makeInstance(ltrim($sourceclassname, '\\'));
+            $tsk->source = $sourceclass instanceof SourceInterface ? $sourceclass : GeneralUtility::makeInstance(Localdatabase::class);
+            $tsk->getSource()->setCreator($creator);
             $tsk->source->setLogger($logger);
         }
         $pid = $creator->getSourcepid();

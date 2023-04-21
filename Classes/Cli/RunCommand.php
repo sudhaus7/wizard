@@ -30,7 +30,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Object\Exception;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 
-class Run extends Command
+class RunCommand extends Command
 {
     private ?CreatorRepository $repository = null;
     private ?PersistenceManager $persistenceManager = null;

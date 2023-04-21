@@ -68,12 +68,24 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         ],
     ];
 
-    public function __construct(private readonly Creator $creator)
+    private ?Creator $creator = null;
+
+    /**
+     * @return Creator|null
+     */
+    public function getCreator(): ?Creator
     {
+        return $this->creator;
+    }
+
+    /**
+     * @param Creator|null $creator
+     */
+    public function setCreator(?Creator $creator): void
+    {
+        $this->creator = $creator;
         $this->couchdb = 'http://tools.sudhaus7.de:32768/' . $creator->getSourcepid() . '/';
         $this->addBaseViews();
-        //$this->getUsedTables();
-        //exit;
     }
 
     public function getSiteConfig(mixed $id): array

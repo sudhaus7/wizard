@@ -19,6 +19,8 @@ use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 
 interface SourceInterface
 {
+    public function setCreator(Creator $creator): void;
+    public function getCreator(): ?Creator;
     /**
      * Returns the Site Config as an array
      *
@@ -86,13 +88,6 @@ interface SourceInterface
      * @return array
      */
     public function getMM($mmtable, $uid, $tablename);
-
-    /**
-     * @param Creator $creator
-     *
-     * @return mixed
-     */
-    public function __construct(Creator $creator);
 
     /**
      * @param $new

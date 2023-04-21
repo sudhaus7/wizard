@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the TYPO3 project.
  *
@@ -11,6 +13,10 @@
  * The TYPO3 project - inspiring people to share!
  */
 
-if (\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded('sudhaus7_wizard')) {
-    \SUDHAUS7\Sudhaus7Wizard\Tools::registerWizardProcess(\SUDHAUS7\Sudhaus7Template\Wizard\WizardProcess::class);
+use SUDHAUS7\Sudhaus7Template\Wizard\WizardProcess;
+use SUDHAUS7\Sudhaus7Wizard\Tools;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+
+if (ExtensionManagementUtility::isLoaded('sudhaus7_wizard')) {
+    Tools::registerWizardProcess(WizardProcess::class);
 }

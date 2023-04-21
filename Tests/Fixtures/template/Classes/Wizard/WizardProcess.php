@@ -37,7 +37,7 @@ class WizardProcess implements WizardProcessInterface
 
     public function getTemplateBackendUserGroup(): array
     {
-        return BackendUtility::getRecord('be_users', 7);
+        return BackendUtility::getRecord('be_groups', 7);
     }
 
     public function getMediaBaseDir(): string

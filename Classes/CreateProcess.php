@@ -51,24 +51,17 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class CreateProcess implements LoggerAwareInterface
 {
-    private EventDispatcherInterface $eventDispatcher;
-
-    public function injectEventDispatcher(EventDispatcherInterface $eventDispatcher): void
-    {
-        $this->eventDispatcher = $eventDispatcher;
-    }
     use LoggerAwareTrait;
     use DbTrait;
+
+    private EventDispatcherInterface $eventDispatcher;
     public array $allwaysIgnoreTables = [];
 
     public array $siteconfig = [];
 
     public array $pageMap = [];
     public ?Creator $task = null;
-    /**
-     * @var SourceInterface
-     */
-    public $source;
+    public ?SourceInterface $source = null;
     public array $group = [];
     public array $user = [];
     public array $filemount = [];
@@ -85,6 +78,11 @@ class CreateProcess implements LoggerAwareInterface
     private array $checkusers = [];
 
     public $errorpage = 0;
+
+    public function __construct(EventDispatcherInterface $eventDispatcher)
+    {
+        $this->eventDispatcher = $eventDispatcher;
+    }
 
     public function run($mapfolder = null): bool
     {
@@ -379,6 +377,7 @@ class CreateProcess implements LoggerAwareInterface
     {
         $tmpl            = $this->template->getTemplateBackendUserGroup();
         $this->tmplgroup = $tmpl['uid'];
+
         $groupname       = $this->confArr['groupprefix'] . ' ' . $this->task->getProjektname();
         $this->log('Create Group ' . $groupname);
         $this->source->ping();
@@ -387,7 +386,6 @@ class CreateProcess implements LoggerAwareInterface
 
         if (! empty($test)) {
             $this->group = $test;
-
             return;
         }
 
@@ -501,9 +499,9 @@ class CreateProcess implements LoggerAwareInterface
 
     private function updateMountpoint($newrootpage): void
     {
-        $this->filemount['relatepage'] = $newrootpage;
-
-        self::updateRecord('sys_filemounts', [ 'relatepage' => $newrootpage ], [ 'uid' => $this->filemount['uid'] ]);
+        //is this needed?
+        //$this->filemount['relatepage'] = $newrootpage;
+        //self::updateRecord('sys_filemounts', [ 'relatepage' => $newrootpage ], [ 'uid' => $this->filemount['uid'] ]);
     }
 
     private function cloneTree()

@@ -71,11 +71,27 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         ],
     ];
 
-    private Creator $creator;
+    private ?Creator $creator = null;
 
-    public function __construct(Creator $creator)
+    /**
+     * @return Creator
+     */
+    public function getCreator(): Creator
+    {
+        return $this->creator;
+    }
+
+    /**
+     * @param Creator $creator
+     */
+    public function setCreator(Creator $creator): void
     {
         $this->creator = $creator;
+    }
+
+    public function __construct()
+    {
+        $x =1;
     }
 
     public function getSiteConfig(mixed $id): array
