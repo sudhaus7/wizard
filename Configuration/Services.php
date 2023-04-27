@@ -14,6 +14,7 @@ declare(strict_types=1);
  */
 
 use SUDHAUS7\Sudhaus7Wizard\Cli\RunCommand;
+use SUDHAUS7\Sudhaus7Wizard\EventHandlers\Extensions\TxNewsPluginHandlerEvent;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\FinalTTContentFormFrameworkListener;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\PreSysFileReferenceEventHandler;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\TypoLinkinRichTextFieldsEvent;
@@ -49,4 +50,6 @@ return static function (ContainerConfigurator $containerConfigurator, ContainerB
              ->tag('event.listener', ['identifier'=>'s7wizardBaseFinalTTContentFormFrameworkListener']);
     $services->set(TypoLinkinRichTextFieldsEvent::class)
              ->tag('event.listener', ['identifier'=>'s7wizardTypoLinkinRichTextFieldsEventListener']);
+    $services->set(TxNewsPluginHandlerEvent::class)
+             ->tag('event.listener', ['identifier'=>'s7wizardTxNewsPluginHandlerEvent']);
 };

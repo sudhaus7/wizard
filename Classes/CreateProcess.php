@@ -276,14 +276,23 @@ class CreateProcess implements LoggerAwareInterface
                     default=>(int)$queryParts['uid']
                 };
             }
+            foreach ($queryParts as $k=>$v) {
+                if (\str_starts_with($k, 'amp;')) {
+                    $k2 = substr($k, 4);
+                    unset($queryParts[$k]);
+                    $queryParts[$k2]=$v;
+                }
+            }
+
             $urlParts['query'] = http_build_query($queryParts);
             $s = $urlParts['scheme'] . '://' . $urlParts['host'];
             if (!empty($urlParts['query'])) {
                 $s .= '?' . $urlParts['query'];
             }
             if (!empty($urlParts['fragment'])) {
-                $s .= '#' . $urlParts['fragment'];
+                $s .= '#' . $this->getTranslateUid('tt_content', $urlParts['fragment']);
             }
+            $x=1;
         }
         return $s;
     }
@@ -718,9 +727,54 @@ class CreateProcess implements LoggerAwareInterface
         }
     }
 
+    public function isTCAFieldActiveForThisRecord(string $table, string $column, array $record): bool
+    {
+        if (isset($GLOBALS['TCA'][$table])) {
+            $tca = $GLOBALS['TCA'][$table];
+            $tcatype = $tca['ctrl']['type'] ?? 'type';
+            $tcatypevalue = $record[ $tcatype ] ?? 0;
+            if (isset($tca['types'][$tcatypevalue]) && \is_array($tca['types'][$tcatypevalue]['showitem'])) {
+                $showitem = $tca['types'][ $tcatypevalue ]['showitem'];
+            } elseif ($tcatypevalue === 0  && isset($tca['types'][1]) && \is_array($tca['types'][1]['showitem'])) {
+                $tcatypevalue = 1;
+                $showitem = $tca['types'][ $tcatypevalue ]['showitem'];
+            } else {
+                return true;
+            }
+
+            $fields = GeneralUtility::trimExplode(',', $showitem, true);
+            foreach ($fields as $field) {
+                if (\str_starts_with($field, '--div--')) {
+                    continue;
+                }
+                if (\str_starts_with($field, '--palette--')) {
+                    $tmp = GeneralUtility::trimExplode(';', $field, true);
+                    $palette = array_pop($tmp);
+                    if (isset($tca['palettes'][$palette]['showitem'])) {
+                        $paletteShowitem = GeneralUtility::trimExplode(',', $tca['palettes'][$palette]['showitem']);
+                        foreach ($paletteShowitem as $paletteItem) {
+                            if (\str_starts_with($paletteItem, $column)) {
+                                return true;
+                            }
+                        }
+                    }
+                } else {
+                    if (\str_starts_with($field, $column)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     private function runTCA(string $state, $config, $row, array $parameters)
     {
         foreach ($config as $column => $columnconfig) {
+            if (!$this->isTCAFieldActiveForThisRecord($parameters['table'], $column, $row)) {
+                continue;
+            }
+
             //$this->out('runTCA '.$state.' '.$parameters['table'].' '.$column);
             $columntype = strtolower($columnconfig['config']['type']);
             switch($state) {
@@ -1036,6 +1090,8 @@ class CreateProcess implements LoggerAwareInterface
 
         */
 
+        $this->siteconfig['websiteTitle'] = $this->getTask()->getProjektname();
+
         if (empty($identifier)) {
             $identifier = Tools::generateslug($this->getTask()->getShortname() ?? $this->getTask()->getProjektname());
 
@@ -1047,7 +1103,7 @@ class CreateProcess implements LoggerAwareInterface
         if (isset($this->siteconfig['errorHandling'])) {
             foreach ($this->siteconfig['errorHandling'] as $idx=>$config) {
                 if (\str_starts_with($config['errorContentSource'], 't3://')) {
-                    $config['errorContentSource'] = $this->translateT3LinkString($config['errorContentSource']);
+                    $this->siteconfig['errorHandling'][$idx]['errorContentSource'] = $this->translateT3LinkString($config['errorContentSource']);
                 }
             }
         }
@@ -1210,7 +1266,7 @@ class CreateProcess implements LoggerAwareInterface
 
                     $test = BackendUtility::getRecord($columnconfig['config']['foreign_table'], $this->contentmap[$columnconfig['config']['foreign_table']][$inlineuid]);
 
-                    $this->debug(__METHOD__ . ':' . __LINE__ . ':' . print_r(['*', $columnconfig['config']['foreign_table'], 'uid=' . $this->contentmap[$columnconfig['config']['foreign_table']][$inlineuid], $test], true));
+                    //$this->debug(__METHOD__ . ':' . __LINE__ . ':' . print_r(['*', $columnconfig['config']['foreign_table'], 'uid=' . $this->contentmap[$columnconfig['config']['foreign_table']][$inlineuid], $test], true));
                 }
 
                 if ($test) {
@@ -1230,7 +1286,7 @@ class CreateProcess implements LoggerAwareInterface
                             'pObj' => $parameters['pObj'],
                         ]
                     );
-                    $this->debug(__METHOD__ . ':' . __LINE__ . ':' . print_r($test, true));
+                    //$this->debug(__METHOD__ . ':' . __LINE__ . ':' . print_r($test, true));
 
                     $update = [];
                     foreach ($test as $k => $v) {
@@ -1238,6 +1294,7 @@ class CreateProcess implements LoggerAwareInterface
                             $update[$k] = $v;
                         }
                     }
+                    $update[$columnconfig['config']['foreign_field']] = $newuid;
                     unset($update['uid']);
                     unset($update['pid']);
 

@@ -14,7 +14,9 @@
 namespace SUDHAUS7\Sudhaus7Wizard;
 
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardProcessInterface;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\FlexForm\FlexFormTools;
+use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class Tools
@@ -99,5 +101,16 @@ class Tools
         /** @var $flexObj FlexFormTools */
         $flexObj = GeneralUtility::makeInstance(FlexFormTools::class);
         return $flexObj->flexArray2Xml($a, true);
+    }
+
+    public static function resolveFieldConfigurationAndRespectColumnsOverrides(string $table, string $field, array $record): array
+    {
+        $tcaFieldConf = $GLOBALS['TCA'][$table]['columns'][$field]['config'];
+        $recordType = BackendUtility::getTCAtypeValue($table, $record);
+        $columnsOverridesConfigOfField = $GLOBALS['TCA'][$table]['types'][$recordType]['columnsOverrides'][$field]['config'] ?? null;
+        if ($columnsOverridesConfigOfField) {
+            ArrayUtility::mergeRecursiveWithOverrule($tcaFieldConf, $columnsOverridesConfigOfField);
+        }
+        return $tcaFieldConf;
     }
 }

@@ -46,17 +46,6 @@
                     </config>
                 </TCEforms>
             </preloader>
-            <footer>
-                <TCEforms>
-                    <label>footer Color</label>
-                    <config>
-                        <type>input</type>
-                        <renderType>colorpicker</renderType>
-                        <default>#0288D1</default>
-                    </config>
-                </TCEforms>
-            </footer>
-
         </el>
     </ROOT>
 </T3DataStructure>

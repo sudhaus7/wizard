@@ -14,26 +14,41 @@
 namespace SUDHAUS7\Sudhaus7Wizard\EventHandlers;
 
 use SUDHAUS7\Sudhaus7Wizard\Events\TCA\ColumnType\FinalEvent;
+use SUDHAUS7\Sudhaus7Wizard\Tools;
 
 class TypoLinkinRichTextFieldsEvent
 {
     public function __invoke(FinalEvent $event)
     {
         if ($event->getColumntype() === 'text') {
-            $config = $event->getColumnConfig();
-            if ((isset($config['enableRichtext']) && $config['enableRichtext']) || isset($config['softref']) && \str_contains(
-                'typolink_tag',
-                $config['softref']
-            )) {
-                $proc = $event->getCreateProcess();
-                $fieldname = $event->getColumn();
-                $record = $event->getRecord();
+            $fieldname = $event->getColumn();
+            $record = $event->getRecord();
 
-                \preg_match_all('/<a.+href="(t3:\/\/\S+)"/mU', $record[$fieldname], $matches);
+            $config = Tools::resolveFieldConfigurationAndRespectColumnsOverrides($event->getTable(), $fieldname, $record);
+            if (
+                (
+                    isset($config['enableRichtext']) &&
+                    $config['enableRichtext']
+                ) || (
+                    isset($config['softref']) &&
+                    \str_contains($config['softref'], 'typolink_tag')
+                )
+            ) {
+                $proc = $event->getCreateProcess();
+
+                \preg_match_all('/<a.+href="(t3:\/\/\S+)"/mU', (string)$record[$fieldname], $matches);
                 foreach ($matches[1] as $match) {
                     $replace = $proc->translateT3LinkString($match);
-                    $record[$fieldname] = str_replace($match, $replace, $record[$fieldname]);
+                    $record[$fieldname] = str_replace($match, $replace, (string)$record[$fieldname]);
                 }
+
+                // Legacy? Will man das?
+                \preg_match_all('/<a.+href="(\d+)"/mU', (string)$record[$fieldname], $matches);
+                foreach ($matches[1] as $match) {
+                    $replace = $proc->getTranslateUid('pages', $match);
+                    $record[$fieldname] = str_replace($match, $replace, (string)$record[$fieldname]);
+                }
+
                 $event->setRecord($record);
             }
         }

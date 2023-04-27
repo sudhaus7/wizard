@@ -31,7 +31,6 @@ class SysTemplateListener
                 $constants['plugin.']['bootstrap_package.']['settings.']['scss.']['secondary'] = $config['secondary'];
                 $constants['plugin.']['bootstrap_package.']['settings.']['scss.']['breadcrumb-bg'] = $config['breadcrumb'];
                 $constants['page.']['preloader.']['backgroundColor'] = $config['preloader'];
-                $constants['plugin.']['bootstrap_package.']['settings.']['scss.']['footer-sections'] = $config['footer'];
 
                 $constants['plugin.']['tx_indexedsearch.']['settings.']['rootPidList'] = $event->getCreateProcess()->translateIDlist(
                     'pages',
@@ -40,6 +39,10 @@ class SysTemplateListener
                 $constants['plugin.']['tx_indexedsearch.']['settings.']['targetPid'] = $event->getCreateProcess()->getTranslateUid(
                     'pages',
                     $constants['plugin.']['tx_indexedsearch.']['settings.']['targetPid']
+                );
+                $constants['styles.']['content.']['loginform.']['pid'] = $event->getCreateProcess()->translateIDlist(
+                    'pages',
+                    $constants['styles.']['content.']['loginform.']['pid']
                 );
                 $record['constants'] = TyposcriptService::fold($constants);
                 $event->setRecord($record);
