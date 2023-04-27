@@ -25,6 +25,7 @@ use SUDHAUS7\Sudhaus7Wizard\Events\AfterContentCloneEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\BeforeClonedTreeInsertEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\BeforeContentCloneEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\BeforeSiteConfigWriteEvent;
+use SUDHAUS7\Sudhaus7Wizard\Events\BeforeUserCreationUCDefaultsEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\CleanContentEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\CreateBackendUserEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\CreateBackendUserGroupEvent;
@@ -39,6 +40,7 @@ use SUDHAUS7\Sudhaus7Wizard\Events\TCA\ColumnType;
 use SUDHAUS7\Sudhaus7Wizard\Events\TCA\Inlines;
 use SUDHAUS7\Sudhaus7Wizard\Events\TtContent\FinalContentByCtypeEvent;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardProcessInterface;
+use SUDHAUS7\Sudhaus7Wizard\Services\TyposcriptService;
 use SUDHAUS7\Sudhaus7Wizard\Sources\SourceInterface;
 use SUDHAUS7\Sudhaus7Wizard\Traits\DbTrait;
 use Symfony\Component\Yaml\Yaml;
@@ -183,7 +185,7 @@ class CreateProcess implements LoggerAwareInterface
         }
 
         match ($info) {
-            'DEBUG2' => $this->logger->alert($c . ' - ' . $this->debugsection, $context),
+            'DEBUG2' => $this->logger->debug($c . ' - ' . $this->debugsection, $context),
             'DEBUG' => $this->logger->debug($c . ' - ' . $this->debugsection, $context),
             default => $this->logger->info($c . ' - ' . $this->debugsection, $context),
         };
@@ -514,6 +516,16 @@ class CreateProcess implements LoggerAwareInterface
         $tmpl['description']      = 'Angelegt durch Wizard';
         $tmpl['TSconfig']         = '';
         $uc                       = [];
+
+        $uc['titleLen'] = 50;
+        $uc['edit_RTE'] = 1;
+        $uc['resizeTextareas_MaxHeight'] = 500;
+        $uc['lang'] = 'default';
+
+        $event = new BeforeUserCreationUCDefaultsEvent($uc, $this);
+        $this->eventDispatcher->dispatch($event);
+        $uc = $event->getUc();
+
         $tmpl['uc']               = serialize($uc);
 
         $salting          = ( new PasswordHashFactory() )->getDefaultHashInstance('BE');
@@ -583,6 +595,11 @@ class CreateProcess implements LoggerAwareInterface
 
             if ($page['is_siteroot']) {
                 $page['title'] = $this->task->getLongname();
+
+                $conf = TyposcriptService::parse((string)$page['TSconfig']);
+                $conf['TCEMAIN.']['permissions.']['userid'] = $this->user['uid'];
+                $conf['TCEMAIN.']['permissions.']['groupid'] = $this->group['uid'];
+                $page['TSconfig'] = TyposcriptService::fold($conf);
             }
 
             if (isset($this->pageMap[ $page['pid'] ]) && $this->pageMap[ $page['pid'] ] > 0) {
@@ -854,7 +871,7 @@ class CreateProcess implements LoggerAwareInterface
 
         $aSkip = array_merge($event->getSkipList(), $this->allwaysIgnoreTables);
         $map   = $this->cleanUpTodo;
-        print_r([ 'cleanupTodo' => $this->cleanUpTodo ]);
+        //print_r([ 'cleanupTodo' => $this->cleanUpTodo ]);
         $this->cleanUpTodo = [];
 
         foreach ($map as $table => $newuid) {
@@ -1244,9 +1261,9 @@ class CreateProcess implements LoggerAwareInterface
 
     private function cloneContent_clean_columntype_inline($column, $columnconfig, $row, $parameters)
     {
-        $this->debug('Memory : ' . memory_get_usage());
+        //$this->debug('Memory : ' . memory_get_usage());
 
-        $this->debug('Clean inline Column ' . $column);
+        $this->log('Clean inline Column ' . $column);
         $table = $parameters['table'];
         $olduid = $row['t3_origuid'] ?? $this->getTranslateUidReverse($table, $row['uid']);
         if ($olduid) {
@@ -1276,7 +1293,7 @@ class CreateProcess implements LoggerAwareInterface
                     $this->eventDispatcher->dispatch($event);
                     $test = $event->getRecord();
 
-                    $this->debug(__METHOD__ . ':' . __LINE__ . print_r($test, true));
+                    // $this->debug(__METHOD__ . ':' . __LINE__ . print_r($test, true));
                     $test = $this->runTCA(
                         'clean',
                         $GLOBALS['TCA'][$columnconfig['config']['foreign_table']]['columns'],
@@ -1298,11 +1315,11 @@ class CreateProcess implements LoggerAwareInterface
                     unset($update['uid']);
                     unset($update['pid']);
 
-                    $this->debug(__METHOD__ . ':' . __LINE__ . print_r($update, true));
+                    //$this->debug(__METHOD__ . ':' . __LINE__ . print_r($update, true));
                     if ($update !== []) {
                         $this->source->ping();
 
-                        $this->debug(__METHOD__ . ':' . __LINE__);
+                        //$this->debug(__METHOD__ . ':' . __LINE__);
                         self::updateRecord($columnconfig['config']['foreign_table'], $update, ['uid'=>$orig['uid']]);
                     }
                 } else {
