@@ -13,6 +13,7 @@
 
 namespace SUDHAUS7\Sudhaus7Template\Wizard\Listeners;
 
+use SUDHAUS7\Sudhaus7Template\Wizard\WizardProcess;
 use SUDHAUS7\Sudhaus7Wizard\Events\FinalContentEvent;
 use SUDHAUS7\Sudhaus7Wizard\Services\FlexformService;
 use SUDHAUS7\Sudhaus7Wizard\Services\TyposcriptService;
@@ -21,7 +22,8 @@ class SysTemplateListener
 {
     public function __invoke(FinalContentEvent $event)
     {
-        if ($event->getExtensionKey()==='template' && $event->getTablename() === 'sys_template') {
+        if ($event->getCreateProcess()->getTemplate() instanceof
+            WizardProcess && $event->getExtensionKey()==='template' && $event->getTablename() === 'sys_template') {
             $record = $event->getRecord();
             if ($record['root'] === 1) {
                 $constants = TyposcriptService::parse($record['constants']);
