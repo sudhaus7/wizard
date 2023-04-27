@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Run Wizard" type="PhpLocalRunConfigurationType" factoryName="PHP Console" path="$PROJECT_DIR$/.Build/bin/typo3" scriptParameters="sudhaus7:wizard single -i 1 --force">
+  <configuration default="false" name="Run Wizard" type="PhpLocalRunConfigurationType" factoryName="PHP Console" path="$PROJECT_DIR$/.Build/bin/typo3" scriptParameters="sudhaus7:wizard single -i 1 --force -vvv">
     <method v="2" />
   </configuration>
 </component>

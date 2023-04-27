@@ -25,7 +25,7 @@ class PreSysFileReferenceEventHandler
         if ($event->getTable() === 'sys_file_reference') {
             $row = $event->getRecord();
             $sys_file = $event->getCreateProcess()->getSource()->getRow('sys_file', ['uid'=>$row['uid_local']]);
-            $newidentifier = $event->getCreateProcess()->getFilemount()['path'] . $sys_file['name'];
+            $newidentifier = '/' . trim($event->getCreateProcess()->getFilemount()['path'] . $sys_file['name'], '/');
 
             $test = BackendUtility::getRecord('sys_file', $newidentifier, 'identifier');
             if (!empty($test)) {

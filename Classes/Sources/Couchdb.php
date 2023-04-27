@@ -457,14 +457,6 @@ function(doc) {
         }
         return $row;
     }
-    public function cloneTreePreInsert($old, $page, $pObj)
-    {
-        if (!isset($page['media']) || \is_null($page['media'])) {
-            $page['media']=0;
-        }
-
-        return $page;
-    }
     public function getTables(): array
     {
         $data = $this->getbyid('_design/application/_view/gettables/?group=true');

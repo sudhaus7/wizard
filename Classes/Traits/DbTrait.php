@@ -45,4 +45,16 @@ trait DbTrait
         $newid = $conn->lastInsertId($tablename);
         return [$rows, $newid];
     }
+
+    public static function tableHasField(string $tablename, string $field): bool
+    {
+        $conn = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($tablename);
+        $columns = $conn->getSchemaManager()->listTableColumns($tablename);
+        foreach ($columns as $column) {
+            if ($column->getName() === $field) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

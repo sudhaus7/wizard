@@ -91,7 +91,6 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 
     public function __construct()
     {
-        $x =1;
     }
 
     public function getSiteConfig(mixed $id): array
@@ -187,19 +186,19 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
      */
     public function handleFile(array $sys_file, $newidentifier)
     {
-        $this->logger->notice('cp ' . Environment::getPublicPath() . '/' . '/fileadmin' . $sys_file['identifier'] . ' ' . Environment::getPublicPath() . '/' . '/fileadmin' . $newidentifier);
-        $this->logger->notice('chown www-data:www-data ' . Environment::getPublicPath() . '/' . '/fileadmin' . $newidentifier);
-        $this->logger->notice('chmod ug+rw ' . Environment::getPublicPath() . '/' . '/fileadmin' . $newidentifier);
+        $this->logger->notice('cp ' . Environment::getPublicPath() . '/fileadmin' . $sys_file['identifier'] . ' ' . Environment::getPublicPath() . '/fileadmin' . $newidentifier);
+        //$this->logger->notice('chown www-data:www-data ' . Environment::getPublicPath() . '/' . '/fileadmin' . $newidentifier);
+        //$this->logger->notice('chmod ug+rw ' . Environment::getPublicPath() . 'fileadmin' . $newidentifier);
 
-        exec('cp ' . Environment::getPublicPath() . '/' . '/fileadmin' . $sys_file['identifier'] . ' ' . Environment::getPublicPath() . '/' . '/fileadmin' . $newidentifier);
+        exec('cp ' . Environment::getPublicPath() . '/fileadmin' . $sys_file['identifier'] . ' ' . Environment::getPublicPath() . '/fileadmin' . $newidentifier);
 
-        exec('chown www-data:www-data ' . Environment::getPublicPath() . '/' . '/fileadmin' . $newidentifier);
-        exec('chmod ug+rw ' . Environment::getPublicPath() . '/' . '/fileadmin' . $newidentifier);
+        //exec('chown www-data:www-data ' . Environment::getPublicPath() . 'fileadmin' . $newidentifier);
+        //exec('chmod ug+rw ' . Environment::getPublicPath() . '/' . '/fileadmin' . $newidentifier);
         $sys_file_metadata = BackendUtility::getRecord('sys_file_metadata', $sys_file['uid'], 'file');
         unset($sys_file['uid']);
         $sys_file['identifier'] = $newidentifier;
-        $sys_file['identifier_hash'] = sha1((string)$sys_file['identifer']);
-        $sys_file['folder_hash'] = sha1(dirname((string)$sys_file['identifer']));
+        $sys_file['identifier_hash'] = sha1((string)$sys_file['identifier']);
+        $sys_file['folder_hash'] = sha1(dirname((string)$sys_file['identifier']));
 
         [$affected,$uid] = self::insertRecord('sys_file', $sys_file);
 

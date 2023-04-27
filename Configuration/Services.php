@@ -16,6 +16,7 @@ declare(strict_types=1);
 use SUDHAUS7\Sudhaus7Wizard\Cli\RunCommand;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\FinalTTContentFormFrameworkListener;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\PreSysFileReferenceEventHandler;
+use SUDHAUS7\Sudhaus7Wizard\EventHandlers\TypoLinkinRichTextFieldsEvent;
 use SUDHAUS7\Sudhaus7Wizard\Sources\Localdatabase;
 use SUDHAUS7\Sudhaus7Wizard\Sources\SourceInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -46,4 +47,6 @@ return static function (ContainerConfigurator $containerConfigurator, ContainerB
              ->tag('event.listener', ['identifier'=>'s7wizardBaseHandleSysFileReferences']);
     $services->set(FinalTTContentFormFrameworkListener::class)
              ->tag('event.listener', ['identifier'=>'s7wizardBaseFinalTTContentFormFrameworkListener']);
+    $services->set(TypoLinkinRichTextFieldsEvent::class)
+             ->tag('event.listener', ['identifier'=>'s7wizardTypoLinkinRichTextFieldsEventListener']);
 };

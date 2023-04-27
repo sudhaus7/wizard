@@ -47,6 +47,8 @@ use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Crypto\PasswordHashing\PasswordHashFactory;
 use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Exception\SiteNotFoundException;
+use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class CreateProcess implements LoggerAwareInterface
@@ -95,15 +97,22 @@ class CreateProcess implements LoggerAwareInterface
 
         $this->log('Start', 'INFO', 'Start');
 
+        $this->log('Read original Site config');
+        try {
+            $origsite = GeneralUtility::makeInstance(SiteFinder::class)
+                                      ->getSiteByRootPageId($this->source->sourcePid());
+            $this->siteconfig = $origsite->getConfiguration();
+        } catch (SiteNotFoundException $e) {
+            $this->debug('Original Site not found');
+        }
         $this->createFilemount();
         $this->createGroup();
         $this->createUser();
-        $this->log(__FUNCTION__ . ':' . __LINE__);
+
         $sourcePid = $this->source->sourcePid();
-        $this->log(__FUNCTION__ . ':' . __LINE__);
 
         $sourcePage = $this->source->getRow('pages', [ 'uid' => $sourcePid ]);
-        $this->log(__FUNCTION__ . ':' . __LINE__);
+
         $this->log('Quelle: ' . $sourcePage['title']);
         if ($sourcePid > 0) {
             $this->pageMap[ $sourcePid ] = 0;
@@ -253,6 +262,32 @@ class CreateProcess implements LoggerAwareInterface
         return $event->getRecord();
     }
 
+    public function translateT3LinkString($s): string
+    {
+        $urlParts = parse_url($s);
+        if ($urlParts['scheme'] === 't3') {
+            $queryParts = [];
+            parse_str($urlParts['query'], $queryParts);
+            if (isset($queryParts['uid'])) {
+                $queryParts['uid'] = match ($urlParts['host']) {
+                    'file' => $this->getTranslateUid('sys_file', (int)$queryParts['uid']),
+                    'page' => $this->getTranslateUid('pages', (int)$queryParts['uid']),
+                    // no break
+                    default=>(int)$queryParts['uid']
+                };
+            }
+            $urlParts['query'] = http_build_query($queryParts);
+            $s = $urlParts['scheme'] . '://' . $urlParts['host'];
+            if (!empty($urlParts['query'])) {
+                $s .= '?' . $urlParts['query'];
+            }
+            if (!empty($urlParts['fragment'])) {
+                $s .= '#' . $urlParts['fragment'];
+            }
+        }
+        return $s;
+    }
+
     public function translateLinkString($s): string
     {
         $s   = trim((string)$s);
@@ -266,6 +301,10 @@ class CreateProcess implements LoggerAwareInterface
                     break;
                 case 'http':
                 case 'https':
+                    return implode(' ', $a);
+                    break;
+                case 't3':
+                    $a[0] = $this->translateT3LinkString($a[0]);
                     return implode(' ', $a);
                     break;
             }
@@ -307,10 +346,7 @@ class CreateProcess implements LoggerAwareInterface
      */
     public function finalContent_pages($row, &$pObj)
     {
-        if ($row['slug'] === '/meta/fehlermeldung') {
-            $pObj->errorpage = $row['uid'];
-        }
-        if ($row['doktype'] == 4 && $row['urltype'] == 1 && ! empty($row['shortcut'])) {
+        if ($row['doktype'] == 4 && ! empty($row['shortcut'])) {
             $row['shortcut'] = $pObj->getTranslateUid('pages', $row['shortcut']);
         }
 
@@ -334,8 +370,8 @@ class CreateProcess implements LoggerAwareInterface
             $this->filemount = $test;
             return;
         }
-        $this->log('Create Filemount ' . 'mkdir -p ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
-        GeneralUtility::mkdir_deep(Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
+        $this->log('Create Filemount ' . 'mkdir -p ' . Environment::getPublicPath() . '/fileadmin/' . $dir);
+        GeneralUtility::mkdir_deep(Environment::getPublicPath() . '/fileadmin/' . $dir);
 
         //@TODO businesslogik - move to template
         //$this->log('Create Filemount ' . 'mkdir -p ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir . '/Formulare');
@@ -345,12 +381,6 @@ class CreateProcess implements LoggerAwareInterface
         //$this->log('Adding Formulare Folder to config');
         //$this->addToFormConfig($dir . '/Formulare');
 
-        //$this->log('Create Filemount ' . 'chown -R www-data ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
-        //exec('chown -R www-data ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
-        //$this->log('Create Filemount ' . 'chgrp -R www-data ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
-        //exec('chgrp -R www-data ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
-        //$this->log('Create Filemount ' . 'chmod -R ug+rw ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
-        //exec('chmod -R ug+rw ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir);
         $tmpl = [
             'title' => $name,
             'path'  => $dir,
@@ -382,7 +412,16 @@ class CreateProcess implements LoggerAwareInterface
         $this->log('Create Group ' . $groupname);
         $this->source->ping();
 
-        $test = BackendUtility::getRecord('be_groups', $groupname, 'title');
+        /** @var \TYPO3\CMS\Core\Database\Connection $query */
+        $query = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('be_groups');
+        /** @var \Doctrine\DBAL\Result $res */
+        $res = $query->select(
+            [ '*' ],
+            'be_groups',
+            ['title'=>$groupname]
+        );
+
+        $test = $res->fetchAssociative();
 
         if (! empty($test)) {
             $this->group = $test;
@@ -419,7 +458,15 @@ class CreateProcess implements LoggerAwareInterface
         $this->tmpluser = $tmpl['uid'];
         $this->source->ping();
 
-        $test = BackendUtility::getRecord('be_users', $this->task->getReduser(), 'username');
+        /** @var \TYPO3\CMS\Core\Database\Connection $query */
+        $query = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('be_users');
+        /** @var \Doctrine\DBAL\Result $res */
+        $res = $query->select(
+            [ '*' ],
+            'be_users',
+            ['username'=>$this->task->getReduser()]
+        );
+        $test = $res->fetchAssociative();
 
         if (! empty($test)) {
             $groups = GeneralUtility::trimExplode(',', $test['usergroup'], true);
@@ -513,6 +560,7 @@ class CreateProcess implements LoggerAwareInterface
 
             $this->log('Cloning Page ' . $page['title']);
             unset($page['uid']);
+
             $page['t3_origuid'] = $old;
 
             if (! $this->isAdmin($page['perms_userid'])) {
@@ -531,9 +579,6 @@ class CreateProcess implements LoggerAwareInterface
             if (isset($this->pageMap[ $page['pid'] ]) && $this->pageMap[ $page['pid'] ] > 0) {
                 $page['pid'] = (int)$this->pageMap[ $page['pid'] ];
             }
-            if (method_exists($this->source, 'cloneTreePreInsert')) {
-                $page = $this->source->cloneTreePreInsert($old, $page, $this);
-            }
 
             $event = new BeforeClonedTreeInsertEvent($old, $page, $this);
             $this->eventDispatcher->dispatch($event);
@@ -541,7 +586,7 @@ class CreateProcess implements LoggerAwareInterface
 
             $this->source->ping();
 
-            if ((int)$page['pid'] > 0) {
+            if ((int)$page['pid'] > 0 || ((int)$page['pid']===0 && $page['is_siteroot'])) {
                 [ $rowsaffected, $newpageid ] = self::insertRecord('pages', $page);
 
                 if (! $rowsaffected) {
@@ -576,7 +621,8 @@ class CreateProcess implements LoggerAwareInterface
     private function createDomain($pid): void
     {
         $this->siteconfig['rootPageId'] = $pid;
-        $this->siteconfig['base']       = 'https://' . $this->task->getDomainname() . '/';
+        $proto = strpos($this->task->getDomainname(), ':')!==false ? 'http://' : 'https://';
+        $this->siteconfig['base']       = $proto . $this->task->getDomainname() . '/';
     }
 
     private function cloneContent()
@@ -611,7 +657,7 @@ class CreateProcess implements LoggerAwareInterface
                         $olduid = $row['uid'];
                         unset($row['uid']);
                         $row['pid'] = $newpid;
-                        if (isset($row['t3_origuid'])) {
+                        if (self::tableHasField($table, 't3_origuid')) {
                             $row['t3_origuid'] = $olduid;
                         }
 
@@ -698,12 +744,6 @@ class CreateProcess implements LoggerAwareInterface
                     break;
                 case 'final':
 
-                    $row = match ($column) {
-                        'bodytext' => $this->cloneContent_final_column_bodytext($column, $columnconfig, $row, $parameters),
-                        // no break
-                        default=>$row
-                    };
-
                     $event = new Column\FinalEvent($parameters['table'], $column, $columnconfig, $row, $parameters, $this);
                     $this->eventDispatcher->dispatch($event);
                     $row = $event->getRecord();
@@ -711,6 +751,7 @@ class CreateProcess implements LoggerAwareInterface
                     $row = match ($columntype) {
                         'group'=>$this->cloneContent_final_columntype_group($column, $columnconfig, $row, $parameters),
                         'select'=>$this->cloneContent_final_columntype_select($column, $columnconfig, $row, $parameters),
+                        // no break
                         default=>$row
                     };
 
@@ -779,10 +820,7 @@ class CreateProcess implements LoggerAwareInterface
 
                 while ($origrow = $stmt->fetchAssociative()) {
                     $row = $origrow;
-                    $this->debug(__METHOD__ . ':' . __LINE__);
                     $this->log('Content Cleanup ' . $table . ' ' . $row['uid']);
-                    $this->debug(__METHOD__ . ':' . __LINE__);
-
                     $event = new Inlines\CleanEvent($table, $row, $this);
                     $this->eventDispatcher->dispatch($event);
                     $row = $event->getRecord();
@@ -791,7 +829,7 @@ class CreateProcess implements LoggerAwareInterface
                         'table' => $table,
                         'pObj'  => $this,
                     ]);
-                    $this->debug(__METHOD__ . ':' . __LINE__);
+
                     $update = [];
                     foreach ($row as $k => $v) {
                         if ($origrow[ $k ] != $v) {
@@ -800,10 +838,10 @@ class CreateProcess implements LoggerAwareInterface
                     }
                     unset($update['uid']);
                     unset($update['pid']);
-                    $this->debug(__METHOD__ . ':' . __LINE__);
+
                     if ($update !== []) {
                         $this->source->ping();
-                        $this->debug(__METHOD__ . ':' . __LINE__);
+
                         self::updateRecord($table, $update, [ 'uid' => $origrow['uid'] ]);
                     }
                 }
@@ -909,18 +947,15 @@ class CreateProcess implements LoggerAwareInterface
                         $row = $this->finalContent_tt_content($row);
                     }
 
-                    $this->debug(__METHOD__ . ':' . __LINE__);
                     $event = new FinalContentEvent($table, $row, $this);
                     $this->eventDispatcher->dispatch($event);
                     $row = $event->getRecord();
 
-                    $this->debug(__METHOD__ . ':' . __LINE__);
                     $row = $this->runTCA('final', $config['columns'], $row, [
                         'table' => $table,
                         'pObj'  => $this,
                     ]);
 
-                    $this->debug(__METHOD__ . ':' . __LINE__);
                     $update = [];
                     foreach ($row as $k => $v) {
                         if ($origrow[ $k ] != $v) {
@@ -932,7 +967,6 @@ class CreateProcess implements LoggerAwareInterface
                     if ($update !== []) {
                         $this->source->ping();
 
-                        $this->debug(__METHOD__ . ':' . __LINE__);
                         self::updateRecord($table, $update, [ 'uid' => $origrow['uid'] ]);
                     }
                 }
@@ -1010,8 +1044,12 @@ class CreateProcess implements LoggerAwareInterface
             }
         }
 
-        if ($this->errorpage > 0) {
-            $this->siteconfig['errorHandling'][0]['errorContentSource'] = 't3://page?uid=' . $this->errorpage;
+        if (isset($this->siteconfig['errorHandling'])) {
+            foreach ($this->siteconfig['errorHandling'] as $idx=>$config) {
+                if (\str_starts_with($config['errorContentSource'], 't3://')) {
+                    $config['errorContentSource'] = $this->translateT3LinkString($config['errorContentSource']);
+                }
+            }
         }
 
         GeneralUtility::mkdir($path . '/config/sites/' . $identifier);
@@ -1030,22 +1068,7 @@ class CreateProcess implements LoggerAwareInterface
     private function cloneContent_final_wizards_link($column, $columnconfig, $row, $parameters)
     {
         if (!empty($row[$column])) {
-            //$this->out(__FUNCTION__.' '.$parameters['table'].' '.$column.' '.$row[$column]);
             $row[$column] = $this->translateLinkString($row[$column]);
-        }
-        return $row;
-    }
-
-    private function cloneContent_final_column_bodytext($column, $columnconfig, $row, $parameters)
-    {
-        if (!empty($row['bodytext'])) {
-            preg_match_all('/<link\s+.*>/U', (string)$row['bodytext'], $matches);
-            if (!empty($matches[0])) {
-                foreach ($matches[0] as $match) {
-                    $row['bodytext'] = str_replace($match, '<link ' . $this->translateLinkString(substr((string)$match, 6, -1)) . '>', (string)$row['bodytext']);
-                }
-            }
-            $row['bodytext'] = str_replace('%EMAIL%', $this->task->getContact(), (string)$row['bodytext']);
         }
         return $row;
     }
@@ -1058,7 +1081,8 @@ class CreateProcess implements LoggerAwareInterface
             $this->log('Clean select Column ' . $column);
 
             $table = $parameters['table'];
-            $olduid = $row['t3_origuid'] ?: $this->getTranslateUidReverse($table, $row['uid']);
+
+            $olduid = $row['t3_origuid'] ?? $this->getTranslateUidReverse($table, $row['uid']);
 
             /*
              if (empty($olduid)) {
@@ -1066,9 +1090,9 @@ class CreateProcess implements LoggerAwareInterface
              }
             */
 
-            $oldpid = $parameters['oldpid'];
+            //$oldpid = $parameters['oldpid'];
             $newuid = $row['uid'];
-            $newpid = $parameters['newpid'];
+            //$newpid = $parameters['newpid'];
 
             if (isset($columnconfig['config']['MM'])) {
                 $this->fixMMRelation($columnconfig['config']['foreign_table'], $columnconfig['config']['MM'], $olduid, $newuid);
@@ -1113,18 +1137,19 @@ class CreateProcess implements LoggerAwareInterface
 
     private function cloneContent_final_columntype_group($column, $columnconfig, $row, $parameters)
     {
-        if ($columnconfig['config']['internal_type'] == 'db') {
+        if (isset($columnconfig['config']['internal_type']) && $columnconfig['config']['internal_type'] == 'db') {
             $this->log('Clean Group Column ' . $column);
             $table = $parameters['table'];
-            $olduid = $row['t3_origuid'] ?: $this->getTranslateUidReverse($table, $row['uid']);
+            $olduid = $row['t3_origuid'] ?? $this->getTranslateUidReverse($table, $row['uid']);
+
             /*
              if (empty($olduid)) {
                  throw new \Exception('Reference clean without t3_origuid in table '.$table);
              }
             */
-            $oldpid = $parameters['oldpid'];
+            //$oldpid = $parameters['oldpid'];
             $newuid = $row['uid'];
-            $newpid = $parameters['newpid'];
+            //$newpid = $parameters['newpid'];
 
             if (isset($columnconfig['config']['MM'])) {
                 if (isset($columnconfig['config']['foreign_table'])) {
@@ -1167,11 +1192,8 @@ class CreateProcess implements LoggerAwareInterface
 
         $this->debug('Clean inline Column ' . $column);
         $table = $parameters['table'];
-        $olduid = $row['t3_origuid'];
-
-        if (!empty($olduid)) {
-            //throw new \Exception('Reference clean without t3_origuid');
-
+        $olduid = $row['t3_origuid'] ?? $this->getTranslateUidReverse($table, $row['uid']);
+        if ($olduid) {
             $newuid = $row['uid'];
             $newpid = $row['pid'];
 
@@ -1179,24 +1201,18 @@ class CreateProcess implements LoggerAwareInterface
             $oldpid = $oldrow['pid'];
 
             $pidlist = array_keys($this->pageMap);
-            $this->debug(__METHOD__ . ':' . __LINE__);
             $inlines = $this->source->getIrre($table, $olduid, $oldpid, $oldrow, $columnconfig, $pidlist);
-            $this->debug(__METHOD__ . ':' . __LINE__);
             foreach ($inlines as $inline) {
-                $this->debug(__METHOD__ . ':' . __LINE__);
                 $inlineuid = $inline['uid'];
+                $test = null;
                 if (isset($this->contentmap[$columnconfig['config']['foreign_table']]) && isset($this->contentmap[$columnconfig['config']['foreign_table']][$inlineuid])) {
-                    $this->debug(__METHOD__ . ':' . __LINE__);
                     $this->source->ping();
-
-                    $this->debug(__METHOD__ . ':' . __LINE__);
 
                     $test = BackendUtility::getRecord($columnconfig['config']['foreign_table'], $this->contentmap[$columnconfig['config']['foreign_table']][$inlineuid]);
 
                     $this->debug(__METHOD__ . ':' . __LINE__ . ':' . print_r(['*', $columnconfig['config']['foreign_table'], 'uid=' . $this->contentmap[$columnconfig['config']['foreign_table']][$inlineuid], $test], true));
                 }
 
-                $this->debug(__METHOD__ . ':' . __LINE__);
                 if ($test) {
                     $orig = $test;
 
@@ -1233,18 +1249,20 @@ class CreateProcess implements LoggerAwareInterface
                         self::updateRecord($columnconfig['config']['foreign_table'], $update, ['uid'=>$orig['uid']]);
                     }
                 } else {
-                    $inline['t3_origuid'] = $inlineuid;
+                    //$columnconfig['config']['foreign_table']
+
+                    if (self::tableHasField($columnconfig['config']['foreign_table'], 't3_origuid')) {
+                        $inline['t3_origuid'] = $inlineuid;
+                    }
+
                     unset($inline['uid']);
                     $inline['pid'] = $newpid;
 
-                    $this->debug(__METHOD__ . ':' . __LINE__);
                     $inline[$columnconfig['config']['foreign_field']] = $newuid;
 
                     $event = new BeforeContentCloneEvent($columnconfig['config']['foreign_table'], $inlineuid, $oldpid, $inline, $this);
                     $this->eventDispatcher->dispatch($event);
                     $inline = $event->getRecord();
-
-                    $this->debug(__METHOD__ . ':' . __LINE__);
 
                     $inline = $this->runTCA(
                         'pre',
