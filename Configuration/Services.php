@@ -46,10 +46,13 @@ return static function (ContainerConfigurator $containerConfigurator, ContainerB
 
     $services->set(PreSysFileReferenceEventHandler::class)
              ->tag('event.listener', ['identifier'=>'s7wizardBaseHandleSysFileReferences']);
+
     $services->set(FinalTTContentFormFrameworkListener::class)
              ->tag('event.listener', ['identifier'=>'s7wizardBaseFinalTTContentFormFrameworkListener']);
+
     $services->set(TypoLinkinRichTextFieldsEvent::class)
              ->tag('event.listener', ['identifier'=>'s7wizardTypoLinkinRichTextFieldsEventListener']);
+
     $services->set(TxNewsPluginHandlerEvent::class)
              ->tag('event.listener', ['identifier'=>'s7wizardTxNewsPluginHandlerEvent']);
 };
