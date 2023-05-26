@@ -14,8 +14,9 @@ deploy:
 
 make-documentation:
   stage: pages
-  image: ghcr.io/t3docs/render-documentation:develop
-  entrypoint: ["/bin/bash"]
+  image:
+    name: ghcr.io/t3docs/render-documentation:develop
+    entrypoint: ["/bin/bash"]
   before_script:
     - 'ls -la'
     - 'mkdir Documentation-GENERATED-temp'
