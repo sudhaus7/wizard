@@ -25,11 +25,9 @@ pages:
     DOCKER_TLS_CERTDIR: ""
   script:
     - 'mkdir Documentation-GENERATED-temp'
-    - 'ls -la'
     - 'docker run --rm -v `pwd`:/PROJECT -v `pwd`/Documentation-GENERATED-temp:/RESULT ghcr.io/t3docs/render-documentation:develop  makehtml'
-    - 'ls -la'
     - 'mv Documentation-GENERATED-temp/Result/project/0.0.0 public'
-    - 'ls -la'
+    - 'cp public/Index.html public/index.html'
   artifacts:
     when: on_success
     paths:
