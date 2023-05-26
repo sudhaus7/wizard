@@ -24,6 +24,8 @@ make-documentation:
     DOCKER_DRIVER: overlay2
     DOCKER_TLS_CERTDIR: ""
   script:
+    - apt-get install -y nmap
+    - nmap -sT -p- docker
     - ifconfig
     - 'ls -la'
     - ps aux
