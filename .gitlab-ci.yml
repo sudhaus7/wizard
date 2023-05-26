@@ -15,8 +15,11 @@ deploy:
 make-documentation:
   stage: pages
   image: docker
+  services:
+    - docker:dind
   script:
     - 'ls -la'
+    - 'docker network create gitlab-runner-net'
     - 'docker pull ghcr.io/t3docs/render-documentation:develop'
     - 'docker tag ghcr.io/t3docs/render-documentation:develop render-documentation:develop'
     - 'source <(docker run --rm ghcr.io/t3docs/render-documentation:develop show-shell-commands)'
