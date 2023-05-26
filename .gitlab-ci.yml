@@ -14,11 +14,15 @@ deploy:
 
 make-documentation:
   stage: pages
-  image: docker:19
+  image: docker:20-dind
   services:
-    - docker:19-dind
+    - name: docker:20-dind
+      alias: docker
+      command: ["--tls=false"]
   variables:
-    DOCKER_HOST: "tcp://localhost:2375"
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
   script:
     - 'ls -la'
     - 'docker pull ghcr.io/t3docs/render-documentation:develop'
