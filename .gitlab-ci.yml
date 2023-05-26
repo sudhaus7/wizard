@@ -20,10 +20,11 @@ make-documentation:
       alias: docker
       command: ["--tls=false"]
   variables:
-    DOCKER_HOST: tcp://docker:2375
+    DOCKER_HOST: tcp://127.0.0.1:2375
     DOCKER_DRIVER: overlay2
     DOCKER_TLS_CERTDIR: ""
   script:
+    - ip -a
     - 'ls -la'
     - 'docker pull ghcr.io/t3docs/render-documentation:develop'
     - 'docker tag ghcr.io/t3docs/render-documentation:develop render-documentation:develop'
