@@ -1,4 +1,5 @@
 stages:
+  - pages
   - deploy
 
 deploy:
@@ -10,3 +11,14 @@ deploy:
     - branches
   script:
     - 'curl --header "Job-Token: $CI_JOB_TOKEN" --data tag=$CI_COMMIT_TAG "${CI_API_V4_URL}/projects/$CI_PROJECT_ID/packages/composer"'
+
+make-documentation:
+  stage: pages
+  image: ghcr.io/t3docs/render-documentation:develop
+  entrypoint: ["/bin/bash"]
+  before_script:
+    - 'ls -la'
+    - 'mkdir Documentation-GENERATED-temp'
+  script:
+    - 'ls -la'
+    - '/bin/bash /ALL/Menu/mainmenu.sh makehtml'
