@@ -193,6 +193,12 @@ class CreateProcess implements LoggerAwareInterface
 
     private array $confArr = [];
 
+    /**
+     * @param $table
+     * @param $old
+     * @param $new
+     * @internal
+     */
     public function addContentMap($table, $old, $new): void
     {
         if (! isset($this->contentmap[ $table ])) {
@@ -202,6 +208,11 @@ class CreateProcess implements LoggerAwareInterface
         $this->contentmap[ $table ][ $old ] = $new;
     }
 
+    /**
+     * @param $table
+     * @param $uid
+     * @interal
+     */
     public function addCleanupInline($table, $uid): void
     {
         if (! isset($this->cleanUpTodo[ $table ])) {
@@ -240,6 +251,7 @@ class CreateProcess implements LoggerAwareInterface
     public function getTranslateUid($table, $uid)
     {
         $tableprefix = false;
+        //@TODO this needs to be table agnostic..
         if (str_starts_with((string)$uid, (string)$table)) {
             $tableprefix = true;
             $x           = explode('_', (string)$uid);

@@ -1,10 +1,10 @@
-.. include:: /Includes.rst.txt
+.. include:: Includes.rst.txt
 
 
 .. _start:
 
 =============================
-(Sudhaus7) GPG/PGP Admin
+(Sudhaus7) Site Wizard
 =============================
 
 :Extension key:
@@ -17,16 +17,16 @@
       en
 
 :Description:
-      This TYPO3 extension enables your TYPO3 instance to send GPG/PGP encrypted emails via :doc:`EXT:form <form:Index>` and to manage GPG/PGP/OpenPGP keys.
+      An extension to duplicate Sites inside TYPO3 and reconfigure them according to a set definition of rules.
 
 :Keywords:
-      pgp, gpg, email, form, security, encryption
+      wizard
 
 :Copyright:
       Since 2018 by Sudhaus7
 
 :Author:
-      Sudhaus7, a B-Factor GmbH label | 12bis3
+      Sudhaus7, a label of the B-Factor GmbH
 
 :License:
       Open Content License available from `www.opencontent.org/opl.shtml
@@ -38,13 +38,13 @@
 **Table of Contents**
 
 .. toctree::
-   :maxdepth: 5
+   :maxdepth: 3
    :titlesonly:
    :glob:
 
    Introduction/Index
    Configuration/Index
-   Editors/Index
+   Reference/Index
    Developers/Index
    Todo
    Thanks

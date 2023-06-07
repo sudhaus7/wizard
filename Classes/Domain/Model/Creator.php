@@ -27,11 +27,11 @@ class Creator extends AbstractEntity implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
     public static array $statusList = [
-        0 => 'In Bearbeitung',
-        5 => 'Nicht freigegeben',
-        10 => 'Freigegeben',
-        15 => 'In Bearbeitung',
-        20 => 'Fertig',
+        0 => 'editing',
+        5 => 'Not ready',
+        10 => 'ready',
+        15 => 'processing',
+        20 => 'done',
     ];
     protected ?string $t3ver_label = null;
     protected ?int $hidden = null;
