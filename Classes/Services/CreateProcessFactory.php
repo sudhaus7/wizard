@@ -20,8 +20,17 @@ use SUDHAUS7\Sudhaus7Wizard\Sources\Localdatabase;
 use SUDHAUS7\Sudhaus7Wizard\Sources\SourceInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
+/**
+ * @internal
+ */
 class CreateProcessFactory
 {
+    /**
+     * @internal
+     * @param Creator $creator
+     * @param LoggerInterface|null $logger
+     * @return CreateProcess
+     */
     public static function get(Creator $creator, ?LoggerInterface $logger = null): CreateProcess
     {
         $tsk              = GeneralUtility::makeInstance(CreateProcess::class);

@@ -21,6 +21,8 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 class TyposcriptService implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
+
+    public const INDENT = '  ';
     public static function parse($s)
     {
         /** @var  TypoScriptParser $oTSparser */
@@ -35,26 +37,26 @@ class TyposcriptService implements LoggerAwareInterface
         foreach ($a as $k=>$v) {
             if (is_array($v)) {
                 if (count($v) > 1) {
-                    $c .= "\n" . str_repeat('  ', $i) . $keys . substr($k, 0, -1) . ' {';
-                    $c .= str_repeat('  ', $i) . self::fold($v, $i+1);
-                    $c .= str_repeat('  ', $i) . '}';
+                    $c .= "\n" . str_repeat(self::INDENT, $i) . $keys . substr($k, 0, -1) . ' {';
+                    $c .= str_repeat(self::INDENT, $i) . self::fold($v, $i+1);
+                    $c .= str_repeat(self::INDENT, $i) . '}';
                 } else {
-                    $c .= str_repeat('  ', $i) . self::fold($v, $i, $keys . $k);
+                    $c .= str_repeat(self::INDENT, $i) . self::fold($v, $i, $keys . $k);
                 }
             } elseif (empty($keys)) {
                 $test = explode("\n", $v);
                 if (count($test) > 1) {
-                    $c .= "\n" . str_repeat('  ', $i) . $k . ' ( ' . "\n" . $v . "\n)";
+                    $c .= "\n" . str_repeat(self::INDENT, $i) . $k . ' ( ' . "\n" . $v . "\n)";
                 } else {
-                    $c .= "\n" . str_repeat('  ', $i) . $k . ' = ' . $v;
+                    $c .= "\n" . str_repeat(self::INDENT, $i) . $k . ' = ' . $v;
                 }
             } else {
-                //$c .= "\n".str_repeat('  ', $i).$keys.$k.' = '.$v;
+                //$c .= "\n".str_repeat(self::INDENT, $i).$keys.$k.' = '.$v;
                 $test = explode("\n", $v);
                 if (count($test) > 1) {
-                    $c .= "\n" . str_repeat('  ', $i) . $keys . $k . ' ( ' . "\n" . $v . "\n)";
+                    $c .= "\n" . str_repeat(self::INDENT, $i) . $keys . $k . ' ( ' . "\n" . $v . "\n)";
                 } else {
-                    $c .= "\n" . str_repeat('  ', $i) . $keys . $k . ' = ' . $v;
+                    $c .= "\n" . str_repeat(self::INDENT, $i) . $keys . $k . ' = ' . $v;
                 }
             }
         }

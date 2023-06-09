@@ -251,18 +251,18 @@ class CreateProcess implements LoggerAwareInterface
     public function getTranslateUid($table, $uid)
     {
         $tableprefix = false;
-        //@TODO this needs to be table agnostic..
-        if (str_starts_with((string)$uid, (string)$table)) {
+        if (\str_contains((string)$uid, '_')) {
             $tableprefix = true;
             $x           = explode('_', (string)$uid);
             $uid         = array_pop($x);
+            $table   = implode('_', $x);
         }
         if ($table == 'pages') {
             if (isset($this->pageMap[ (int)$uid ])) {
-                return (int)$this->pageMap[ (int)$uid ] > 0 ? (int)$this->pageMap[ (int)$uid ] : (int)$uid;
+                $uid = (int)$this->pageMap[ (int)$uid ] > 0 ? (int)$this->pageMap[ (int)$uid ] : (int)$uid;
             }
         } elseif (isset($this->contentmap[ $table ]) && isset($this->contentmap[ $table ][ (int)$uid ])) {
-            return (int)$this->contentmap[ $table ][ (int)$uid ] > 0 ? (int)$this->contentmap[ $table ][ (int)$uid ] : (int)$uid;
+            $uid = (int)$this->contentmap[ $table ][ (int)$uid ] > 0 ? (int)$this->contentmap[ $table ][ (int)$uid ] : (int)$uid;
         }
 
         //return (int)$uid;
@@ -276,10 +276,20 @@ class CreateProcess implements LoggerAwareInterface
         return $event->getRecord();
     }
 
+    /**
+     * @param string $s
+     *
+     *
+     * <p>You can insert <a class="link-page" href="65">internal links</a> (links to pages within the website), <a class="link-external" href="http://typo3.org">external links</a> (links to external sites) or <a class="link-mail" href="test@test.net">e-mail links</a> (links that open the user's email client when clicked).</p>
+    <p>Additional link stylings:</p>
+    <ul> 	<li><a class="link-arrow" href="65">Arrow</a></li> 	<li><a class="link-page" href="65">Page</a></li> 	<li><a class="link-file" href="file:1">File</a></li> 	<li><a class="link-folder" href="t3://folder?storage=1&amp;identifier=%2Fintroduction%2Fimages%2F">Folder</a></li> 	<li><a class="link-mail" href="john.doe@example.com">E-Mail&nbsp;</a></li> </ul>
+     *
+     * @return string
+     */
     public function translateT3LinkString($s): string
     {
         $urlParts = parse_url($s);
-        if ($urlParts['scheme'] === 't3') {
+        if (isset($urlParts['scheme']) && $urlParts['scheme'] === 't3') {
             $queryParts = [];
             parse_str($urlParts['query'], $queryParts);
             if (isset($queryParts['uid'])) {
@@ -299,7 +309,10 @@ class CreateProcess implements LoggerAwareInterface
             }
 
             $urlParts['query'] = http_build_query($queryParts);
-            $s = $urlParts['scheme'] . '://' . $urlParts['host'];
+            $s = $urlParts['scheme'] . '://';
+            if (isset($urlParts['host'])) {
+                $s .= $urlParts['host'];
+            }
             if (!empty($urlParts['query'])) {
                 $s .= '?' . $urlParts['query'];
             }
@@ -307,11 +320,15 @@ class CreateProcess implements LoggerAwareInterface
                 $s .= '#' . $this->getTranslateUid('tt_content', $urlParts['fragment']);
             }
             $x=1;
+        } elseif (isset($urlParts['host']) && $urlParts['host'] === 'file') {
+            $s = $urlParts['host'] . ':' . $this->getTranslateUid('sys_file', (int)$urlParts['port']);
+        } elseif (isset($urlParts['host']) && $urlParts['host'] === 'page') {
+            $s = $urlParts['host'] . ':' . $this->getTranslateUid('pages', (int)$urlParts['port']);
         }
         return $s;
     }
 
-    public function translateLinkString($s): string
+    public function translateTypolinkString($s): string
     {
         $s   = trim((string)$s);
         $a   = str_getcsv($s, ' ', 'dasdhasdsalkdjsalk13');
@@ -1153,7 +1170,7 @@ class CreateProcess implements LoggerAwareInterface
     private function cloneContent_final_wizards_link($column, $columnconfig, $row, $parameters)
     {
         if (!empty($row[$column])) {
-            $row[$column] = $this->translateLinkString($row[$column]);
+            $row[$column] = $this->translateTypolinkString($row[$column]);
         }
         return $row;
     }

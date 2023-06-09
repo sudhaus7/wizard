@@ -30,6 +30,12 @@ class FlexformService
         return $data;
     }
 
+    /**
+     * @param $data
+     * @deprecated
+     * @interal
+     * @return array[]
+     */
     public static function blowup($data)
     {
         $ret = [];

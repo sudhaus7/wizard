@@ -89,7 +89,6 @@ fabric.properties
 /phpunit.xml
 
 # Build data
-/build/
 /.Build/
 
 # Composer PHAR
@@ -104,3 +103,4 @@ fabric.properties
 /config
 /composer.lock
 /.php-cs-fixer.cache
+!/Tests/Unit/

@@ -13,4 +13,6 @@ Here you can find a basic introduction to the TYPO3 CMS extension "*sudhaus7_wiz
 
    TaskRecord/Index
    Interfaces/Index
+   Creator/Index
+   Utilities/Index
    Events/Index

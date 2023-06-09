@@ -47,9 +47,38 @@ In this class are several utility methods available to access the mapping betwee
 
    .. php:method:: getTranslateUid($table, $uid)
 
-      translates an old uid to the new uid for the given table. This does not create records, it only looks up the mapping filled with  addContentMap.
+      translates an old uid to the new uid for the given table. This does not create records, it only looks up the mapping filled with addContentMap.
+
+      This method supports the TYPO3 table prefixed notations as well, in this case the table-parameter will be ignored. For example: 'tt_content_10' will be translated to 'tt_content_55' if the lookup-table for tt_content points from 10 to 55, and 'tt_content_55' will be the returned value.
+
+      If the uid is not found in the lookup tables, the old uid will be returned. This is intended behaviour as it could mean that either the content has not been cloned yet, or the uid references a record outside of the current site (for example a page linked to a page inside another site in the same TYPO3)
 
       :param string $table: the tablename
       :param int|string $uid: the old uid
       :returns: the new uid
       :returnvalue: int
+
+   .. php:method:: translateIDlist($table,$list)
+
+      This method translates comma separated lists of ids or table-prefixed ids. The table prefixes can be mixed.
+
+      :param string $table: the tablename
+      :param string $list: the old idlist, a comma separated string
+      :returns: the translated id list, as a comma separated string
+      :returnvalue: string
+
+   .. php:method:: translateT3LinkString($link)
+
+      This method translates TYPO3 style URI links, for example created by the RTE. For example :samp:`t3://page?uid=6#212` or :samp:`t3://file?uid=2`, but older notations like `file:2` are supported as well
+
+      :param string $link: the URI string
+      :returns: the translated URI
+      :returnvalue: string
+
+   .. php:method:: translateTypolinkString($link)
+
+      This method will translate a Typolink created by the link-wizard. For example this :samp:`t3://page?uid=10#20 _blank cssclass "My great link"` will be translated to :samp:`t3://page?uid=25#55 _blank cssclass "My great link"`
+
+      :param string $link: the Typolink string
+      :returns: the translated Typolink
+      :returnvalue: string

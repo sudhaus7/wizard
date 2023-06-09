@@ -4,3 +4,7 @@
 
 Events
 ======
+
+.. php:namespace::   SUDHAUS7\Sudhaus7Wizard
+
+.. php:class:: CreateProcess
