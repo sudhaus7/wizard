@@ -5,7 +5,7 @@
 References
 ==========
 
-Here you can find a basic introduction to the TYPO3 CMS extension "*sudhaus7_wizard*"
+References to various classes and untilities a template-creator can use to make the new template or sitepackage cloneable with *sudhaus7_wizard*
 
 .. toctree::
    :maxdepth: 5

@@ -104,3 +104,4 @@ fabric.properties
 /composer.lock
 /.php-cs-fixer.cache
 !/Tests/Unit/
+/Documentation-GENERATED-temp/

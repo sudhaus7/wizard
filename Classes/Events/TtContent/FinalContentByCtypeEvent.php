@@ -14,9 +14,15 @@
 namespace SUDHAUS7\Sudhaus7Wizard\Events\TtContent;
 
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
+use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventInterface;
+use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventWriteableRecordInterface;
+use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
+use SUDHAUS7\Sudhaus7Wizard\Traits\EventWriteableRecordTrait;
 
-class FinalContentByCtypeEvent
+class FinalContentByCtypeEvent implements WizardEventInterface, WizardEventWriteableRecordInterface
 {
+    use EventTrait;
+    use EventWriteableRecordTrait;
     protected string $ctype;
     protected ?string $listType;
     protected array $record;
@@ -44,29 +50,5 @@ class FinalContentByCtypeEvent
     public function getListType(): ?string
     {
         return $this->listType;
-    }
-
-    /**
-     * @return array
-     */
-    public function getRecord(): array
-    {
-        return $this->record;
-    }
-
-    /**
-     * @return CreateProcess
-     */
-    public function getCreateProcess(): CreateProcess
-    {
-        return $this->create_process;
-    }
-
-    /**
-     * @param array $record
-     */
-    public function setRecord(array $record): void
-    {
-        $this->record = $record;
     }
 }

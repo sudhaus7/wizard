@@ -20,34 +20,21 @@ use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventInterface;
+use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventWriteableRecordInterface;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
+use SUDHAUS7\Sudhaus7Wizard\Traits\EventWriteableRecordTrait;
 
-class CreateBackendUserEvent implements LoggerAwareInterface, WizardEventInterface
+class CreateBackendUserEvent implements LoggerAwareInterface, WizardEventInterface, WizardEventWriteableRecordInterface
 {
     use LoggerAwareTrait;
     use EventTrait;
+    use EventWriteableRecordTrait;
     protected array $record;
     public function __construct(array $record, CreateProcess $create_process)
     {
         $this->create_process = $create_process;
         $this->record         = $record;
         $this->logger = $create_process->getLogger();
-    }
-
-    /**
-     * @return array
-     */
-    public function getRecord(): array
-    {
-        return $this->record;
-    }
-
-    /**
-     * @param array $record
-     */
-    public function setRecord(array $record): void
-    {
-        $this->record = $record;
     }
 
     public function getLogger(): LoggerInterface

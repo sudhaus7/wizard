@@ -44,8 +44,8 @@
 
    Introduction/Index
    Configuration/Index
-   Reference/Index
    Developers/Index
+   Reference/Index
    Todo
    Thanks
    Targets

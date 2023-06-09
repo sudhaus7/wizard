@@ -17,14 +17,17 @@ namespace SUDHAUS7\Sudhaus7Wizard\Events\TCA\Column;
 
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventInterface;
+use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventWriteableRecordInterface;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
+use SUDHAUS7\Sudhaus7Wizard\Traits\EventWriteableRecordTrait;
 
 /**
  * This is the Second Pass after all other BeforeEvents have been called
  */
-class FinalEvent implements WizardEventInterface
+class FinalEvent implements WizardEventInterface, WizardEventWriteableRecordInterface
 {
     use EventTrait;
+    use EventWriteableRecordTrait;
     /**
      * @var string the tablename
      */
@@ -66,14 +69,6 @@ class FinalEvent implements WizardEventInterface
     /**
      * @return string
      */
-    public function getTable(): string
-    {
-        return $this->table;
-    }
-
-    /**
-     * @return string
-     */
     public function getColumn(): string
     {
         return $this->column;
@@ -90,24 +85,8 @@ class FinalEvent implements WizardEventInterface
     /**
      * @return array
      */
-    public function getRecord(): array
-    {
-        return $this->record;
-    }
-
-    /**
-     * @return array
-     */
     public function getParameters(): array
     {
         return $this->parameters;
-    }
-
-    /**
-     * @param array $record
-     */
-    public function setRecord(array $record): void
-    {
-        $this->record = $record;
     }
 }

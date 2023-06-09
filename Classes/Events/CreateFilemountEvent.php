@@ -20,35 +20,23 @@ use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventInterface;
+use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventWriteableRecordInterface;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
+use SUDHAUS7\Sudhaus7Wizard\Traits\EventWriteableRecordTrait;
 
-class CreateFilemountEvent implements LoggerAwareInterface, WizardEventInterface
+class CreateFilemountEvent implements LoggerAwareInterface, WizardEventInterface, WizardEventWriteableRecordInterface
 {
     use LoggerAwareTrait;
     use EventTrait;
+    use EventWriteableRecordTrait;
 
     protected array $row;
     public function __construct(array $row, CreateProcess $create_process)
     {
-        $this->row = $row;
+        $this->record = $row;
         $this->create_process = $create_process;
         $this->logger = $create_process->getLogger();
-    }
-
-    /**
-     * @return array
-     */
-    public function getRow(): array
-    {
-        return $this->row;
-    }
-
-    /**
-     * @param array $row
-     */
-    public function setRow(array $row): void
-    {
-        $this->row = $row;
+        $this->table = 'sys_filemounts';
     }
 
     public function getLogger(): LoggerInterface

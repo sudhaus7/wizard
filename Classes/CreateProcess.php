@@ -430,7 +430,7 @@ class CreateProcess implements LoggerAwareInterface
 
         $event =  new CreateFilemountEvent($tmpl, $this);
         $this->eventDispatcher->dispatch($event);
-        $tmpl = $event->getRow();
+        $tmpl = $event->getRecord();
 
         $this->source->ping();
 

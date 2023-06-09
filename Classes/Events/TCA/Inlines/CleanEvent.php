@@ -17,42 +17,20 @@ namespace SUDHAUS7\Sudhaus7Wizard\Events\TCA\Inlines;
 
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventInterface;
+use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventWriteableRecordInterface;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
+use SUDHAUS7\Sudhaus7Wizard\Traits\EventWriteableRecordTrait;
 
-class CleanEvent implements WizardEventInterface
+class CleanEvent implements WizardEventInterface, WizardEventWriteableRecordInterface
 {
     use EventTrait;
+    use EventWriteableRecordTrait;
 
-    protected string $tablename;
     protected array $record;
-    public function __construct(string $tablename, array $record, CreateProcess $create_process)
+    public function __construct(string $table, array $record, CreateProcess $create_process)
     {
         $this->record = $record;
-        $this->tablename = $tablename;
+        $this->table = $table;
         $this->create_process = $create_process;
-    }
-
-    /**
-     * @return string
-     */
-    public function getTablename(): string
-    {
-        return $this->tablename;
-    }
-
-    /**
-     * @return array
-     */
-    public function getRecord(): array
-    {
-        return $this->record;
-    }
-
-    /**
-     * @param array $record
-     */
-    public function setRecord(array $record): void
-    {
-        $this->record = $record;
     }
 }

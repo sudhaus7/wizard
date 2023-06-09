@@ -20,11 +20,14 @@ use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventInterface;
+use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventWriteableRecordInterface;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
+use SUDHAUS7\Sudhaus7Wizard\Traits\EventWriteableRecordTrait;
 
-class AfterContentCloneEvent implements LoggerAwareInterface, WizardEventInterface
+class AfterContentCloneEvent implements LoggerAwareInterface, WizardEventInterface, WizardEventWriteableRecordInterface
 {
     use LoggerAwareTrait;
+    use EventWriteableRecordTrait;
     use EventTrait;
     protected string $table;
     protected int $newuid;
@@ -44,22 +47,6 @@ class AfterContentCloneEvent implements LoggerAwareInterface, WizardEventInterfa
     }
 
     /**
-     * @return array
-     */
-    public function getRecord(): array
-    {
-        return $this->record;
-    }
-
-    /**
-     * @param array $record
-     */
-    public function setRecord(array $record): void
-    {
-        $this->record = $record;
-    }
-
-    /**
      * @return int
      */
     public function getOlduid(): int
@@ -73,14 +60,6 @@ class AfterContentCloneEvent implements LoggerAwareInterface, WizardEventInterfa
     public function getOldpid(): int
     {
         return $this->oldpid;
-    }
-
-    /**
-     * @return string
-     */
-    public function getTable(): string
-    {
-        return $this->table;
     }
 
     public function getLogger(): LoggerInterface

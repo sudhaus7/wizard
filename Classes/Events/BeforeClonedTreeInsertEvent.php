@@ -20,12 +20,15 @@ use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventInterface;
+use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventWriteableRecordInterface;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
+use SUDHAUS7\Sudhaus7Wizard\Traits\EventWriteableRecordTrait;
 
-class BeforeClonedTreeInsertEvent implements LoggerAwareInterface, WizardEventInterface
+class BeforeClonedTreeInsertEvent implements LoggerAwareInterface, WizardEventInterface, WizardEventWriteableRecordInterface
 {
     use LoggerAwareTrait;
     use EventTrait;
+    use EventWriteableRecordTrait;
 
     protected string|int $oldid;
     /**
@@ -46,22 +49,6 @@ class BeforeClonedTreeInsertEvent implements LoggerAwareInterface, WizardEventIn
     public function getOldid(): int|string
     {
         return $this->oldid;
-    }
-
-    /**
-     * @return array
-     */
-    public function getRecord(): array
-    {
-        return $this->record;
-    }
-
-    /**
-     * @param array $record
-     */
-    public function setRecord(array $record): void
-    {
-        $this->record = $record;
     }
 
     public function getLogger(): LoggerInterface

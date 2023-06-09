@@ -15,11 +15,14 @@ namespace SUDHAUS7\Sudhaus7Wizard\Events;
 
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventInterface;
+use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventWriteableRecordInterface;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
+use SUDHAUS7\Sudhaus7Wizard\Traits\EventWriteableRecordTrait;
 
-class CleanContentEvent implements WizardEventInterface
+class CleanContentEvent implements WizardEventInterface, WizardEventWriteableRecordInterface
 {
     use EventTrait;
+    use EventWriteableRecordTrait;
     protected string $table;
     protected array $record;
     public function __construct(string $table, array $record, CreateProcess $create_process)
@@ -27,29 +30,5 @@ class CleanContentEvent implements WizardEventInterface
         $this->create_process = $create_process;
         $this->record = $record;
         $this->table = $table;
-    }
-
-    /**
-     * @return string
-     */
-    public function getTable(): string
-    {
-        return $this->table;
-    }
-
-    /**
-     * @return array
-     */
-    public function getRecord(): array
-    {
-        return $this->record;
-    }
-
-    /**
-     * @param array $record
-     */
-    public function setRecord(array $record): void
-    {
-        $this->record = $record;
     }
 }
