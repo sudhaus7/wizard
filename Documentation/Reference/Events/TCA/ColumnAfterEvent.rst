@@ -1,6 +1,6 @@
 .. include:: /Includes.rst.txt
 
-.. _TCACoolumnAfterEvent:
+.. _TCAColumnAfterEvent:
 
 TCA\\Column\\AfterEvent
 =====================

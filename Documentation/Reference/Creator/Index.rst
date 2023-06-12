@@ -10,7 +10,7 @@ This class is the main part of the :ref:`cloning process <workflow>` and is avai
 
 In this class are several utility methods available to access the mapping between old UID and new UID in the different tables, as well as other methods.
 
--- tip::
+.. tip::
 
    the whole process is very event-driven and you should implement the interactions between the cloning process and your template in events as much as possible
 

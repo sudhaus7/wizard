@@ -9,9 +9,15 @@ This Event is called during the clone process before a page-record is written to
 
 This Event implements :ref:`WizardEventWriteableRecordInterface<WizardEventWriteableRecordInterface>`
 
--- tip::
+.. tip::
 
    `getRecord()` and `setRecord()` deal with the page record before it is inserted, but the pid has already been translated, if available. As well, user and group ids have been added as owners if the original owner was *NOT* an admin user.
+
+
+.. attention::
+
+   At this point the id-mapping tables are still filling up!
+
 
 .. php:namespace:: SUDHAUS7\Sudhaus7Wizard\Events
 

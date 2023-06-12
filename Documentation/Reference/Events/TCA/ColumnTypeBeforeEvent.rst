@@ -1,6 +1,6 @@
 .. include:: /Includes.rst.txt
 
-.. _TCACoolumnTypeBeforeEvent:
+.. _TCAColumnTypeBeforeEvent:
 
 TCA\\ColumnType\\BeforeEvent
 ==========================

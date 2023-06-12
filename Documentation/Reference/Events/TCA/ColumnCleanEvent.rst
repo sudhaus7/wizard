@@ -1,6 +1,6 @@
 .. include:: /Includes.rst.txt
 
-.. _TCACoolumnCleanEvent:
+.. _TCAColumnCleanEvent:
 
 TCA\\Column\\CleanEvent
 =====================
