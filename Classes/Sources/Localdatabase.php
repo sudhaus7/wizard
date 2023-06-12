@@ -22,6 +22,9 @@ use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
+use TYPO3\CMS\Core\Database\Query\Restriction\EndTimeRestriction;
+use TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
+use TYPO3\CMS\Core\Database\Query\Restriction\StartTimeRestriction;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -259,25 +262,41 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         return array_keys($GLOBALS['TCA']);
     }
 
-    public function getRow($table, $where = [], $pidfilter = [])
+    public function getRow($table, $where = [])
     {
-        $query = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($table);
-        $row   = $query->select(
-            [ '*' ],
-            $table,
-            $where
-        )->fetchAssociative();
-        return $row ?? [];
+        /** @var \TYPO3\CMS\Core\Database\Query\QueryBuilder $query */
+        $query = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
+        $query->getRestrictions()->removeByType(HiddenRestriction::class);
+        $query->getRestrictions()->removeByType(StartTimeRestriction::class);
+        $query->getRestrictions()->removeByType(EndTimeRestriction::class);
+        $query = $query->select('*')
+            ->from($table);
+        foreach ($where as $identifier => $value) {
+            $query->andWhere($query->expr()->eq($identifier, $query->createNamedParameter($value)));
+        }
+        $result = $query->execute();
+        if ($result) {
+            return $result->fetchAssociative();
+        }
+        return [];
     }
 
-    public function getRows($table, $where = [], $pidfilter = [])
+    public function getRows($table, $where = [])
     {
-        $query = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($table);
-        $rows = $query->select(
-            [ '*' ],
-            $table,
-            $where
-        )->fetchAllAssociative();
-        return $rows ?? [];
+        /** @var \TYPO3\CMS\Core\Database\Query\QueryBuilder $query */
+        $query = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
+        $query->getRestrictions()->removeByType(HiddenRestriction::class);
+        $query->getRestrictions()->removeByType(StartTimeRestriction::class);
+        $query->getRestrictions()->removeByType(EndTimeRestriction::class);
+        $query = $query->select('*')
+            ->from($table);
+        foreach ($where as $identifier => $value) {
+            $query->andWhere($query->expr()->eq($identifier, $query->createNamedParameter($value)));
+        }
+        $result = $query->execute();
+        if ($result) {
+            return $result->fetchAllAssociative();
+        }
+        return [];
     }
 }

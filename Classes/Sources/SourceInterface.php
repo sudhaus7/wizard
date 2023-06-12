@@ -37,7 +37,7 @@ interface SourceInterface
      *
      * @return mixed
      */
-    public function getRow($table, $where=[], $pidfilter=[]);
+    public function getRow($table, $where=[]);
 
     /**
      * @param $table
@@ -46,7 +46,7 @@ interface SourceInterface
      *
      * @return mixed
      */
-    public function getRows($table, $where=[], $pidfilter=[]);
+    public function getRows($table, $where=[]);
 
     /**
      * @param $start
