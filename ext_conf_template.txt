@@ -3,3 +3,6 @@ unifyshortname = 1
 
 # cat=basic//02; type=string; label=Gruppen Prefix
 groupprefix = GBK
+
+# cat=basic//100; type=boolean; label=Enable default site-sorting in backend
+defaultSiteSorter = 0

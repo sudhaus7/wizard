@@ -38,5 +38,6 @@ For more information on how events are implemented in TYPO3 please refer to the 
    TCA/InlinesCleanEvent
    TtContentFinalContentByCtypeEvent
    FinalContentEvent
+   PageSortEvent
    GenerateSiteIdentifierEvent
    BeforeSiteConfigWriteEvent

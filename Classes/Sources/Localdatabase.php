@@ -17,7 +17,6 @@ use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use SUDHAUS7\Sudhaus7Wizard\Traits\DbTrait;
-use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
@@ -241,15 +240,6 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         //}
         $ret = $res->fetchAllAssociative();
         return $ret ?? [];
-    }
-
-    public function pageSort($new): void
-    {
-        $page = BackendUtility::getRecord('pages', $new);
-        $query = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('pages');
-
-        $query->executeQuery('SET @count=16');
-        $query->executeQuery('update pages set sorting=@count:=@count+16 where pid=' . $page['pid'] . ' order by doktype desc,title asc');
     }
 
     public function sourcePid(): ?string

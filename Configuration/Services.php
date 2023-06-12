@@ -14,6 +14,7 @@ declare(strict_types=1);
  */
 
 use SUDHAUS7\Sudhaus7Wizard\Cli\RunCommand;
+use SUDHAUS7\Sudhaus7Wizard\EventHandlers\DefaultSiteSorterListener;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\Extensions\TxNewsPluginHandlerEvent;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\FinalTTContentFormFrameworkListener;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\PreSysFileReferenceEventHandler;
@@ -46,6 +47,9 @@ return static function (ContainerConfigurator $containerConfigurator, ContainerB
 
     $services->set(PreSysFileReferenceEventHandler::class)
              ->tag('event.listener', ['identifier'=>'s7wizardBaseHandleSysFileReferences']);
+
+    $services->set(DefaultSiteSorterListener::class)
+        ->tag('event.listener', ['identifier'=>'s7wizardDefaultSiteSorterListener']);
 
     $services->set(FinalTTContentFormFrameworkListener::class)
              ->tag('event.listener', ['identifier'=>'s7wizardBaseFinalTTContentFormFrameworkListener']);

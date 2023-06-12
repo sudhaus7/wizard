@@ -90,13 +90,6 @@ interface SourceInterface
     public function getMM($mmtable, $uid, $tablename);
 
     /**
-     * @param $new
-     *
-     * @return mixed
-     */
-    public function pageSort($new);
-
-    /**
      * @return mixed
      */
     public function sourcePid();

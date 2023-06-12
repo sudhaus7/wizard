@@ -35,6 +35,7 @@ use SUDHAUS7\Sudhaus7Wizard\Events\GenerateSiteIdentifierEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\ModifyCleanContentSkipListEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\ModifyCloneContentSkipTableEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\ModifyCloneInlinesSkipTablesEvent;
+use SUDHAUS7\Sudhaus7Wizard\Events\PageSortEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\TCA\Column;
 use SUDHAUS7\Sudhaus7Wizard\Events\TCA\ColumnType;
 use SUDHAUS7\Sudhaus7Wizard\Events\TCA\Inlines;
@@ -225,7 +226,8 @@ class CreateProcess implements LoggerAwareInterface
     {
         $old = $this->source->sourcePid();
         $new = $this->pageMap[ $old ];
-        $this->source->pageSort($new);
+
+        $this->eventDispatcher->dispatch(new PageSortEvent($old, BackendUtility::getRecord('pages', $new)));
     }
 
     public function translateIDlist($table, $list)
