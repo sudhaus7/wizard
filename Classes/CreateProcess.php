@@ -1148,7 +1148,7 @@ class CreateProcess implements LoggerAwareInterface
 
         if (isset($this->siteconfig['errorHandling'])) {
             foreach ($this->siteconfig['errorHandling'] as $idx=>$config) {
-                if (\str_starts_with($config['errorContentSource'], 't3://')) {
+                if (isset($config['errorContentSource']) && \str_starts_with($config['errorContentSource'], 't3://')) {
                     $this->siteconfig['errorHandling'][$idx]['errorContentSource'] = $this->translateT3LinkString($config['errorContentSource']);
                 }
             }
