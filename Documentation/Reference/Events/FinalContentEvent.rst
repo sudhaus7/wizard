@@ -9,6 +9,14 @@ This runs for every record during the final phase, just before the TCA final pha
 
 This Event implements :ref:`WizardEventWriteableRecordInterface<WizardEventWriteableRecordInterface>`
 
+
+.. tip::
+
+   the final phase is usually your safest bet to interact with the cloning process, as all records should be created by now
+
+
+
+
 .. php:namespace:: SUDHAUS7\Sudhaus7Wizard\Events
 
 .. php:class:: FinalContentEvent
