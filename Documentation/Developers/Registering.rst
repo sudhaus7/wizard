@@ -52,7 +52,7 @@ Registering a theme or template
 
 #. Registering the theme/sitepackage
 
-   Now you have to register your process class with the wizard, by adding this line to your themes :lit:`ext_tables.php` or :lit:`ext_localconf.php`:
+   Now you have to register your process class with the wizard, by crating a file :lit:`Configuration/TCA/Overrides/wizard.php` in your theme-extension/sitepackage and add the following lines :
 
    .. code-block:php::
 

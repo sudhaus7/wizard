@@ -596,6 +596,10 @@ class CreateProcess implements LoggerAwareInterface
         }
     }
 
+    /**
+     * @param $newrootpage
+     * @deprecated
+     */
     private function updateMountpoint($newrootpage): void
     {
         //is this needed?
@@ -654,7 +658,7 @@ class CreateProcess implements LoggerAwareInterface
             }
             if ($page['is_siteroot']) {
                 $this->createDomain($this->pageMap[ $old ]);
-                $this->updateMountpoint($this->pageMap[ $old ]);
+                //$this->updateMountpoint($this->pageMap[ $old ]);
                 $this->siterootid = $this->pageMap[ $old ];
             }
             $this->eventDispatcher->dispatch(new AfterClonedTreeInsertEvent($old, $page, $this));
