@@ -14,7 +14,7 @@
 namespace SUDHAUS7\Sudhaus7Wizard\Tests\Unit;
 
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
-use SUDHAUS7\Sudhaus7Wizard\Tests\Mocks\MockEventDispatcher;
+use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
 class CreateProcessTest extends UnitTestCase
@@ -23,7 +23,9 @@ class CreateProcessTest extends UnitTestCase
 
     protected function setUp(): void
     {
-        $this->create_process = new CreateProcess(new MockEventDispatcher());
+        $eventDispatcher = $this->createMock(EventDispatcher::class);
+
+        $this->create_process = new CreateProcess($eventDispatcher);
         $this->create_process->pageMap = [
             1=>10,
             2=>20,
