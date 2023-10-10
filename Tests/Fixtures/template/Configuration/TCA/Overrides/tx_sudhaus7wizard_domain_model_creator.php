@@ -10,3 +10,7 @@
  *
  * The TYPO3 project - inspiring people to share!
  */
+
+call_user_func(function (): void {
+    // $GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['columns']['sourceclass']['config']['items'][] = ['EKBO Server', '\\' . \Fixtures\template\Classes\Wizard\WizardSource::class];
+});

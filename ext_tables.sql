@@ -30,7 +30,7 @@ CREATE TABLE tx_sudhaus7wizard_domain_model_creator (
   email text,
   sourceclass varchar(255) NOT NULL DEFAULT '\\SUDHAUS7\\Sudhaus7Wizard\\Sources\\Localdatabase',
 
-
+	valuemapping varchar(255) NOT NULL DEFAULT '',
 
   sourcepid varchar(255) NOT NULL DEFAULT '0',
 

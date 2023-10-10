@@ -47,4 +47,13 @@ interface WizardTemplateConfigInterface
      * @return string
      */
     public function getAddFields(): string;
+
+    /**
+     * Gives a chance to modify the TCA Part for the tx_sudhaus7wizard_domain_model_creator record
+     *
+     * @param array $TCA
+     *
+     * @return array
+     */
+    public function modifyRecordTCA(array $TCA): array;
 }

@@ -619,6 +619,8 @@ class CreateProcess implements LoggerAwareInterface
 
             $page['t3_origuid'] = $old;
 
+            $page = $this->staticValueReplacement('pages', $page);
+
             if (! $this->isAdmin($page['perms_userid'])) {
                 $page['perms_userid']  = $this->user['uid'];
                 $page['perms_groupid'] = $this->group['uid'];
@@ -682,6 +684,7 @@ class CreateProcess implements LoggerAwareInterface
     private function createDomain($pid): void
     {
         $this->siteconfig['rootPageId'] = $pid;
+        // this is the case if the hostname has a port added, then http:// will be chosen
         $proto = strpos($this->task->getDomainname(), ':')!==false ? 'http://' : 'https://';
         $this->siteconfig['base']       = $proto . $this->task->getDomainname() . '/';
     }
@@ -691,16 +694,27 @@ class CreateProcess implements LoggerAwareInterface
         $runTables = $this->source->getTables();
         $this->log('Start Clone Content');
 
-        $event = new ModifyCloneContentSkipTableEvent([
+        $aSkip = [
             'pages',
             'sys_domain',
-            'sys_file_reference',
+            'sys_log',
+            //'sys_file_reference',
+            'tx_impexp_presets',
+            'tx_extensionmanager_domain_model_extension',
             'be_users',
             'be_groups',
             'tx_sudhaus7wizard_domain_model_creator',
             'sys_file',
             'sys_action',
-        ], $this);
+        ];
+
+        foreach ($GLOBALS['TCA'] as $tcatable => $tca) {
+            if (isset($tca['ctrl']['rootLevel']) && (int)$tca['ctrl']['rootLevel'] === 1 && !in_array($tcatable, $aSkip)) {
+                $aSkip[]=$tcatable;
+            }
+        }
+
+        $event = new ModifyCloneContentSkipTableEvent($aSkip, $this);
         $this->eventDispatcher->dispatch($event);
         $aSkip = $event->getSkipList();
 
@@ -721,6 +735,8 @@ class CreateProcess implements LoggerAwareInterface
                         if (self::tableHasField($table, 't3_origuid')) {
                             $row['t3_origuid'] = $olduid;
                         }
+
+                        $row = $this->staticValueReplacement($table, $row);
 
                         $event = new BeforeContentCloneEvent($table, $olduid, $oldpid, $row, $this);
                         $this->eventDispatcher->dispatch($event);
@@ -1306,7 +1322,10 @@ class CreateProcess implements LoggerAwareInterface
             $newpid = $row['pid'];
 
             $oldrow = $this->source->getRow($table, ['uid'=>$olduid]);
-            $oldpid = $oldrow['pid'];
+            $oldpid = 0;
+            if (isset($oldpid['pid'])) {
+                $oldpid = $oldrow['pid'];
+            }
 
             $pidlist = array_keys($this->pageMap);
             $inlines = $this->source->getIrre($table, $olduid, $oldpid, $oldrow, $columnconfig, $pidlist);
@@ -1418,6 +1437,24 @@ class CreateProcess implements LoggerAwareInterface
             }
         } else {
             $this->log('No t3_origuid in Table ' . $table . ' - skipped');
+        }
+        return $row;
+    }
+
+    public function staticValueReplacement(string $table, array $row): array
+    {
+        if (!empty($this->getTask()->getValuemapping())) {
+            $config = $this->getTask()->getValuemappingArray();
+            if (isset($config[$table])) {
+                foreach ($config[$table] as $field=>$map) {
+                    if (isset($row[$field])) {
+                        $origvalue = $row[$field];
+                        if (isset($map[$origvalue])) {
+                            $row[$field] = $map[$origvalue];
+                        }
+                    }
+                }
+            }
         }
         return $row;
     }

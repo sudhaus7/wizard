@@ -18,11 +18,11 @@ use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardProcessInterface;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardTemplateConfigInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 
-class WizardProcess implements WizardProcessInterface
+class WizardProcessRemote implements WizardProcessInterface
 {
     public static function getWizardConfig(): WizardTemplateConfigInterface
     {
-        return new WizardConfigRemote();
+        return new WizardConfig();
     }
 
     public static function checkWizardConfig(array $data): bool

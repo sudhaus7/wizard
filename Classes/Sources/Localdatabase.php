@@ -13,7 +13,6 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard\Sources;
 
-use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use SUDHAUS7\Sudhaus7Wizard\Traits\DbTrait;
@@ -28,7 +27,7 @@ use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class Localdatabase implements SourceInterface, LoggerAwareInterface
+class Localdatabase implements SourceInterface
 {
     use LoggerAwareTrait;
     use DbTrait;

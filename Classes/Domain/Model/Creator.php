@@ -17,6 +17,7 @@ use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use SUDHAUS7\Sudhaus7Wizard\Tools;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Configuration\Loader\YamlFileLoader;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
@@ -48,6 +49,8 @@ class Creator extends AbstractEntity implements LoggerAwareInterface
     protected string $status = '';
     protected ?string $flexinfo = null;
     protected ?string $email = null;
+    protected ?string $valuemapping = null;
+    private array $valuemappingcache = [];
     /**
      * CruserId
      *
@@ -446,5 +449,26 @@ class Creator extends AbstractEntity implements LoggerAwareInterface
             $a[] = [$v, $k];
         }
         return $a;
+    }
+
+    public function getValuemapping(): string
+    {
+        return (string)$this->valuemapping;
+    }
+
+    public function setValuemapping(?string $valuemapping): void
+    {
+        $this->valuemapping = (string)$valuemapping;
+    }
+
+    public function getValuemappingArray(): array
+    {
+        if (!empty($this->valuemapping)) {
+            if (empty($this->valuemappingcache)) {
+                $this->valuemappingcache = GeneralUtility::makeInstance(YamlFileLoader::class)->load($this->getValuemapping());
+            }
+            return $this->valuemappingcache;
+        }
+        return [];
     }
 }

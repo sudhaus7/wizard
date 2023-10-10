@@ -17,6 +17,9 @@
 			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.shortname" xml:space="preserve">
 				<source>Short name of the Site (e.q CUSTOMER_our_little_farm - must be one word, and only characters of the alphabet, numbers and the character "_" are allowed. All characters before the first _ will be converted to uppercase, all following characters will be converted to lowercase. Is for example being used as the name of the folder in fileadmin)</source>
 			</trans-unit>
+			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.valuemapping" xml:space="preserve">
+				<source>Value Mapping Configuration File. - must be a path to a YAML file containing the table und field translation mapping. (Normaly only used in remote source with different content types)</source>
+			</trans-unit>
 			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.domainname" xml:space="preserve">
 				<source>Domain/Address (e.q. www.our-little-farm.com - withouht http:// or https://)</source>
 			</trans-unit>

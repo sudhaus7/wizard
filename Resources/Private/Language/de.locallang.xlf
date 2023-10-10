@@ -22,6 +22,10 @@
 				<source>Short name of the Site (e.q CUSTOMER_our_little_farm - must be one word, and only characters of the alphabet, numbers and the character "_" are allowed. All characters before the first _ will be converted to uppercase, all following characters will be converted to lowercase. Is for example being used as the name of the folder in fileadmin)</source>
 				<target>Kurzname des Auftritts (z.B. KUNDE_unsere_kleine_farm - MUSS ein Wort sein und nur Zeichen des Alphabetes, Zahlen "_" sind erlaubt. Alle Zeichen vor dem 1. "_" werden vom System auf Gross-, alle nachfolgenden Zeichen auf Kleinbuchstaben umgestellt. Wird z.b. als Ordner Name im fileadmin verwendet.)</target>
 			</trans-unit>
+
+			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.valuemapping" xml:space="preserve">
+				<target>Value Mapping Konfigurationsdatei. - Eine YAML Datei welche die value replacements von Feldern in Tabellen definiert. (Nur relevant bei Quellen ausserhalb der lokalen Datenbank)</target>
+			</trans-unit>
 			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.domainname" xml:space="preserve">
 				<source>Domain/Address (e.q. www.our-little-farm.com - withouht http:// or https://)</source>
 				<target>Domain/Adresse (z.B. www.unsere-kleine-farm.de - ohne http:// oder https://)</target>

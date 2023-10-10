@@ -35,6 +35,7 @@ return static function (ContainerConfigurator $containerConfigurator, ContainerB
              ->exclude([
                  __DIR__ . '/../Classes/Domain/Model/',
                  __DIR__ . '/../Classes/Events/',
+                 __DIR__ . '/../Classes/Backend/',
              ]);
 
     $services->alias(SourceInterface::class, Localdatabase::class);
@@ -59,4 +60,6 @@ return static function (ContainerConfigurator $containerConfigurator, ContainerB
 
     $services->set(TxNewsPluginHandlerEvent::class)
              ->tag('event.listener', ['identifier'=>'s7wizardTxNewsPluginHandlerEvent']);
+    $services->set(\SUDHAUS7\Sudhaus7Wizard\EventHandlers\Extensions\TxNewsFixRecordHandler::class)
+             ->tag('event.listener', ['identifier'=>'s7wizardTxNewsFixRecordHandler']);
 };

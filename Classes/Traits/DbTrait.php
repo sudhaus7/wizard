@@ -29,6 +29,8 @@ trait DbTrait
      */
     public static function updateRecord(string $tablename, array $data, array $where): int
     {
+        $data = self::cleanFieldsBeforeInsert($tablename, $data);
+
         return GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($tablename)->update($tablename, $data, $where);
     }
 
@@ -40,6 +42,7 @@ trait DbTrait
      */
     public static function insertRecord(string $tablename, array $data): array
     {
+        $data = self::cleanFieldsBeforeInsert($tablename, $data);
         $conn = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($tablename);
         $rows =$conn->insert($tablename, $data);
         $newid = $conn->lastInsertId($tablename);
@@ -56,5 +59,29 @@ trait DbTrait
             }
         }
         return false;
+    }
+
+    public static function cleanFieldsBeforeInsert(string $tablename, array $row): array
+    {
+        if (!isset($GLOBALS['localtables'])) {
+            $GLOBALS['localtables'] = [];
+        }
+        if (!isset($GLOBALS['localtables'][$tablename])) {
+            $GLOBALS['localtables'][$tablename] = [];
+            $res = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($tablename);
+            $schema = $res->createSchemaManager();
+            $columns = $schema->listTableColumns($tablename);
+            $GLOBALS['localtables'][$tablename] = [];
+            foreach ($columns as $column) {
+                $GLOBALS['localtables'][$tablename][] = $column->getName();
+            }
+        }
+
+        foreach ($row as $field=>$value) {
+            if (!\in_array($field, $GLOBALS['localtables'][$tablename])) {
+                unset($row[$field]);
+            }
+        }
+        return $row;
     }
 }

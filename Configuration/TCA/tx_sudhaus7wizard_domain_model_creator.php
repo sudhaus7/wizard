@@ -32,6 +32,7 @@ return [
         'searchFields' => 'projektname,longname,domainname,',
         'dynamicConfigFile' => \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('sudhaus7_wizard') . 'Configuration/TCA/tx_sudhaus7wizard_domain_model_creator.php',
         'iconfile' => 'EXT:sudhaus7_wizard/Resources/Public/Icons/icon.svg',
+        'subtype_value_field'=>'sourceclass',
     ],
     'types' => [
         '1' => ['showitem' => 'base'],
@@ -91,12 +92,15 @@ return [
             'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.sourcetype',
             'exclude' => 1,
             'displayCond' => 'FIELD:status:<:10',
+            'onChange' => 'reload',
             'config'=>[
                 'type'=>'select',
                 'renderType' => 'selectSingle',
                 'default'=>'\\' . \SUDHAUS7\Sudhaus7Wizard\Sources\Localdatabase::class,
                 'items'=> [
                     ['LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.sourcetype.localdb', '\\' . \SUDHAUS7\Sudhaus7Wizard\Sources\Localdatabase::class],
+
+                    //['Remote Server with WizardServer component', '\\' . \SUDHAUS7\Sudhaus7Wizard\Sources\RestWizardServer::class],
                     //['Umzugs-service', '\\' . \SUDHAUS7\Sudhaus7Wizard\Sources\Couchdb::class],
                 ],
             ],
@@ -132,6 +136,19 @@ return [
                 'type' => 'input',
                 'size' => 30,
                 'eval' => 'trim,required',
+            ],
+        ],
+        'valuemapping' => [
+            'exclude' => 0,
+
+            'displayCond' => 'FIELD:status:<:10',
+            'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.valuemapping',
+            'config' => [
+                'type' => 'select',
+                'renderType'=>'selectSingle',
+                'items'=> [
+                    ['Bitte wählen', ''],
+                ],
             ],
         ],
         'domainname' => [

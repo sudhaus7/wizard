@@ -41,4 +41,9 @@ class WizardConfig implements WizardTemplateConfigInterface
     {
         return '';
     }
+
+    public function modifyRecordTCA(array $TCA): array
+    {
+        return $TCA;
+    }
 }

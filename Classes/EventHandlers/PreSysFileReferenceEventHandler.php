@@ -16,7 +16,10 @@ declare(strict_types=1);
 namespace SUDHAUS7\Sudhaus7Wizard\EventHandlers;
 
 use SUDHAUS7\Sudhaus7Wizard\Events\BeforeContentCloneEvent;
+use SUDHAUS7\Sudhaus7Wizard\Events\NewFileIdentifierEvent;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class PreSysFileReferenceEventHandler
 {
@@ -25,7 +28,19 @@ class PreSysFileReferenceEventHandler
         if ($event->getTable() === 'sys_file_reference') {
             $row = $event->getRecord();
             $sys_file = $event->getCreateProcess()->getSource()->getRow('sys_file', ['uid'=>$row['uid_local']]);
+
+            if (empty($sys_file)) {
+                $row['uid_local'] = 0;
+                $event->setRecord($row);
+                return;
+            }
+
             $newidentifier = '/' . trim($event->getCreateProcess()->getFilemount()['path'] . $sys_file['name'], '/');
+
+            $subEventDispatcher = GeneralUtility::makeInstance(EventDispatcher::class);
+            $subEvent = new NewFileIdentifierEvent($sys_file['identifier'], $newidentifier, $event->getCreateProcess());
+            $subEventDispatcher->dispatch($subEvent);
+            $newidentifier = $subEvent->getNewidentifier();
 
             $test = BackendUtility::getRecord('sys_file', $newidentifier, 'identifier');
             if (!empty($test)) {

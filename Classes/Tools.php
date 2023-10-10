@@ -65,6 +65,8 @@ class Tools
             ' . $config->getAddFields(),
             ];
             $GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['columns']['sourcepid']['config']['default'] = $config->getSourcePid();
+
+            $GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator'] = $config->modifyRecordTCA($GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']);
         }
     }
 

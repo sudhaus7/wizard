@@ -12,11 +12,13 @@
  */
 
 use SUDHAUS7\Sudhaus7Template\Wizard\WizardProcess;
+use SUDHAUS7\Sudhaus7Template\Wizard\WizardProcessRemote;
 use SUDHAUS7\Sudhaus7Wizard\Tools;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 
 call_user_func(function (): void {
     if (ExtensionManagementUtility::isLoaded('sudhaus7_wizard')) {
         Tools::registerWizardProcess(WizardProcess::class);
+        Tools::registerWizardProcess(WizardProcessRemote::class);
     }
 });
