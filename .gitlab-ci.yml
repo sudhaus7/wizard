@@ -27,7 +27,7 @@ pages:
     - ls -la
     - ls -la Documentation
     - 'mkdir Documentation-GENERATED-temp'
-    - 'docker run --rm -v `pwd`:/PROJECT -v `pwd`/Documentation-GENERATED-temp:/RESULT ghcr.io/t3docs/render-documentation:develop  makehtml'
+    - 'docker run --rm -v `pwd`:/PROJECT -v `pwd`/Documentation-GENERATED-temp:/RESULT ghcr.io/t3docs/render-documentation:latest  makehtml'
     - 'mv Documentation-GENERATED-temp/Result/project/0.0.0 public'
     - 'cp public/Index.html public/index.html'
   artifacts:
