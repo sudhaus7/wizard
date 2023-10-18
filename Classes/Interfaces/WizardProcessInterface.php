@@ -35,13 +35,13 @@ interface WizardProcessInterface
      * Returns the be_users Record for the template Backend User to clone
      * @return array
      */
-    public function getTemplateBackendUser(): array;
+    public function getTemplateBackendUser(CreateProcess $pObj): array;
 
     /**
      * Returns the be_groups record for the template backend group to clone
      * @return array
      */
-    public function getTemplateBackendUserGroup(): array;
+    public function getTemplateBackendUserGroup(CreateProcess $pObj): array;
 
     /**
      * Returns the base directory under 1:fileadmin where to create the new Sites folder structure

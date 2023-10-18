@@ -447,7 +447,7 @@ class CreateProcess implements LoggerAwareInterface
 
     private function createGroup()
     {
-        $tmpl            = $this->template->getTemplateBackendUserGroup();
+        $tmpl            = $this->template->getTemplateBackendUserGroup($this);
         $this->tmplgroup = $tmpl['uid'];
 
         $groupname       = $this->confArr['groupprefix'] . ' ' . $this->task->getProjektname();
@@ -496,7 +496,7 @@ class CreateProcess implements LoggerAwareInterface
     private function createUser()
     {
         $this->log('Create User ' . $this->task->getReduser());
-        $tmpl           = $this->template->getTemplateBackendUser();
+        $tmpl           = $this->template->getTemplateBackendUser($this);
         $this->tmpluser = $tmpl['uid'];
         $this->source->ping();
 
