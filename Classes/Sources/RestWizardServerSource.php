@@ -18,6 +18,7 @@ use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use SUDHAUS7\Sudhaus7Wizard\Services\RestWizardRequest;
 use SUDHAUS7\Sudhaus7Wizard\Traits\DbTrait;
 use TYPO3\CMS\Core\Core\Environment;
+use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -206,7 +207,20 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     public function handleFile(array $sys_file, $newidentifier)
     {
         $this->logger->debug('handleFile ' . $newidentifier . ' START');
+
+        if (is_file(Environment::getPublicPath() . '/fileadmin' . $newidentifier)) {
+            $this->logger->debug('file exists - END' . Environment::getPublicPath() . '/fileadmin' . $newidentifier);
+            $res = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('sys_file')
+                                 ->select(
+                                     [ '*' ],
+                                     'sys_file',
+                                     ['identifier'=>$newidentifier]
+                                 );
+            return $res->fetchAssociative();
+        }
+
         $this->logger->debug('fetching ' . $this->getAPI()->getAPIHOST() . 'fileadmin/' . trim($sys_file['identifier'], '/'));
+
         $buf = @\file_get_contents($this->getAPI()->getAPIHOST() . 'fileadmin' . $sys_file['identifier']);
         if (!$buf) {
             $this->logger->error('fetch failed' . $this->getAPI()->getAPIHOST() . 'fileadmin/' . trim($sys_file['identifier'], '/'));
