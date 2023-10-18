@@ -124,8 +124,9 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
             $content = $this->getAPI()->request($endpoint);
             if ($table === 'pages') {
                 $this->rowCache[$endpoint] = $content;
+            } else {
+                $this->rowCache[ $endpoint ] = $content[0] ?? [];
             }
-            $this->rowCache[$endpoint] = $content[0] ?? [];
         }
         return $this->rowCache[$endpoint];
     }
