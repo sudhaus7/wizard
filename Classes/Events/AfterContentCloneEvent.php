@@ -66,4 +66,9 @@ class AfterContentCloneEvent implements LoggerAwareInterface, WizardEventInterfa
     {
         return $this->logger;
     }
+
+    public function getNewuid(): int
+    {
+        return $this->newuid;
+    }
 }
