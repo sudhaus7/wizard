@@ -102,6 +102,8 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         return $this->siteconfig;
     }
 
+    protected $rowCache = [];
+
     /**
      * @inheritDoc
      */
@@ -118,11 +120,14 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         }
         $this->logger->debug('getRow ' . $endpoint);
 
-        $content = $this->getAPI()->request($endpoint);
-        if ($table === 'pages') {
-            return $content;
+        if (!isset($this->rowCache[$endpoint])) {
+            $content = $this->getAPI()->request($endpoint);
+            if ($table === 'pages') {
+                $this->rowCache[$endpoint] = $content;
+            }
+            $this->rowCache[$endpoint] = $content[0] ?? [];
         }
-        return $content[0] ?? [];
+        return $this->rowCache[$endpoint];
     }
 
     /**
@@ -138,6 +143,12 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $endpoint = sprintf('content/%s/%s/%d', $table, $fields[0], $values[0]);
         $this->logger->debug('getRows ' . $endpoint);
         $content = $this->getAPI()->request($endpoint);
+        foreach ($content as $row) {
+            $cacheendpoint = sprintf('content/%s/uid/%d', $table, $row['uid']);
+            if (!isset($this->rowCache[$cacheendpoint])) {
+                $this->rowCache[$cacheendpoint] = $row;
+            }
+        }
         return $content;
     }
 
