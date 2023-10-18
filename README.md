@@ -1,8 +1,21 @@
-register
+# TYPO3 Sudhaus7 Wizard
 
-<pre>
-    if (\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded('sudhaus7_wizard')) {
-        \SUDHAUS7\Sudhaus7Wizard\Tools::registerExtention(\BFACTOR\BfactorBkv4\Backend\Sudhaus7Wizard::class);
-    }
+[![Latest Stable Version](https://img.shields.io/packagist/v/sudhaus7/sudhaus7-wizard.svg)](https://packagist.org/packages/sudhaus7/sudhaus7-wizard)
+[![Build Status](https://github.com/endroid/qr-code/workflows/CI/badge.svg)](https://github.com/sudhaus7/sudhaus7-wizard/actions)
+[![Total Downloads](https://img.shields.io/packagist/dt/sudhaus7/sudhaus7-wizard.svg)](https://packagist.org/packages/sudhaus7/sudhaus7-wizard)
+[![Monthly Downloads](https://img.shields.io/packagist/dm/sudhaus7/sudhaus7-wizard.svg)](https://packagist.org/packages/sudhaus7/sudhaus7-wizard)
 
-</pre>
+A TYPO3 Plugin for duplicating Sites
+
+Changelog
+
+0.2.0
+
+* Breaking change: Update in WizardTemplateConfigInterface - please add at least the following lines to your implementations of this interface:
+
+```php
+public function modifyRecordTCA(array $TCA): array
+{
+    return $TCA;
+}
+```
