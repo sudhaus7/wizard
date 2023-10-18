@@ -10,6 +10,17 @@ A TYPO3 Plugin for duplicating Sites
 Changelog
 
 0.2.0
+* Breaking change: Update in WizardProcessInterface - in getTemplateBackendUserGroup and getTemplateBackendUser the CreateProcess Object is now added as a parameter. Please update your implementations for this Interface accordingly
+
+```php
+
+public function getTemplateBackendUser(CreateProcess $pObj): array;
+public function getTemplateBackendUserGroup(CreateProcess $pObj): array;
+
+
+```
+
+0.2.0
 
 * Breaking change: Update in WizardTemplateConfigInterface - please add at least the following lines to your implementations of this interface:
 

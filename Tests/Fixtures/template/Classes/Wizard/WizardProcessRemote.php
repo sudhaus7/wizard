@@ -30,12 +30,12 @@ class WizardProcessRemote implements WizardProcessInterface
         return true;
     }
 
-    public function getTemplateBackendUser(): array
+    public function getTemplateBackendUser(CreateProcess $pObj): array
     {
         return BackendUtility::getRecord('be_users', 3);
     }
 
-    public function getTemplateBackendUserGroup(): array
+    public function getTemplateBackendUserGroup(CreateProcess $pObj): array
     {
         return BackendUtility::getRecord('be_groups', 4);
     }
