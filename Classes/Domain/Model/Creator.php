@@ -18,6 +18,7 @@ use Psr\Log\LoggerAwareTrait;
 use SUDHAUS7\Sudhaus7Wizard\Tools;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Loader\YamlFileLoader;
+use TYPO3\CMS\Core\Service\FlexFormService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
@@ -353,13 +354,20 @@ class Creator extends AbstractEntity implements LoggerAwareInterface
      * The template specific configuration from the Creator Task
      * This is a standard flexform result array
      *
+     * @param bool $useTypo3Service returns in a flattened format
+     *
      * @return array flexform array
      */
-    public function getFlexinfo()
+    public function getFlexinfo(bool $useTypo3Service = false)
     {
         if ($this->flexinfo === null && isset($GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['types'][$this->base]) && strpos((string)$GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['types'][$this->base]['showitem'], 'flexinfo')) {
             $row = BackendUtility::getRecord('tx_sudhaus7wizard_domain_model_creator', $this->getUid());
             $this->flexinfo = $row['flexinfo'];
+        }
+
+        if ($useTypo3Service) {
+            return  GeneralUtility::makeInstance(FlexFormService::class)
+                                          ->convertFlexFormContentToArray($this->flexinfo);
         }
 
         return GeneralUtility::xml2array($this->flexinfo);
