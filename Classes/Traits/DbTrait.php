@@ -16,10 +16,21 @@ declare(strict_types=1);
 namespace SUDHAUS7\Sudhaus7Wizard\Traits;
 
 use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Database\Query\QueryBuilder;
+use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 trait DbTrait
 {
+    public static function getQueryBuilderWithoutRestriction(string $tablename): QueryBuilder
+    {
+        $query = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($tablename);
+
+        $query->getRestrictions()->removeAll();
+        $query->getRestrictions()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
+        return $query;
+    }
+
     /**
      * @param string $tablename
      * @param array $data

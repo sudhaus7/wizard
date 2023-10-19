@@ -931,8 +931,7 @@ class CreateProcess implements LoggerAwareInterface
             if (! in_array($table, $aSkip)) {
                 $this->source->ping();
 
-                $query = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
-
+                $query = self::getQueryBuilderWithoutRestriction($table);
                 $stmt = $query->select('*')
                               ->from($table)
                               ->where(
@@ -986,12 +985,12 @@ class CreateProcess implements LoggerAwareInterface
         foreach ($this->pageMap as $oldpid => $newpid) {
             $this->source->ping();
 
-            $query = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($table);
-            $res   = $query->select(
-                [ '*' ],
-                $table,
-                [ 'uid' => $newpid ]
-            );
+            $query = self::getQueryBuilderWithoutRestriction($table);
+            $res = $query->select('*')
+                ->from($table)
+                ->where(
+                    $query->expr()->eq('uid', $newpid)
+                )->execute();
 
             while ($origrow = $res->fetchAssociative()) {
                 // fetch a clean version, might have changed in between
@@ -1060,7 +1059,7 @@ class CreateProcess implements LoggerAwareInterface
                 $this->source->ping();
                 $this->log('Content Cleanup ' . $table);
 
-                $query = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
+                $query = self::getQueryBuilderWithoutRestriction($table);
 
                 $stmt = $query->select('*')
                               ->from($table)
