@@ -698,7 +698,7 @@ class CreateProcess implements LoggerAwareInterface
             'pages',
             'sys_domain',
             'sys_log',
-            //'sys_file_reference',
+            'sys_file_reference',
             'tx_impexp_presets',
             'tx_extensionmanager_domain_model_extension',
             'be_users',
@@ -913,7 +913,7 @@ class CreateProcess implements LoggerAwareInterface
         $this->log('Start Inlines Clone , TODO ' . count($this->cleanUpTodo));
         $event = new ModifyCloneInlinesSkipTablesEvent([
             'sys_domain',
-            'sys_file_reference',
+            //'sys_file_reference',
             'be_users',
             'be_groups',
             'tx_sudhaus7wizard_domain_model_creator',
