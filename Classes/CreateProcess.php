@@ -941,7 +941,11 @@ class CreateProcess implements LoggerAwareInterface
                               ->execute();
 
                 while ($origrow = $stmt->fetchAssociative()) {
-                    $row = $origrow;
+                    // fetch a clean version, might have changed in between
+                    $row = BackendUtility::getRecord($table, $origrow['uid']);
+                    if (!$row) {
+                        continue;
+                    }
                     $this->log('Content Cleanup ' . $table . ' ' . $row['uid']);
                     $event = new Inlines\CleanEvent($table, $row, $this);
                     $this->eventDispatcher->dispatch($event);
@@ -990,7 +994,11 @@ class CreateProcess implements LoggerAwareInterface
             );
 
             while ($origrow = $res->fetchAssociative()) {
-                $row = $origrow;
+                // fetch a clean version, might have changed in between
+                $row = BackendUtility::getRecord($table, $origrow['uid']);
+                if (!$row) {
+                    continue;
+                }
                 $this->log('Page Cleanup ' . $row['title'] . ' ' . $row['uid']);
 
                 $row = $this->finalContent_pages($row, $this);
