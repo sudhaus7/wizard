@@ -1062,7 +1062,11 @@ class CreateProcess implements LoggerAwareInterface
                               ->execute();
 
                 while ($origrow = $stmt->fetchAssociative()) {
-                    $row = $origrow;
+                    // fetch a clean version, might have changed in between
+                    $row = BackendUtility::getRecord($table, $origrow['uid']);
+                    if (!$row) {
+                        continue;
+                    }
                     $this->log('Content Cleanup ' . $table . ' ' . $row['uid']);
 
                     if ($table === 'tt_content') {
