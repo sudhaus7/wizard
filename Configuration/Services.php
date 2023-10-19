@@ -15,9 +15,11 @@ declare(strict_types=1);
 
 use SUDHAUS7\Sudhaus7Wizard\Cli\RunCommand;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\DefaultSiteSorterListener;
+use SUDHAUS7\Sudhaus7Wizard\EventHandlers\Extensions\TxNewsFixRecordHandler;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\Extensions\TxNewsPluginHandlerEvent;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\FinalTTContentFormFrameworkListener;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\PreSysFileReferenceEventHandler;
+use SUDHAUS7\Sudhaus7Wizard\EventHandlers\SysFileReferenceHandleLinkFieldListener;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\TypoLinkinRichTextFieldsEvent;
 use SUDHAUS7\Sudhaus7Wizard\Sources\Localdatabase;
 use SUDHAUS7\Sudhaus7Wizard\Sources\SourceInterface;
@@ -60,6 +62,8 @@ return static function (ContainerConfigurator $containerConfigurator, ContainerB
 
     $services->set(TxNewsPluginHandlerEvent::class)
              ->tag('event.listener', ['identifier'=>'s7wizardTxNewsPluginHandlerEvent']);
-    $services->set(\SUDHAUS7\Sudhaus7Wizard\EventHandlers\Extensions\TxNewsFixRecordHandler::class)
+    $services->set(TxNewsFixRecordHandler::class)
              ->tag('event.listener', ['identifier'=>'s7wizardTxNewsFixRecordHandler']);
+    $services->set(SysFileReferenceHandleLinkFieldListener::class)
+             ->tag('event.listener', ['identifier'=>'s7wizardSysFileReferenceHandleLinkFieldListener']);
 };
