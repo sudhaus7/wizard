@@ -416,14 +416,6 @@ class CreateProcess implements LoggerAwareInterface
             return;
         }
 
-        //@TODO businesslogik - move to template
-        //$this->log('Create Filemount ' . 'mkdir -p ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir . '/Formulare');
-        //exec('mkdir -p ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir . 'Formulare');
-
-        //@TODO move to template
-        //$this->log('Adding Formulare Folder to config');
-        //$this->addToFormConfig($dir . '/Formulare');
-
         $tmpl = [
             'title' => $name,
             'path'  => $dir,
