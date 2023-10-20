@@ -46,16 +46,16 @@ class PreSysFileReferenceEventHandler
             if (!empty($test)) {
                 $event->getCreateProcess()->log('Using File ' . $newidentifier);
                 $row['uid_local'] = $test['uid'];
-                $event->setRecord($row);
-            }
-            $event->getCreateProcess()->log('Create File ' . $newidentifier);
-            try {
-                $new_sys_file = $event->getCreateProcess()->getSource()->handleFile($sys_file, $newidentifier);
-                $event->getCreateProcess()->addContentMap('sys_file', $sys_file['uid'], $new_sys_file['uid']);
-                $row['uid_local'] = $new_sys_file['uid'];
-            } catch (\Exception $e) {
-                print_r([$e->getMessage(), $e->getTraceAsString()]);
-                exit;
+            } else {
+                $event->getCreateProcess()->log('Create File ' . $newidentifier);
+                try {
+                    $new_sys_file = $event->getCreateProcess()->getSource()->handleFile($sys_file, $newidentifier);
+                    $event->getCreateProcess()->addContentMap('sys_file', $sys_file['uid'], $new_sys_file['uid']);
+                    $row['uid_local'] = $new_sys_file['uid'];
+                } catch (\Exception $e) {
+                    print_r([ $e->getMessage(), $e->getTraceAsString() ]);
+                    exit;
+                }
             }
             $event->setRecord($row);
         }
