@@ -17,9 +17,13 @@ use Psr\Log\LoggerAwareTrait;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use SUDHAUS7\Sudhaus7Wizard\Services\RestWizardRequest;
 use SUDHAUS7\Sudhaus7Wizard\Traits\DbTrait;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
+use TYPO3\CMS\Core\Resource\Folder;
+use TYPO3\CMS\Core\Resource\ResourceStorage;
+use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -208,7 +212,11 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     {
         $this->logger->debug('handleFile ' . $newidentifier . ' START');
 
-        if (is_file(Environment::getPublicPath() . '/fileadmin' . $newidentifier)) {
+        $storageRepository = GeneralUtility::makeInstance(StorageRepository::class);
+        /** @var ResourceStorage $storage */
+        $storage           = $storageRepository->getDefaultStorage();
+
+        if ($storage->hasFile($newidentifier)) {
             $this->logger->debug('file exists - END' . Environment::getPublicPath() . '/fileadmin' . $newidentifier);
             $res = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('sys_file')
                                  ->select(
@@ -226,18 +234,20 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
             $this->logger->error('fetch failed' . $this->getAPI()->getAPIHOST() . 'fileadmin/' . trim($sys_file['identifier'], '/'));
             return ['uid'=>0];
         }
-        \file_put_contents(Environment::getPublicPath() . '/fileadmin' . $newidentifier, $buf);
+
+        $tempfile = \tempnam(\sys_get_temp_dir(), 'wizarddl');
+        \file_put_contents($tempfile, $buf);
+        $folder = $this->createFolderRecursive($storage, dirname($newidentifier));
+        $file = $folder->addFile($tempfile, basename($newidentifier));
+        @unlink($tempfile);
 
         $this->logger->debug('wrote file ' . Environment::getPublicPath() . '/fileadmin' . $newidentifier);
 
         $olduid = $sys_file['uid'];
+
         unset($sys_file['uid']);
 
-        $sys_file['identifier'] = $newidentifier;
-        $sys_file['identifier_hash'] = sha1((string)$sys_file['identifier']);
-        $sys_file['folder_hash'] = sha1(dirname((string)$sys_file['identifier']));
-
-        [$affected,$uid] = self::insertRecord('sys_file', $sys_file);
+        $uid = $file->getUid();
 
         try {
             $endpoint = sprintf('content/%s/file/%d', 'sys_file_metadata', $olduid);
@@ -252,7 +262,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         } catch (\Exception $e) {
             $this->logger->error('FILE fetching ' . $endpoint . ' : ' . $e->getMessage());
         }
-        $sys_file['uid'] = $uid;
+        $sys_file = BackendUtility::getRecord('sys_file', $uid);
         $this->logger->debug('handleFile ' . $newidentifier . ' END');
         return $sys_file;
     }
@@ -305,5 +315,28 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     public function getAPI(): RestWizardRequest
     {
         throw new \Exception('implement the getAPI method first', 1696870054);
+    }
+
+    public function createFolderRecursive(ResourceStorage $storage, string $identifier): Folder
+    {
+        $identifier = trim($identifier, '/');
+        $identifierList = GeneralUtility::trimExplode('/', $identifier);
+        $folder = null;
+        foreach ($identifierList as $foldername) {
+            if ($folder === null) {
+                if ($storage->hasFolder($foldername)) {
+                    $folder = $storage->getFolder($foldername);
+                } else {
+                    $folder = $storage->createFolder($foldername);
+                }
+            } else {
+                if ($folder->hasFolder($foldername)) {
+                    $folder = $storage->getFolderInFolder($foldername, $folder);
+                } else {
+                    $folder = $folder->createFolder($foldername);
+                }
+            }
+        }
+        return $folder;
     }
 }
