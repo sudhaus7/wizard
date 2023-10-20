@@ -22,6 +22,7 @@ use Psr\Log\NullLogger;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use SUDHAUS7\Sudhaus7Wizard\Events\AfterClonedTreeInsertEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\AfterContentCloneEvent;
+use SUDHAUS7\Sudhaus7Wizard\Events\AfterCreateFilemountEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\BeforeClonedTreeInsertEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\BeforeContentCloneEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\BeforeSiteConfigWriteEvent;
@@ -410,10 +411,10 @@ class CreateProcess implements LoggerAwareInterface
         $test = BackendUtility::getRecord('sys_filemounts', $name, 'title');
         if (! empty($test)) {
             $this->filemount = $test;
+            $event =  new AfterCreateFilemountEvent($this->filemount, $this);
+            $this->eventDispatcher->dispatch($event);
             return;
         }
-        $this->log('Create Filemount ' . 'mkdir -p ' . Environment::getPublicPath() . '/fileadmin/' . $dir);
-        GeneralUtility::mkdir_deep(Environment::getPublicPath() . '/fileadmin/' . $dir);
 
         //@TODO businesslogik - move to template
         //$this->log('Create Filemount ' . 'mkdir -p ' . Environment::getPublicPath() . '/' . '/fileadmin' . $dir . '/Formulare');
@@ -434,6 +435,9 @@ class CreateProcess implements LoggerAwareInterface
         $this->eventDispatcher->dispatch($event);
         $tmpl = $event->getRecord();
 
+        $this->log('Create Filemount ' . 'mkdir -p ' . Environment::getPublicPath() . '/fileadmin/' . $tmpl['path']);
+        GeneralUtility::mkdir_deep(Environment::getPublicPath() . '/fileadmin/' . $tmpl['path']);
+
         $this->source->ping();
 
         [ $rows, $newuid ] = self::insertRecord('sys_filemounts', $tmpl);
@@ -443,6 +447,8 @@ class CreateProcess implements LoggerAwareInterface
         $tmpl['uid'] = $newuid;
 
         $this->filemount = $tmpl;
+        $event =  new AfterCreateFilemountEvent($this->filemount, $this);
+        $this->eventDispatcher->dispatch($event);
     }
 
     private function createGroup()
