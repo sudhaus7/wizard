@@ -32,7 +32,9 @@ CREATE TABLE tx_sudhaus7wizard_domain_model_creator (
 
 	valuemapping varchar(255) NOT NULL DEFAULT '',
 
-  sourcepid varchar(255) NOT NULL DEFAULT '0',
+	sourcepid varchar(255) NOT NULL DEFAULT '0',
+	sourceuser varchar(255) NOT NULL DEFAULT '0',
+	sourcefilemount varchar(255) NOT NULL DEFAULT '0',
 
   status int(11) unsigned NOT NULL DEFAULT '0',
 

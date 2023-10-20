@@ -56,6 +56,12 @@
 			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.base" xml:space="preserve">
 				<source>Template/Sitepackage</source>
 			</trans-unit>
+			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.sourceuser" xml:space="preserve">
+				<source>Source User</source>
+			</trans-unit>
+			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.sourcefilemount" xml:space="preserve">
+				<source>Source Filemount</source>
+			</trans-unit>
 
         </body>
     </file>

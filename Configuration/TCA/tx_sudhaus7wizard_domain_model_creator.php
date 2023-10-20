@@ -252,5 +252,19 @@ return [
             ],
         ],
 
+        'sourceuser'=>[
+            'label'=>'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.sourceuser',
+            'config'=>[
+                'type'=>'input',
+            ],
+        ],
+
+        'sourcefilemount'=>[
+            'label'=>'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.sourcefilemount',
+            'config'=>[
+                'type'=>'input',
+            ],
+        ],
+
     ],
 ];
