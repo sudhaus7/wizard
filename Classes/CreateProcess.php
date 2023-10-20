@@ -538,7 +538,9 @@ class CreateProcess implements LoggerAwareInterface
         unset($tmpl['uid']);
         $tmpl['username']         = $this->task->getReduser();
         $tmpl['realName']         = $this->task->getProjektname();
-        $tmpl['email']            = $this->task->getRedemail();
+        if (!empty($this->task->getRedemail())) {
+            $tmpl['email']            = $this->task->getRedemail();
+        }
         $tmpl['file_mountpoints'] = $this->filemount['uid'];
         $tmpl['admin']            = 0;
         $tmpl['lastlogin']        = 0;

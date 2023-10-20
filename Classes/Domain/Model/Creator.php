@@ -52,6 +52,8 @@ class Creator extends AbstractEntity implements LoggerAwareInterface
     protected ?string $email = null;
     protected ?string $valuemapping = null;
     private array $valuemappingcache = [];
+    protected int $sourceuser = 0;
+    protected int $sourcefilemount = 0;
     /**
      * CruserId
      *
@@ -478,5 +480,25 @@ class Creator extends AbstractEntity implements LoggerAwareInterface
             return $this->valuemappingcache;
         }
         return [];
+    }
+
+    public function getSourceuser(): int
+    {
+        return $this->sourceuser;
+    }
+
+    public function setSourceuser(int $sourceuser): void
+    {
+        $this->sourceuser = $sourceuser;
+    }
+
+    public function getSourcefilemount(): int
+    {
+        return $this->sourcefilemount;
+    }
+
+    public function setSourcefilemount(int $sourcefilemount): void
+    {
+        $this->sourcefilemount = $sourcefilemount;
     }
 }
