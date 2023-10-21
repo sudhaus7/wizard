@@ -20,9 +20,12 @@ use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
+use SUDHAUS7\Sudhaus7Wizard\Events\AfterAllContentCloneEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\AfterClonedTreeInsertEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\AfterContentCloneEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\AfterCreateFilemountEvent;
+use SUDHAUS7\Sudhaus7Wizard\Events\AfterFinalContentCloneEvent;
+use SUDHAUS7\Sudhaus7Wizard\Events\AfterTreeCloneEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\BeforeClonedTreeInsertEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\BeforeContentCloneEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\BeforeSiteConfigWriteEvent;
@@ -128,10 +131,16 @@ class CreateProcess implements LoggerAwareInterface
         $this->source->ping();
         $this->log('Clone Tree', 'INFO', 'Clone TREE');
         $this->cloneTree();
+
+        $this->eventDispatcher->dispatch(new AfterTreeCloneEvent($this));
+
         $this->source->ping();
         $this->log('Clone Content', 'INFO', 'Clone Content');
         $this->cloneContent();
         $this->source->ping();
+
+        $this->eventDispatcher->dispatch(new AfterAllContentCloneEvent($this));
+
         //$this->cleanContent('clean');
 
         while ($this->cleanUpTodo !== []) {
@@ -145,6 +154,9 @@ class CreateProcess implements LoggerAwareInterface
         $this->source->ping();
         $this->log('Clean Content', 'INFO', 'Clean Content');
         $this->finalContent();
+
+        $this->eventDispatcher->dispatch(new AfterFinalContentCloneEvent($this));
+
         $this->source->ping();
         $this->log('About to finish', 'INFO', 'Finish');
         $this->pageSort();
