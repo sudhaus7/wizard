@@ -211,8 +211,9 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $this->logger->debug('handleFile ' . $newidentifier . ' START');
 
         $folder = FolderService::getOrCreateFromIdentifier(dirname($newidentifier));
-
-        if ($folder->hasFile(basename($newidentifier))) {
+        $newfilename = $folder->getStorage()->sanitizeFileName(basename($newidentifier));
+        $newidentifier = $folder->getIdentifier() . $newfilename;
+        if ($folder->hasFile($newfilename)) {
             $this->logger->debug('file exists - END' . Environment::getPublicPath() . '/fileadmin' . $newidentifier);
             $res = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('sys_file')
                                  ->select(
