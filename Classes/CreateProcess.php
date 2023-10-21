@@ -405,10 +405,10 @@ class CreateProcess implements LoggerAwareInterface
 
         $name = 'Medien ' . $this->task->getProjektname();
 
-        $this->log('Create Filemount 1 ' . $name);
+        $this->log('Create Filemount 1 ' . $name . ' - ' . $dir);
         $this->source->ping();
 
-        $test = BackendUtility::getRecord('sys_filemounts', $name, 'title');
+        $test = BackendUtility::getRecord('sys_filemounts', $dir, 'path');
         if (! empty($test)) {
             $this->filemount = $test;
             $event =  new AfterCreateFilemountEvent($this->filemount, $this);
