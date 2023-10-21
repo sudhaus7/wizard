@@ -20,12 +20,20 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class FolderService
 {
-    public static function getOrCreateFromIdentifier(string $identifier, ResourceStorage $storage = null): Folder
+    protected StorageRepository $storage_repository;
+
+    protected ResourceStorage $defaultStorage;
+
+    public function __construct(StorageRepository $storage_repository)
+    {
+        $this->storage_repository = $storage_repository;
+        $this->defaultStorage = $this->storage_repository->getDefaultStorage();
+    }
+
+    public function getOrCreateFromIdentifier(string $identifier, ResourceStorage $storage = null): Folder
     {
         if ($storage === null) {
-            $storageRepository = GeneralUtility::makeInstance(StorageRepository::class);
-            /** @var ResourceStorage $storage */
-            $storage           = $storageRepository->getDefaultStorage();
+            $storage = $this->defaultStorage;
         }
         $identifier = trim($identifier, '/');
         $identifierList = GeneralUtility::trimExplode('/', $identifier);

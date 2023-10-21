@@ -190,7 +190,9 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     public function handleFile(array $sys_file, $newidentifier)
     {
         $this->logger->debug('handleFile ' . $newidentifier . ' START');
-        $folder = FolderService::getOrCreateFromIdentifier(dirname($newidentifier));
+
+        $folder = GeneralUtility::makeInstance(FolderService::class)->getOrCreateFromIdentifier(dirname($newidentifier));
+
         if ($folder->hasFile(basename($newidentifier))) {
             $this->logger->debug('file exists - END' . Environment::getPublicPath() . '/fileadmin' . $newidentifier);
             $res = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('sys_file')
