@@ -115,6 +115,9 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         if (!empty($this->remoteTables) && !\in_array($table, $this->remoteTables)) {
             return [];
         }
+        if ($where['uid'] < 0) {
+            return [];
+        }
 
         if ($table === 'pages') {
             $endpoint = sprintf('page/%d', $where['uid']);
@@ -142,8 +145,14 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         if (!empty($this->remoteTables) && !\in_array($table, $this->remoteTables)) {
             return [];
         }
+
         $fields = array_keys($where);
         $values = array_values($where);
+
+        if ((int)$values[0] < 0) {
+            return [];
+        }
+
         $endpoint = sprintf('content/%s/%s/%d', $table, $fields[0], $values[0]);
         $this->logger->debug('getRows ' . $endpoint);
         $content = $this->getAPI()->request($endpoint);
@@ -181,6 +190,9 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     public function getIrre($table, $uid, $pid, array $oldrow, array $columnconfig, $pidlist = [])
     {
         if (!empty($this->remoteTables) && !\in_array($table, $this->remoteTables)) {
+            return [];
+        }
+        if ($uid < 0 || $pid < 0) {
             return [];
         }
         $where = [
