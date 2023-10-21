@@ -14,8 +14,8 @@
 namespace SUDHAUS7\Sudhaus7Wizard\Sources;
 
 use Psr\Log\LoggerAwareTrait;
-use Services\FolderService;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
+use SUDHAUS7\Sudhaus7Wizard\Services\FolderService;
 use SUDHAUS7\Sudhaus7Wizard\Services\RestWizardRequest;
 use SUDHAUS7\Sudhaus7Wizard\Traits\DbTrait;
 use TYPO3\CMS\Backend\Utility\BackendUtility;

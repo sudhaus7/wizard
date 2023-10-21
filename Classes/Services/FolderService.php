@@ -11,7 +11,7 @@
  * The TYPO3 project - inspiring people to share!
  */
 
-namespace Services;
+namespace SUDHAUS7\Sudhaus7Wizard\Services;
 
 use TYPO3\CMS\Core\Resource\Folder;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
