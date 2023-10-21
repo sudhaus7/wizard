@@ -14,6 +14,7 @@
 namespace SUDHAUS7\Sudhaus7Wizard\Sources;
 
 use Psr\Log\LoggerAwareTrait;
+use Services\FolderService;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use SUDHAUS7\Sudhaus7Wizard\Services\RestWizardRequest;
 use SUDHAUS7\Sudhaus7Wizard\Traits\DbTrait;
@@ -21,9 +22,6 @@ use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
-use TYPO3\CMS\Core\Resource\Folder;
-use TYPO3\CMS\Core\Resource\ResourceStorage;
-use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -212,11 +210,9 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     {
         $this->logger->debug('handleFile ' . $newidentifier . ' START');
 
-        $storageRepository = GeneralUtility::makeInstance(StorageRepository::class);
-        /** @var ResourceStorage $storage */
-        $storage           = $storageRepository->getDefaultStorage();
+        $folder = FolderService::getOrCreateFromIdentifier(dirname($newidentifier));
 
-        if ($storage->hasFile($newidentifier)) {
+        if ($folder->hasFile(basename($newidentifier))) {
             $this->logger->debug('file exists - END' . Environment::getPublicPath() . '/fileadmin' . $newidentifier);
             $res = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('sys_file')
                                  ->select(
@@ -237,7 +233,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 
         $tempfile = \tempnam(\sys_get_temp_dir(), 'wizarddl');
         \file_put_contents($tempfile, $buf);
-        $folder = $this->createFolderRecursive($storage, dirname($newidentifier));
+
         $file = $folder->addFile($tempfile, basename($newidentifier));
         @unlink($tempfile);
 
@@ -315,28 +311,5 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     public function getAPI(): RestWizardRequest
     {
         throw new \Exception('implement the getAPI method first', 1696870054);
-    }
-
-    public function createFolderRecursive(ResourceStorage $storage, string $identifier): Folder
-    {
-        $identifier = trim($identifier, '/');
-        $identifierList = GeneralUtility::trimExplode('/', $identifier);
-        $folder = null;
-        foreach ($identifierList as $foldername) {
-            if ($folder === null) {
-                if ($storage->hasFolder($foldername)) {
-                    $folder = $storage->getFolder($foldername);
-                } else {
-                    $folder = $storage->createFolder($foldername);
-                }
-            } else {
-                if ($folder->hasFolder($foldername)) {
-                    $folder = $storage->getFolderInFolder($foldername, $folder);
-                } else {
-                    $folder = $folder->createFolder($foldername);
-                }
-            }
-        }
-        return $folder;
     }
 }

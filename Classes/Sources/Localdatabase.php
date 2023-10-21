@@ -14,8 +14,10 @@
 namespace SUDHAUS7\Sudhaus7Wizard\Sources;
 
 use Psr\Log\LoggerAwareTrait;
+use Services\FolderService;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use SUDHAUS7\Sudhaus7Wizard\Traits\DbTrait;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
@@ -187,14 +189,24 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
      */
     public function handleFile(array $sys_file, $newidentifier)
     {
+        $this->logger->debug('handleFile ' . $newidentifier . ' START');
+        $folder = FolderService::getOrCreateFromIdentifier(dirname($newidentifier));
+        if ($folder->hasFile(basename($newidentifier))) {
+            $this->logger->debug('file exists - END' . Environment::getPublicPath() . '/fileadmin' . $newidentifier);
+            $res = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('sys_file')
+                                 ->select(
+                                     [ '*' ],
+                                     'sys_file',
+                                     ['identifier'=>$newidentifier]
+                                 );
+            return $res->fetchAssociative();
+        }
+
         $this->logger->notice('cp ' . Environment::getPublicPath() . '/fileadmin' . $sys_file['identifier'] . ' ' . Environment::getPublicPath() . '/fileadmin' . $newidentifier);
-        //$this->logger->notice('chown www-data:www-data ' . Environment::getPublicPath() . '/' . '/fileadmin' . $newidentifier);
-        //$this->logger->notice('chmod ug+rw ' . Environment::getPublicPath() . 'fileadmin' . $newidentifier);
 
-        exec('cp ' . Environment::getPublicPath() . '/fileadmin' . $sys_file['identifier'] . ' ' . Environment::getPublicPath() . '/fileadmin' . $newidentifier);
-
-        //exec('chown www-data:www-data ' . Environment::getPublicPath() . 'fileadmin' . $newidentifier);
-        //exec('chmod ug+rw ' . Environment::getPublicPath() . '/' . '/fileadmin' . $newidentifier);
+        $file = $folder->addFile(Environment::getPublicPath() . '/fileadmin' . $sys_file['identifier'], basename($newidentifier));
+        $newidentifier = $file->getIdentifier();
+        $uid = $file->getUid();
 
         /** @var \TYPO3\CMS\Core\Database\Connection $query */
         $query = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('sys_file_metadata');
@@ -205,21 +217,13 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
             ['file'=>$sys_file['uid']]
         );
         $sys_file_metadata = $res->fetchAssociative();
-
-        unset($sys_file['uid']);
-        $sys_file['identifier'] = $newidentifier;
-        $sys_file['identifier_hash'] = sha1((string)$sys_file['identifier']);
-        $sys_file['folder_hash'] = sha1(dirname((string)$sys_file['identifier']));
-
-        [$affected,$uid] = self::insertRecord('sys_file', $sys_file);
-
         if (!empty($sys_file_metadata)) {
             unset($sys_file_metadata['uid']);
             $sys_file_metadata['file'] = $uid;
             self::insertRecord('sys_file_metadata', $sys_file_metadata);
         }
-        $sys_file['uid'] = $uid;
-        return $sys_file;
+
+        return   BackendUtility::getRecord('sys_file', $uid);
     }
 
     public function getMM($mmtable, $uid, $tablename)
