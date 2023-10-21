@@ -405,6 +405,18 @@ class CreateProcess implements LoggerAwareInterface
 
         $name = 'Medien ' . $this->task->getProjektname();
 
+        $event =  new CreateFilemountEvent([
+            'title' => $name,
+            'path'  => $dir,
+            'base'  => 1,
+            'pid'   => 0,
+        ], $this);
+        $this->eventDispatcher->dispatch($event);
+        $tmpl = $event->getRecord();
+
+        $dir = $tmpl['path'];
+        $name = $tmpl['title'];
+
         $this->log('Create Filemount 1 ' . $name . ' - ' . $dir);
         $this->source->ping();
 
@@ -415,17 +427,6 @@ class CreateProcess implements LoggerAwareInterface
             $this->eventDispatcher->dispatch($event);
             return;
         }
-
-        $tmpl = [
-            'title' => $name,
-            'path'  => $dir,
-            'base'  => 1,
-            'pid'   => 0,
-        ];
-
-        $event =  new CreateFilemountEvent($tmpl, $this);
-        $this->eventDispatcher->dispatch($event);
-        $tmpl = $event->getRecord();
 
         $this->log('Create Filemount ' . 'mkdir -p ' . Environment::getPublicPath() . '/fileadmin/' . $tmpl['path']);
         GeneralUtility::mkdir_deep(Environment::getPublicPath() . '/fileadmin/' . $tmpl['path']);
