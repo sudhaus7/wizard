@@ -210,7 +210,8 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     {
         $this->logger->debug('handleFile ' . $newidentifier . ' START');
 
-        $folder = FolderService::getOrCreateFromIdentifier(dirname($newidentifier));
+        $folder = GeneralUtility::makeInstance(FolderService::class)->getOrCreateFromIdentifier(dirname($newidentifier));
+
         $newfilename = $folder->getStorage()->sanitizeFileName(basename($newidentifier));
         $newidentifier = $folder->getIdentifier() . $newfilename;
         if ($folder->hasFile($newfilename)) {
