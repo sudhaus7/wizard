@@ -432,7 +432,16 @@ class CreateProcess implements LoggerAwareInterface
         $this->log('Create Filemount 1 ' . $name . ' - ' . $dir);
         $this->source->ping();
 
-        $test = BackendUtility::getRecord('sys_filemounts', $dir, 'path');
+        $res = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('sys_filemounts')
+                             ->select(
+                                 [ '*' ],
+                                 'sys_filemounts',
+                                 [
+                                     'path'=>$dir,
+                                 ]
+                             );
+
+        $test = $res->fetchAssociative();
         if (! empty($test)) {
             $this->filemount = $test;
             $event =  new AfterCreateFilemountEvent($this->filemount, $this);
