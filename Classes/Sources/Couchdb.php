@@ -226,7 +226,7 @@ function(doc) {
             //print_r($data);exit;
         }
 
-//        print_r($data);exit;
+        //        print_r($data);exit;
 
         foreach ($data as $row) {
             if (!\in_array((int)$row['uid'], $this->tree)) {
@@ -701,5 +701,10 @@ function(doc) {
     private function out(string $out): void
     {
         echo $out,"\n";
+    }
+
+    public function filterByPid(string $table, array $pidList): array
+    {
+        return $pidList;
     }
 }
