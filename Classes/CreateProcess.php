@@ -744,7 +744,10 @@ class CreateProcess implements LoggerAwareInterface
         foreach ($runTables as $table) {
             $config = $GLOBALS['TCA'][ $table ];
             if (! in_array($table, $aSkip)) {
-                foreach ($this->pageMap as $oldpid => $newpid) {
+                $filteredPids = $this->getSource()->filterByPid($table, array_keys($this->pageMap));
+
+                foreach ($filteredPids as $oldpid) {
+                    $newpid = $this->pageMap[$oldpid];
                     $where        = self::myEnableFields($table);
                     $where['pid'] = $oldpid;
                     $rows         = $this->source->getRows($table, $where);

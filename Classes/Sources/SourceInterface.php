@@ -50,6 +50,17 @@ interface SourceInterface extends LoggerAwareInterface
     public function getRows($table, $where=[]);
 
     /**
+     * Filters the possible PIDs for a given table. This Method expects all p
+     * possible pid and should return the pids which actually have rows
+     *
+     * @param string $table
+     * @param array $pidList
+     *
+     * @return array
+     */
+    public function filterByPid(string $table, array $pidList): array;
+
+    /**
      * @param $start
      *
      * @return mixed

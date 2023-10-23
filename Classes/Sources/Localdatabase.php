@@ -296,4 +296,25 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         }
         return [];
     }
+
+    public function filterByPid(string $table, array $pidList): array
+    {
+        $preList = array_filter($pidList, function ($v) { return (int)$v > 0; });
+
+        $filteredPidList = [];
+        if (count($preList) > 0) {
+            $query = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
+            $stmt  = $query->selectLiteral('distinct pid')
+                           ->from($table)
+                           ->where(
+                               $query->expr()->in('pid', $pidList)
+                           )
+                           ->execute();
+            while ($row = $stmt->fetchAssociative()) {
+                $filteredPidList[]=$row['pid'];
+            }
+        }
+
+        return $filteredPidList;
+    }
 }

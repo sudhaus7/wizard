@@ -326,4 +326,17 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     {
         throw new \Exception('implement the getAPI method first', 1696870054);
     }
+
+    public function filterByPid(string $table, array $pidList): array
+    {
+        $preList = array_filter($pidList, function ($v) { return (int)$v > 0; });
+
+        $filteredList = [];
+        if (count($preList)>0) {
+            $endpoint = sprintf('filter/%s/pid', $table);
+            $this->logger->debug('filterByPid ' . $endpoint);
+            $filteredList = $this->getAPI()->post($endpoint, [ 'values' => implode(',', $preList) ]);
+        }
+        return $filteredList;
+    }
 }

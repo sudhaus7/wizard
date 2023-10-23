@@ -30,6 +30,7 @@ class RestWizardRequest
         $this->requestFactory = $requestFactory;
     }
 
+    // @TODO add paging
     public function request(string $endpoint): array
     {
         $additionalOptions = [
