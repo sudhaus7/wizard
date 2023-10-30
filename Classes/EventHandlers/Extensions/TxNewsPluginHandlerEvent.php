@@ -46,6 +46,10 @@ class TxNewsPluginHandlerEvent
                     $flex['data']['sDEF']['lDEF']['settings.startingpoint']['vDEF'] = $process->translateIDlist('pages', $flex['data']['sDEF']['lDEF']['settings.startingpoint']['vDEF']);
                 }
 
+                if (isset($flex['data']['sDEF']['lDEF']['settings.categories']['vDEF'])) {
+                    $flex['data']['sDEF']['lDEF']['settings.categories']['vDEF'] = $process->translateIDlist('sys_category', $flex['data']['sDEF']['lDEF']['settings.categories']['vDEF']);
+                }
+
                 $record['pi_flexform'] = Tools::array2xml($flex);
             }
             $event->setRecord($record);
