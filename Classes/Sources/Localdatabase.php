@@ -208,8 +208,11 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 
         $this->logger->notice('cp ' . Environment::getPublicPath() . '/fileadmin' . $sys_file['identifier'] . ' ' . Environment::getPublicPath() . '/fileadmin' . $newidentifier);
 
-        $file = $folder->addFile(Environment::getPublicPath() . '/fileadmin' . $sys_file['identifier'], basename($newidentifier));
+        $oldfile = $folder->getStorage()->getFileByIdentifier($sys_file['identifier']);
+        $file = $oldfile->copyTo($folder);
+
         $newidentifier = $file->getIdentifier();
+
         $uid = $file->getUid();
 
         /** @var \TYPO3\CMS\Core\Database\Connection $query */
