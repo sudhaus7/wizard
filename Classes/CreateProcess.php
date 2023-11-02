@@ -51,6 +51,7 @@ use SUDHAUS7\Sudhaus7Wizard\Traits\DbTrait;
 use Symfony\Component\Yaml\Yaml;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
+use TYPO3\CMS\Core\Configuration\SiteConfiguration;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Crypto\PasswordHashing\PasswordHashFactory;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -1212,16 +1213,18 @@ class CreateProcess implements LoggerAwareInterface
             }
         }
 
-        GeneralUtility::mkdir($path . '/config/sites/' . $identifier);
+        //GeneralUtility::mkdir($path . '/config/sites/' . $identifier);
 
         $event = new BeforeSiteConfigWriteEvent($this->siteconfig, $this);
         $this->eventDispatcher->dispatch($event);
         $this->siteconfig = $event->getSiteconfig();
 
-        file_put_contents(
-            $path . '/config/sites/' . $identifier . '/config.yaml',
-            Yaml::dump($this->siteconfig, 99, 2)
-        );
+        //file_put_contents(
+        //    $path . '/config/sites/' . $identifier . '/config.yaml',
+        //    Yaml::dump($this->siteconfig, 99, 2)
+        //);
+
+        GeneralUtility::makeInstance(SiteConfiguration::class)->write($identifier, $this->siteconfig);
     }
 
     //private function cloneContent_final_column_header_link($column, $columnconfig, $row, $parameters)
