@@ -13,7 +13,6 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard\Sources;
 
-use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use SUDHAUS7\Sudhaus7Wizard\Traits\DbTrait;
@@ -25,7 +24,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  * @internal
  * @deprecated
  */
-class Couchdb implements SourceInterface, LoggerAwareInterface
+class Couchdb implements SourceInterface
 {
     use LoggerAwareTrait;
     use DbTrait;
