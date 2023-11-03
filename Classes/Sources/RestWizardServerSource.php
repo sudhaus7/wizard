@@ -228,13 +228,20 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $newidentifier = $folder->getIdentifier() . $newfilename;
         if ($folder->hasFile($newfilename)) {
             $this->logger->debug('file exists - END' . Environment::getPublicPath() . '/fileadmin' . $newidentifier);
+
+            $file = $folder->getFile($newfilename);
+
             $res = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('sys_file')
                                  ->select(
                                      [ '*' ],
                                      'sys_file',
-                                     ['identifier'=>$newidentifier]
+                                     ['uid'=>$file->getUid()]
                                  );
-            return $res->fetchAssociative();
+            $sys_file = $res->fetchAssociative();
+            if (!$sys_file) {
+                return ['uid'=>0];
+            }
+            return $sys_file;
         }
 
         $this->logger->debug('fetching ' . $this->getAPI()->getAPIHOST() . 'fileadmin/' . trim($sys_file['identifier'], '/'));
