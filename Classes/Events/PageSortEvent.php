@@ -13,6 +13,7 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard\Events;
 
+use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventInterface;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
 
@@ -22,6 +23,13 @@ class PageSortEvent implements WizardEventInterface
 
     protected array $record;
     protected int $oldpid;
+
+    public function __construct(int $oldpid, array $record, CreateProcess $create_process)
+    {
+        $this->create_process = $create_process;
+        $this->oldpid = $oldpid;
+        $this->record = $record;
+    }
 
     /**
      * gets the current record for the given table from the database
@@ -35,11 +43,5 @@ class PageSortEvent implements WizardEventInterface
     public function getOldpid(): int
     {
         return $this->oldpid;
-    }
-
-    public function __construct(int $oldpid, array $record)
-    {
-        $this->record = $record;
-        $this->oldpid = $oldpid;
     }
 }

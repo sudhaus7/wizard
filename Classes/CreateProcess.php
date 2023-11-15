@@ -241,7 +241,7 @@ class CreateProcess implements LoggerAwareInterface
         $old = $this->source->sourcePid();
         $new = $this->pageMap[ $old ];
 
-        $this->eventDispatcher->dispatch(new PageSortEvent($old, BackendUtility::getRecord('pages', $new)));
+        $this->eventDispatcher->dispatch(new PageSortEvent($old, BackendUtility::getRecord('pages', $new), $this));
     }
 
     public function translateIDlist($table, $list)
