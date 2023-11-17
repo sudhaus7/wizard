@@ -907,6 +907,11 @@ class CreateProcess implements LoggerAwareInterface
                     $this->eventDispatcher->dispatch($event);
                     $row = $event->getRecord();
 
+                    if (isset($columnconfig['config']['renderType']) && $columnconfig['config']['renderType'] === 'inputLink') {
+                        $row = $this->cloneContent_final_wizards_link($column, $columnconfig, $row, $parameters);
+                    } elseif (isset($columnconfig['config']['softref']) && $columnconfig['config']['softref'] === 'typolink') {
+                        $row = $this->cloneContent_final_wizards_link($column, $columnconfig, $row, $parameters);
+                    }
                     if (isset($columnconfig['config']['wizards'])) {
                         foreach ($columnconfig['config']['wizards'] as $wizard => $wizardconfig) {
                             $row = $this->cloneContent_final_wizards_link($wizard, $wizard, $row, $parameters);
