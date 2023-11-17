@@ -41,4 +41,14 @@ class CreatorRepository extends Repository
         $query->matching($query->equals('status', 10));
         return $query->execute()->getFirst();
     }
+
+    public function isRunning(): bool
+    {
+        $query = $this->createQuery();
+        $querySettings = $query->getQuerySettings();
+        $querySettings->setRespectStoragePage(false);
+        $query->setQuerySettings($querySettings);
+        $query->matching($query->equals('status', 15));
+        return $query->count() > 0;
+    }
 }

@@ -189,7 +189,9 @@ class RunCommand extends Command
             case 'next':
                 $o = $this->repository->findNext();
                 if ($o) {
-                    $this->create($o, $input, $output, $mapfolder);
+                    if (!$this->repository->isRunning()) {
+                        $this->create($o, $input, $output, $mapfolder);
+                    }
                 }
                 return 0;
             default:
