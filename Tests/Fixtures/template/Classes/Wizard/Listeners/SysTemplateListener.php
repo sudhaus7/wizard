@@ -23,7 +23,7 @@ class SysTemplateListener
     public function __invoke(FinalContentEvent $event)
     {
         if ($event->getCreateProcess()->getTemplate() instanceof
-            WizardProcess && $event->getExtensionKey()==='template' && $event->getTable() === 'sys_template') {
+            WizardProcess && $event->getExtensionKey() === 'template' && $event->getTable() === 'sys_template') {
             $record = $event->getRecord();
             if ($record['root'] === 1) {
                 $constants = TyposcriptService::parse($record['constants']);

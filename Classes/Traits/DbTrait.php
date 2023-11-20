@@ -55,7 +55,7 @@ trait DbTrait
     {
         $data = self::cleanFieldsBeforeInsert($tablename, $data);
         $conn = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($tablename);
-        $rows =$conn->insert($tablename, $data);
+        $rows = $conn->insert($tablename, $data);
         $newid = $conn->lastInsertId($tablename);
         return [$rows, $newid];
     }
@@ -88,7 +88,7 @@ trait DbTrait
             }
         }
 
-        foreach ($row as $field=>$value) {
+        foreach ($row as $field => $value) {
             if (!\in_array($field, $GLOBALS['localtables'][$tablename])) {
                 unset($row[$field]);
             }

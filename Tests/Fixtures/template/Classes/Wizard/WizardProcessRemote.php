@@ -45,7 +45,5 @@ class WizardProcessRemote implements WizardProcessInterface
         return 'sites/';
     }
 
-    public function finalize(CreateProcess &$pObj): void
-    {
-    }
+    public function finalize(CreateProcess &$pObj): void {}
 }

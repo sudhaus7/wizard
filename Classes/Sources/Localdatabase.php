@@ -69,7 +69,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 ',
                     ],
             ],
-        'imports'=>[
+        'imports' => [
 
         ],
     ];
@@ -92,9 +92,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $this->creator = $creator;
     }
 
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     public function getSiteConfig(mixed $id): array
     {
@@ -106,7 +104,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
             // no harm done
             $x = 1;
         } catch (\Exception $e) {
-            $x =1;
+            $x = 1;
         }
         return $this->siteconfig;
     }
@@ -201,7 +199,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                                  ->select(
                                      [ '*' ],
                                      'sys_file',
-                                     ['identifier'=>$newidentifier]
+                                     ['identifier' => $newidentifier]
                                  );
             return $res->fetchAssociative();
         }
@@ -221,7 +219,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $res = $query->select(
             [ '*' ],
             'sys_file_metadata',
-            ['file'=>$sys_file['uid']]
+            ['file' => $sys_file['uid']]
         );
         $sys_file_metadata = $res->fetchAssociative();
         if (!empty($sys_file_metadata)) {
@@ -239,7 +237,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $res = $query->select(
             [ '*' ],
             $mmtable,
-            ['uid_local'=>$uid]
+            ['uid_local' => $uid]
         );
 
         //$sql = 'select * from '.$mmtable.' where uid_local='.$uid;
@@ -314,7 +312,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                            )
                            ->execute();
             while ($row = $stmt->fetchAssociative()) {
-                $filteredPidList[]=$row['pid'];
+                $filteredPidList[] = $row['pid'];
             }
         }
 

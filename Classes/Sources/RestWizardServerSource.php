@@ -68,7 +68,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 ',
                     ],
             ],
-        'imports'=>[
+        'imports' => [
 
         ],
     ];
@@ -100,7 +100,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
             // no harm done
             $x = 1;
         } catch (\Exception $e) {
-            $x =1;
+            $x = 1;
         }
         return $this->siteconfig;
     }
@@ -196,7 +196,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
             return [];
         }
         $where = [
-            $columnconfig['config']['foreign_field']=>$uid,
+            $columnconfig['config']['foreign_field'] => $uid,
         ];
         if (isset($columnconfig['config']['foreign_table_field'])) {
             $where[$columnconfig['config']['foreign_table_field']] = $table;
@@ -204,7 +204,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 
         if (isset($columnconfig['config']['foreign_match_fields']) && !empty($columnconfig['config']['foreign_match_fields'])) {
             foreach ($columnconfig['config']['foreign_match_fields'] as $ff => $vv) {
-                $where[$ff]=$vv;
+                $where[$ff] = $vv;
             }
         }
 
@@ -235,11 +235,11 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                                  ->select(
                                      [ '*' ],
                                      'sys_file',
-                                     ['uid'=>$file->getUid()]
+                                     ['uid' => $file->getUid()]
                                  );
             $sys_file = $res->fetchAssociative();
             if (!$sys_file) {
-                return ['uid'=>0];
+                return ['uid' => 0];
             }
             return $sys_file;
         }
@@ -249,7 +249,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $buf = @\file_get_contents($this->getAPI()->getAPIHOST() . 'fileadmin' . $sys_file['identifier']);
         if (!$buf) {
             $this->logger->error('fetch failed' . $this->getAPI()->getAPIHOST() . 'fileadmin/' . trim($sys_file['identifier'], '/'));
-            return ['uid'=>0];
+            return ['uid' => 0];
         }
 
         $tempfile = \tempnam(\sys_get_temp_dir(), 'wizarddl');
@@ -339,7 +339,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $preList = array_filter($pidList, function ($v) { return (int)$v > 0; });
 
         $filteredList = [];
-        if (count($preList)>0) {
+        if (count($preList) > 0) {
             $endpoint = sprintf('filter/%s/pid', $table);
             $this->logger->debug('filterByPid ' . $endpoint);
             $filteredList = $this->getAPI()->post($endpoint, [ 'values' => implode(',', $preList) ]);

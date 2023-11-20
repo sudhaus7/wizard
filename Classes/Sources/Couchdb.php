@@ -505,7 +505,7 @@ function(doc) {
         if (!empty($where)) {
             foreach ($where as $key=>$value) {
                 if (is_array($value)) {
-                    $mywhere[] = ' ' . implode(' && ', $this>$this->expandwhere($value, [])) . '  ';
+                    $mywhere[] = ' ' . implode(' && ', $this->expandwhere($value, [])) . '  ';
                 } else {
                     $mywhere[] = sprintf('doc.row.%s == \'%s\'', $key, $value);
                 }

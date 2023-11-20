@@ -38,7 +38,7 @@ interface SourceInterface extends LoggerAwareInterface
      *
      * @return mixed
      */
-    public function getRow($table, $where=[]);
+    public function getRow($table, $where = []);
 
     /**
      * @param $table
@@ -47,7 +47,7 @@ interface SourceInterface extends LoggerAwareInterface
      *
      * @return mixed
      */
-    public function getRows($table, $where=[]);
+    public function getRows($table, $where = []);
 
     /**
      * Filters the possible PIDs for a given table. This Method expects all p
@@ -82,7 +82,7 @@ interface SourceInterface extends LoggerAwareInterface
      *
      * @return array
      */
-    public function getIrre($table, $uid, $pid, array $oldrow, array $columnconfig, $pidlist=[]);
+    public function getIrre($table, $uid, $pid, array $oldrow, array $columnconfig, $pidlist = []);
 
     /**
      * @param array $sys_file

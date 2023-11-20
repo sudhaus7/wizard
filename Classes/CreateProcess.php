@@ -173,7 +173,7 @@ class CreateProcess implements LoggerAwareInterface
         $this->source->ping();
 
         $this->task->setPid($this->pageMap[ $sourcePid ]);
-        if (! \is_null($mapfolder)) {
+        if (!\is_null($mapfolder)) {
             if ($fp = fopen($mapfolder . '/page.csv', 'w')) {
                 foreach ($this->pageMap as $k => $v) {
                     fwrite($fp, sprintf("%s;%s\n", $k, $v));
@@ -195,7 +195,7 @@ class CreateProcess implements LoggerAwareInterface
 
     public function log($c, $info = 'DEBUG', string $section = null, array $context = []): void
     {
-        if (! \is_null($section)) {
+        if (!\is_null($section)) {
             $this->debugsection = $section;
         }
 
@@ -216,7 +216,7 @@ class CreateProcess implements LoggerAwareInterface
      */
     public function addContentMap($table, $old, $new): void
     {
-        if (! isset($this->contentmap[ $table ])) {
+        if (!isset($this->contentmap[ $table ])) {
             $this->contentmap[ $table ] = [];
         }
 
@@ -230,7 +230,7 @@ class CreateProcess implements LoggerAwareInterface
      */
     public function addCleanupInline($table, $uid): void
     {
-        if (! isset($this->cleanUpTodo[ $table ])) {
+        if (!isset($this->cleanUpTodo[ $table ])) {
             $this->cleanUpTodo[ $table ] = [];
         }
         $this->cleanUpTodo[ $table ][] = $uid;
@@ -287,7 +287,7 @@ class CreateProcess implements LoggerAwareInterface
 
     public function finalContent_tt_content($row)
     {
-        $event = new FinalContentByCtypeEvent($row['CType'], $row['CType']==='list' ? $row['list_type'] : null, $row, $this);
+        $event = new FinalContentByCtypeEvent($row['CType'], $row['CType'] === 'list' ? $row['list_type'] : null, $row, $this);
         $this->eventDispatcher->dispatch($event);
         return $event->getRecord();
     }
@@ -313,14 +313,14 @@ class CreateProcess implements LoggerAwareInterface
                     'file' => $this->getTranslateUid('sys_file', (int)$queryParts['uid']),
                     'page' => $this->getTranslateUid('pages', (int)$queryParts['uid']),
                     // no break
-                    default=>(int)$queryParts['uid']
+                    default => (int)$queryParts['uid']
                 };
             }
-            foreach ($queryParts as $k=>$v) {
+            foreach ($queryParts as $k => $v) {
                 if (\str_starts_with($k, 'amp;')) {
                     $k2 = substr($k, 4);
                     unset($queryParts[$k]);
-                    $queryParts[$k2]=$v;
+                    $queryParts[$k2] = $v;
                 }
             }
 
@@ -335,7 +335,7 @@ class CreateProcess implements LoggerAwareInterface
             if (!empty($urlParts['fragment'])) {
                 $s .= '#' . $this->getTranslateUid('tt_content', $urlParts['fragment']);
             }
-            $x=1;
+            $x = 1;
         } elseif (isset($urlParts['host']) && $urlParts['host'] === 'file') {
             $s = $urlParts['host'] . ':' . $this->getTranslateUid('sys_file', (int)$urlParts['port']);
         } elseif (isset($urlParts['host']) && $urlParts['host'] === 'page') {
@@ -402,7 +402,7 @@ class CreateProcess implements LoggerAwareInterface
      */
     public function finalContent_pages($row, &$pObj)
     {
-        if ($row['doktype'] == 4 && ! empty($row['shortcut'])) {
+        if ($row['doktype'] == 4 && !empty($row['shortcut'])) {
             $row['shortcut'] = $pObj->getTranslateUid('pages', $row['shortcut']);
         }
 
@@ -438,12 +438,12 @@ class CreateProcess implements LoggerAwareInterface
                                  [ '*' ],
                                  'sys_filemounts',
                                  [
-                                     'path'=>$dir,
+                                     'path' => $dir,
                                  ]
                              );
 
         $test = $res->fetchAssociative();
-        if (! empty($test)) {
+        if (!empty($test)) {
             $this->filemount = $test;
             $event =  new AfterCreateFilemountEvent($this->filemount, $this);
             $this->eventDispatcher->dispatch($event);
@@ -456,7 +456,7 @@ class CreateProcess implements LoggerAwareInterface
         $this->source->ping();
 
         [ $rows, $newuid ] = self::insertRecord('sys_filemounts', $tmpl);
-        if (! $rows) {
+        if (!$rows) {
             throw new \Exception('Failed to insert', 1_616_680_146);
         }
         $tmpl['uid'] = $newuid;
@@ -481,12 +481,12 @@ class CreateProcess implements LoggerAwareInterface
         $res = $query->select(
             [ '*' ],
             'be_groups',
-            ['title'=>$groupname]
+            ['title' => $groupname]
         );
 
         $test = $res->fetchAssociative();
 
-        if (! empty($test)) {
+        if (!empty($test)) {
             $this->group = $test;
             return;
         }
@@ -527,11 +527,11 @@ class CreateProcess implements LoggerAwareInterface
         $res = $query->select(
             [ '*' ],
             'be_users',
-            ['username'=>$this->task->getReduser()]
+            ['username' => $this->task->getReduser()]
         );
         $test = $res->fetchAssociative();
 
-        if (! empty($test)) {
+        if (!empty($test)) {
             $groups = GeneralUtility::trimExplode(',', $test['usergroup'], true);
             array_unshift($groups, $this->group['uid']);
             foreach ($groups as $k => $gid) {
@@ -602,7 +602,7 @@ class CreateProcess implements LoggerAwareInterface
 
         [ $rows, $newuid ] = self::insertRecord('be_users', $tmpl);
 
-        if (! $rows) {
+        if (!$rows) {
             throw new \Exception('could not create user', 1_616_683_642);
         }
         $tmpl['uid'] = $newuid;
@@ -613,7 +613,7 @@ class CreateProcess implements LoggerAwareInterface
     {
         $tree = $this->source->getTree($start);
         foreach ($tree as $uid) {
-            if (! isset($this->pageMap[ $uid ])) {
+            if (!isset($this->pageMap[ $uid ])) {
                 $this->pageMap[ $uid ] = 0;
             }
         }
@@ -644,7 +644,7 @@ class CreateProcess implements LoggerAwareInterface
 
             $page = $this->staticValueReplacement('pages', $page);
 
-            if (! $this->isAdmin($page['perms_userid'])) {
+            if (!$this->isAdmin($page['perms_userid'])) {
                 $page['perms_userid']  = $this->user['uid'];
                 $page['perms_groupid'] = $this->group['uid'];
             }
@@ -672,10 +672,10 @@ class CreateProcess implements LoggerAwareInterface
 
             $this->source->ping();
 
-            if ((int)$page['pid'] > 0 || ((int)$page['pid']===0 && $page['is_siteroot'])) {
+            if ((int)$page['pid'] > 0 || ((int)$page['pid'] === 0 && $page['is_siteroot'])) {
                 [ $rowsaffected, $newpageid ] = self::insertRecord('pages', $page);
 
-                if (! $rowsaffected) {
+                if (!$rowsaffected) {
                     throw new \Exception('Create page failed', 1_616_685_103);
                 }
                 $this->pageMap[ $old ] = $newpageid;
@@ -693,7 +693,7 @@ class CreateProcess implements LoggerAwareInterface
 
     private function isAdmin($uid)
     {
-        if (! isset($this->checkusers[ $uid ])) {
+        if (!isset($this->checkusers[ $uid ])) {
             $this->source->ping();
             $this->checkusers[ $uid ] = BackendUtility::getRecord('be_users', $uid);
         }
@@ -708,7 +708,7 @@ class CreateProcess implements LoggerAwareInterface
     {
         $this->siteconfig['rootPageId'] = $pid;
         // this is the case if the hostname has a port added, then http:// will be chosen
-        $proto = strpos($this->task->getDomainname(), ':')!==false ? 'http://' : 'https://';
+        $proto = strpos($this->task->getDomainname(), ':') !== false ? 'http://' : 'https://';
         $this->siteconfig['base']       = $proto . $this->task->getDomainname() . '/';
     }
 
@@ -733,7 +733,7 @@ class CreateProcess implements LoggerAwareInterface
 
         foreach ($GLOBALS['TCA'] as $tcatable => $tca) {
             if (isset($tca['ctrl']['rootLevel']) && (int)$tca['ctrl']['rootLevel'] === 1 && !in_array($tcatable, $aSkip)) {
-                $aSkip[]=$tcatable;
+                $aSkip[] = $tcatable;
             }
         }
 
@@ -744,7 +744,7 @@ class CreateProcess implements LoggerAwareInterface
         $aSkip = array_merge($aSkip, $this->allwaysIgnoreTables);
         foreach ($runTables as $table) {
             $config = $GLOBALS['TCA'][ $table ];
-            if (! in_array($table, $aSkip)) {
+            if (!in_array($table, $aSkip)) {
                 $filteredPids = $this->getSource()->filterByPid($table, array_keys($this->pageMap));
 
                 foreach ($filteredPids as $oldpid) {
@@ -780,7 +780,7 @@ class CreateProcess implements LoggerAwareInterface
                         if ($row) {
                             [ $rowsaffected, $newuid ] = self::insertRecord($table, $row);
 
-                            if (! $rowsaffected) {
+                            if (!$rowsaffected) {
                                 throw new \Exception(sprintf(
                                     'cannot insert into %s payload %s',
                                     $table,
@@ -897,10 +897,10 @@ class CreateProcess implements LoggerAwareInterface
                     $row = $event->getRecord();
 
                     $row = match ($columntype) {
-                        'group'=>$this->cloneContent_final_columntype_group($column, $columnconfig, $row, $parameters),
-                        'select'=>$this->cloneContent_final_columntype_select($column, $columnconfig, $row, $parameters),
+                        'group' => $this->cloneContent_final_columntype_group($column, $columnconfig, $row, $parameters),
+                        'select' => $this->cloneContent_final_columntype_select($column, $columnconfig, $row, $parameters),
                         // no break
-                        default=>$row
+                        default => $row
                     };
 
                     $event = new ColumnType\FinalEvent($parameters['table'], $column, $columntype, $columnconfig, $row, $parameters, $this);
@@ -920,9 +920,9 @@ class CreateProcess implements LoggerAwareInterface
                     $row = $event->getRecord();
 
                     $row = match ($columntype) {
-                        'inline'=>$this->cloneContent_clean_columntype_inline($column, $columnconfig, $row, $parameters),
+                        'inline' => $this->cloneContent_clean_columntype_inline($column, $columnconfig, $row, $parameters),
                         // no break
-                        default=>$row
+                        default => $row
                     };
 
                     $event = new ColumnType\CleanEvent($parameters['table'], $column, $columntype, $columnconfig, $row, $parameters, $this);
@@ -954,7 +954,7 @@ class CreateProcess implements LoggerAwareInterface
         foreach ($map as $table => $newuid) {
             $config = $GLOBALS['TCA'][ $table ];
 
-            if (! in_array($table, $aSkip)) {
+            if (!in_array($table, $aSkip)) {
                 $this->source->ping();
 
                 $query = self::getQueryBuilderWithoutRestriction($table);
@@ -1080,7 +1080,7 @@ class CreateProcess implements LoggerAwareInterface
         $aSkip   = array_merge($event->getSkipList(), $this->allwaysIgnoreTables);
         $newpids = \array_values($this->pageMap);
         foreach ($GLOBALS['TCA'] as $table => $config) {
-            if (! in_array($table, $aSkip)) {
+            if (!in_array($table, $aSkip)) {
                 //foreach ($this->pageMap as $oldpid => $newpid) {
                 $this->source->ping();
                 $this->log('Content Cleanup ' . $table);
@@ -1206,7 +1206,7 @@ class CreateProcess implements LoggerAwareInterface
         }
 
         if (isset($this->siteconfig['errorHandling'])) {
-            foreach ($this->siteconfig['errorHandling'] as $idx=>$config) {
+            foreach ($this->siteconfig['errorHandling'] as $idx => $config) {
                 if (isset($config['errorContentSource']) && \str_starts_with($config['errorContentSource'], 't3://')) {
                     $this->siteconfig['errorHandling'][$idx]['errorContentSource'] = $this->translateT3LinkString($config['errorContentSource']);
                 }
@@ -1360,7 +1360,7 @@ class CreateProcess implements LoggerAwareInterface
             $newuid = $row['uid'];
             $newpid = $row['pid'];
 
-            $oldrow = $this->source->getRow($table, ['uid'=>$olduid]);
+            $oldrow = $this->source->getRow($table, ['uid' => $olduid]);
             $oldpid = 0;
             if (isset($oldpid['pid'])) {
                 $oldpid = $oldrow['pid'];
@@ -1413,7 +1413,7 @@ class CreateProcess implements LoggerAwareInterface
                         $this->source->ping();
 
                         //$this->debug(__METHOD__ . ':' . __LINE__);
-                        self::updateRecord($columnconfig['config']['foreign_table'], $update, ['uid'=>$orig['uid']]);
+                        self::updateRecord($columnconfig['config']['foreign_table'], $update, ['uid' => $orig['uid']]);
                     }
                 } else {
                     //$columnconfig['config']['foreign_table']
@@ -1485,7 +1485,7 @@ class CreateProcess implements LoggerAwareInterface
         if (!empty($this->getTask()->getValuemapping())) {
             $config = $this->getTask()->getValuemappingArray();
             if (isset($config[$table])) {
-                foreach ($config[$table] as $field=>$map) {
+                foreach ($config[$table] as $field => $map) {
                     if (isset($row[$field])) {
                         $origvalue = $row[$field];
                         if (isset($map[$origvalue])) {
@@ -1517,7 +1517,7 @@ class CreateProcess implements LoggerAwareInterface
         if (!\array_search('1:' . $path, $config['TYPO3']['CMS']['Form']['persistenceManager']['allowedFileMounts'], true)) {
             $keys = \array_keys($config['TYPO3']['CMS']['Form']['persistenceManager']['allowedFileMounts']);
             $lastkey = array_pop($keys);
-            $config['TYPO3']['CMS']['Form']['persistenceManager']['allowedFileMounts'][$lastkey+10] = '1:' . $path;
+            $config['TYPO3']['CMS']['Form']['persistenceManager']['allowedFileMounts'][$lastkey + 10] = '1:' . $path;
         }
         \file_put_contents(Environment::getPublicPath() . '/fileadmin/bk_form_config.yaml', Yaml::dump($config, 99, 2));
     }

@@ -31,14 +31,14 @@ class TyposcriptService implements LoggerAwareInterface
         return $oTSparser->setup;
     }
 
-    public static function fold(array $a, $i=0, $keys=''): string
+    public static function fold(array $a, $i = 0, $keys = ''): string
     {
         $c = '';
-        foreach ($a as $k=>$v) {
+        foreach ($a as $k => $v) {
             if (is_array($v)) {
                 if (count($v) > 1) {
                     $c .= "\n" . str_repeat(self::INDENT, $i) . $keys . substr($k, 0, -1) . ' {';
-                    $c .= str_repeat(self::INDENT, $i) . self::fold($v, $i+1);
+                    $c .= str_repeat(self::INDENT, $i) . self::fold($v, $i + 1);
                     $c .= str_repeat(self::INDENT, $i) . '}';
                 } else {
                     $c .= str_repeat(self::INDENT, $i) . self::fold($v, $i, $keys . $k);

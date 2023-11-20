@@ -27,7 +27,7 @@ class PreSysFileReferenceEventHandler
     {
         if ($event->getTable() === 'sys_file_reference') {
             $row = $event->getRecord();
-            $sys_file = $event->getCreateProcess()->getSource()->getRow('sys_file', ['uid'=>$row['uid_local']]);
+            $sys_file = $event->getCreateProcess()->getSource()->getRow('sys_file', ['uid' => $row['uid_local']]);
 
             if (empty($sys_file)) {
                 $row['uid_local'] = 0;

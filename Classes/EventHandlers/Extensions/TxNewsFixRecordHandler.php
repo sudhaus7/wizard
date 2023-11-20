@@ -19,9 +19,9 @@ class TxNewsFixRecordHandler
 {
     public function __invoke(BeforeContentCloneEvent $event)
     {
-        if ($event->getTable()==='tx_news_domain_model_news') {
+        if ($event->getTable() === 'tx_news_domain_model_news') {
             $record = $event->getRecord();
-            if ($record['related_links']===null) {
+            if ($record['related_links'] === null) {
                 $record['related_links'] = 0;
             }
 

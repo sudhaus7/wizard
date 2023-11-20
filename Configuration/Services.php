@@ -43,27 +43,27 @@ return static function (ContainerConfigurator $containerConfigurator, ContainerB
     $services->alias(SourceInterface::class, Localdatabase::class);
     $services->set(RunCommand::class)
         ->tag('console.command', [
-            'command'=>'sudhaus7:wizard',
-            'description'=>'run wizard tasks',
-            'schedulable'=>true,
+            'command' => 'sudhaus7:wizard',
+            'description' => 'run wizard tasks',
+            'schedulable' => true,
         ]);
 
     $services->set(PreSysFileReferenceEventHandler::class)
-             ->tag('event.listener', ['identifier'=>'s7wizardBaseHandleSysFileReferences']);
+             ->tag('event.listener', ['identifier' => 's7wizardBaseHandleSysFileReferences']);
 
     $services->set(DefaultSiteSorterListener::class)
-        ->tag('event.listener', ['identifier'=>'s7wizardDefaultSiteSorterListener']);
+        ->tag('event.listener', ['identifier' => 's7wizardDefaultSiteSorterListener']);
 
     $services->set(FinalTTContentFormFrameworkListener::class)
-             ->tag('event.listener', ['identifier'=>'s7wizardBaseFinalTTContentFormFrameworkListener']);
+             ->tag('event.listener', ['identifier' => 's7wizardBaseFinalTTContentFormFrameworkListener']);
 
     $services->set(TypoLinkinRichTextFieldsEvent::class)
-             ->tag('event.listener', ['identifier'=>'s7wizardTypoLinkinRichTextFieldsEventListener']);
+             ->tag('event.listener', ['identifier' => 's7wizardTypoLinkinRichTextFieldsEventListener']);
 
     $services->set(TxNewsPluginHandlerEvent::class)
-             ->tag('event.listener', ['identifier'=>'s7wizardTxNewsPluginHandlerEvent']);
+             ->tag('event.listener', ['identifier' => 's7wizardTxNewsPluginHandlerEvent']);
     $services->set(TxNewsFixRecordHandler::class)
-             ->tag('event.listener', ['identifier'=>'s7wizardTxNewsFixRecordHandler']);
+             ->tag('event.listener', ['identifier' => 's7wizardTxNewsFixRecordHandler']);
     $services->set(SysFileReferenceHandleLinkFieldListener::class)
-             ->tag('event.listener', ['identifier'=>'s7wizardSysFileReferenceHandleLinkFieldListener']);
+             ->tag('event.listener', ['identifier' => 's7wizardSysFileReferenceHandleLinkFieldListener']);
 };

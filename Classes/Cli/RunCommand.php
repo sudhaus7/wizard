@@ -78,7 +78,7 @@ class RunCommand extends Command
         }
     }
 
-    public function create(Creator $creator, InputInterface $input, OutputInterface $output, $mapfolder=null): void
+    public function create(Creator $creator, InputInterface $input, OutputInterface $output, $mapfolder = null): void
     {
         $creator->setStatus(15);
         $this->persistenceManager->update($creator);
@@ -96,7 +96,7 @@ class RunCommand extends Command
             $user  = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('be_users')->select(
                 [ '*' ],
                 'be_users',
-                ['uid'=>$creator->getCruserId()]
+                ['uid' => $creator->getCruserId()]
             )
             ->fetchAssociative();
 
@@ -204,8 +204,8 @@ class RunCommand extends Command
                       ->getConnectionForTable('tx_sudhaus7wizard_domain_model_creator')
                       ->update(
                           'tx_sudhaus7wizard_domain_model_creator',
-                          ['uid'=>$id],
-                          ['hidden'=>0, 'deleted'=>0, 'status'=>10]
+                          ['uid' => $id],
+                          ['hidden' => 0, 'deleted' => 0, 'status' => 10]
                       );
     }
 }

@@ -40,7 +40,7 @@ class RestWizardRequest
 
         if (!empty($this->getAPISHAREDSECRET())) {
             $password = \password_hash($this->getAPISHAREDSECRET(), \PASSWORD_DEFAULT);
-            $additionalOptions['headers']['X-Authorization']=\base64_encode($password);
+            $additionalOptions['headers']['X-Authorization'] = \base64_encode($password);
         }
 
         // $additionalOptions['headers']['X-Authorization']=\base64_encode( 'bla');
@@ -73,12 +73,12 @@ class RestWizardRequest
         $additionalOptions = [
             'headers' => ['Cache-Control' => 'no-cache'],
             'allow_redirects' => false,
-            'form_params'=>$body,
+            'form_params' => $body,
         ];
 
         if (!empty($this->getAPISHAREDSECRET())) {
             $password = \password_hash($this->getAPISHAREDSECRET(), \PASSWORD_DEFAULT);
-            $additionalOptions['headers']['X-Authorization']=\base64_encode($password);
+            $additionalOptions['headers']['X-Authorization'] = \base64_encode($password);
         }
 
         // Get a PSR-7-compliant response object
