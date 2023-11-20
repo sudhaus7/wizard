@@ -68,4 +68,14 @@ Registering a theme or template
 
    From this point on your theme will be available in the Themes drop down inside a :ref:`task record<taskrecord>` as an option, and you can start to clone sites implementing this theme.
 
+   As a last step your WizardProcess Class needs to be known to the wizard extension itself by adding the following line to your sitepackages ext_localconf.php (or any other place you can add to `$GLOBALS['TYPO3_CONF_VARS'])
 
+   .. code-block:php::
+
+      $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['Sudhaus7Wizard']['registeredTemplateExtentions']['SITEPACKAGE_EXTENSION'] = WizardProcess::class;
+
+   the :php:`WizardProcess` class is of course again your class you implemented in the previous step, and :php:`SITEPACKAGE_EXTENSION` is the extension name for your sitepackage.
+
+   .. tip::
+
+      the key :php:`SITEPACKAGE_EXTENSION` does not actually need to match the extension name per se. If you have several :php:`WizardProcess` classes in your extension this can be something like sitepackage_theme1 and sitepackage_theme2 for example. It just needs to match what your :php:`WizardConfig->getTemplate()` returns
