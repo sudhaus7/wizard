@@ -39,7 +39,6 @@ class CreatorRepository
 
     /**
      * @return Creator[]
-     * @throws \TYPO3\CMS\Extbase\Persistence\Generic\Exception
      * @throws DBALException
      * @throws Exception
      */
@@ -131,7 +130,6 @@ class CreatorRepository
                 )
             )
             ->setMaxResults(1);
-        $found = null;
 
         $result = $statement->executeQuery();
 
@@ -143,7 +141,6 @@ class CreatorRepository
         $data = [
             self::$table => [
                 $creator->getUid() => [
-                    'pid' => $creator->getPid(),
                     'status' => $creator->getStatus(),
                 ],
             ],
@@ -152,5 +149,20 @@ class CreatorRepository
         $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
         $dataHandler->start($data, []);
         $dataHandler->process_datamap();
+    }
+
+    public function updatePid(Creator $creator): void
+    {
+        $cmd = [
+            self::$table => [
+                $creator->getUid() => [
+                    'move' => $creator->getPid(),
+                ],
+            ],
+        ];
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start([], $cmd);
+        $dataHandler->process_cmdmap();
     }
 }

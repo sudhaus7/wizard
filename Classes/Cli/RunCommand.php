@@ -167,6 +167,7 @@ final class RunCommand extends Command
             $creator->setStatus(20);
 
             $this->repository->updateStatus($creator);
+            $this->repository->updatePid($creator);
 
             $user = GeneralUtility::makeInstance(ConnectionPool::class)
                 ->getConnectionForTable('be_users')
