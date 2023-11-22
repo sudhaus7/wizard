@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the TYPO3 project.
  *
@@ -20,12 +22,11 @@ use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Loader\YamlFileLoader;
 use TYPO3\CMS\Core\Service\FlexFormService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
 /**
  * Model Creator
  */
-class Creator extends AbstractEntity implements LoggerAwareInterface
+class Creator implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
     public static array $statusList = [
@@ -35,76 +36,78 @@ class Creator extends AbstractEntity implements LoggerAwareInterface
         15 => 'processing',
         20 => 'done',
     ];
-    protected ?string $t3ver_label = null;
-    protected ?int $hidden = null;
-    protected ?string $sourcepid = null;
-    protected ?string $base = null;
-    protected ?string $projektname = null;
-    protected ?string $longname = null;
-    protected ?string $shortname = null;
-    protected ?string $domainname = null;
-    protected ?string $contact = null;
-    protected ?string $reduser = null;
-    protected ?string $redemail = null;
-    protected ?string $redpass = null;
-    protected string $status = '';
-    protected ?string $flexinfo = null;
-    protected ?string $email = null;
-    protected ?string $valuemapping = null;
-    private array $valuemappingcache = [];
-    protected int $sourceuser = 0;
-    protected int $sourcefilemount = 0;
-    /**
-     * CruserId
-     *
-     * @var int
-     */
-    protected $cruserId = 0;
-    /**
-     * Source Class
-     */
-    protected ?string $sourceclass = null;
+
+    protected function __construct(
+        protected int $uid,
+        protected int $pid,
+        protected int $cruserId, // @todo cruser is removed by default in v12, if needed, handle in other ways
+        protected string $sourcepid,
+        protected string $base,
+        protected string $projektname,
+        protected string $longname,
+        protected string $shortname,
+        protected string $domainname,
+        protected string $contact,
+        protected string $reduser,
+        protected string $redemail,
+        protected string $redpass,
+        protected int $status,
+        protected string $flexinfo,
+        protected string $email,
+        protected string $valuemapping,
+        protected int $sourceuser,
+        protected int $sourcefilemount,
+        protected string $sourceclass,
+        private array $valuemappingcache = []
+    ) {}
 
     /**
-     * T3verLabel
-     *
-     * @return string|null t3ver_label
+     * @param array{
+     *     uid: int,
+     *     cruser_id: int,
+     *     sourcepid: string,
+     * base: string,
+     * projektname: string,
+     * longname: string,
+     * shortname: string,
+     * domainname: string,
+     * contact: string,
+     * reduser: string,
+     * redemail: string,
+     * redpass: string,
+     *  status: string,
+     *  flexinfo: string,
+     * email: string,
+     * valuemapping: string,
+     * sourceuser: int,
+     * sourcefilemount: int,
+     * sourceclass: string
+     * } $row
      */
-    public function getT3verLabel(): ?string
+    public static function createFromDatabaseRow(array $row): Creator
     {
-        return $this->t3ver_label;
-    }
-
-    /**
-     * T3verLabel
-     *
-     * @return $this
-     */
-    public function setT3verLabel(?string $t3ver_label)
-    {
-        $this->t3ver_label = $t3ver_label;
-        return $this;
-    }
-
-    /**
-     * Hidden
-     *
-     * @return int|null hidden
-     */
-    public function getHidden(): ?int
-    {
-        return $this->hidden;
-    }
-
-    /**
-     * Hidden
-     *
-     * @return $this
-     */
-    public function setHidden(?int $hidden)
-    {
-        $this->hidden = $hidden;
-        return $this;
+        return new self(
+            $row['uid'],
+            $row['pid'],
+            $row['cruser_id'],
+            $row['sourcepid'],
+            $row['base'],
+            $row['projektname'],
+            $row['longname'],
+            $row['shortname'],
+            $row['domainname'],
+            $row['contact'],
+            $row['reduser'],
+            $row['redemail'],
+            $row['redpass'],
+            $row['status'],
+            $row['flexinfo'],
+            $row['email'] ?? '',
+            $row['valuemapping'],
+            (int)$row['sourceuser'],
+            (int)$row['sourcefilemount'],
+            $row['sourceclass']
+        );
     }
 
     public function getSourcepid(): int
@@ -113,17 +116,6 @@ class Creator extends AbstractEntity implements LoggerAwareInterface
             return (int)GeneralUtility::trimExplode('=', $this->sourcepid)[1];
         }
         return (int)$this->sourcepid;
-    }
-
-    /**
-     * Sourcepid
-     *
-     * @return $this
-     */
-    public function setSourcepid(null|string|int $sourcepid)
-    {
-        $this->sourcepid = $sourcepid;
-        return $this;
     }
 
     /**
@@ -137,17 +129,6 @@ class Creator extends AbstractEntity implements LoggerAwareInterface
     }
 
     /**
-     * Base
-     *
-     * @return $this
-     */
-    public function setBase(?string $base)
-    {
-        $this->base = $base;
-        return $this;
-    }
-
-    /**
      * Projektname
      *
      * @return string|null projektname
@@ -155,17 +136,6 @@ class Creator extends AbstractEntity implements LoggerAwareInterface
     public function getProjektname(): ?string
     {
         return $this->projektname;
-    }
-
-    /**
-     * Projektname
-     *
-     * @return $this
-     */
-    public function setProjektname(?string $projektname)
-    {
-        $this->projektname = $projektname;
-        return $this;
     }
 
     /**
@@ -179,17 +149,6 @@ class Creator extends AbstractEntity implements LoggerAwareInterface
     }
 
     /**
-     * Longname
-     *
-     * @return $this
-     */
-    public function setLongname(?string $longname)
-    {
-        $this->longname = $longname;
-        return $this;
-    }
-
-    /**
      * Shortname
      *
      * @return string|null shortname
@@ -197,17 +156,6 @@ class Creator extends AbstractEntity implements LoggerAwareInterface
     public function getShortname(): ?string
     {
         return $this->shortname;
-    }
-
-    /**
-     * Shortname
-     *
-     * @return $this
-     */
-    public function setShortname(?string $shortname)
-    {
-        $this->shortname = $shortname;
-        return $this;
     }
 
     /**
@@ -221,17 +169,6 @@ class Creator extends AbstractEntity implements LoggerAwareInterface
     }
 
     /**
-     * Domainname
-     *
-     * @return $this
-     */
-    public function setDomainname(?string $domainname)
-    {
-        $this->domainname = $domainname;
-        return $this;
-    }
-
-    /**
      * Contact
      *
      * @return string|null contact
@@ -239,17 +176,6 @@ class Creator extends AbstractEntity implements LoggerAwareInterface
     public function getContact(): ?string
     {
         return $this->contact;
-    }
-
-    /**
-     * Contact
-     *
-     * @return $this
-     */
-    public function setContact(?string $contact)
-    {
-        $this->contact = $contact;
-        return $this;
     }
 
     /**
@@ -263,17 +189,6 @@ class Creator extends AbstractEntity implements LoggerAwareInterface
     }
 
     /**
-     * Reduser
-     *
-     * @return $this
-     */
-    public function setReduser(?string $reduser)
-    {
-        $this->reduser = $reduser;
-        return $this;
-    }
-
-    /**
      * Redemail
      *
      * @return string|null redemail
@@ -281,17 +196,6 @@ class Creator extends AbstractEntity implements LoggerAwareInterface
     public function getRedemail(): ?string
     {
         return $this->redemail;
-    }
-
-    /**
-     * Redemail
-     *
-     * @return $this
-     */
-    public function setRedemail(?string $redemail)
-    {
-        $this->redemail = $redemail;
-        return $this;
     }
 
     /**
@@ -304,45 +208,18 @@ class Creator extends AbstractEntity implements LoggerAwareInterface
         return $this->redpass;
     }
 
-    /**
-     * Redpass
-     *
-     * @return $this
-     */
-    public function setRedpass(?string $redpass)
-    {
-        $this->redpass = $redpass;
-        return $this;
-    }
-
-    /**
-     * Status
-     *
-     * @return string status
-     */
-    public function getStatus(): string
+    public function getStatus(): int
     {
         return $this->status;
     }
 
-    /**
-     * Status
-     *
-     * @param mixed $status
-     * @return $this
-     */
-    public function setStatus(string $status)
+    public function setStatus(int $status): Creator
     {
         $this->status = $status;
         return $this;
     }
 
-    /**
-     * Status
-     *
-     * @return string status
-     */
-    public function getStatusLabel()
+    public function getStatusLabel(): string
     {
         return self::$statusList[$this->status];
     }
@@ -364,7 +241,7 @@ class Creator extends AbstractEntity implements LoggerAwareInterface
 
         if ($useTypo3Service) {
             return  GeneralUtility::makeInstance(FlexFormService::class)
-                                          ->convertFlexFormContentToArray($this->flexinfo);
+                ->convertFlexFormContentToArray($this->flexinfo);
         }
 
         return GeneralUtility::xml2array($this->flexinfo);
@@ -393,17 +270,6 @@ class Creator extends AbstractEntity implements LoggerAwareInterface
     }
 
     /**
-     * Email
-     *
-     * @return $this
-     */
-    public function setEmail(?string $email)
-    {
-        $this->email = $email;
-        return $this;
-    }
-
-    /**
      * Returns the CruserId
      *
      * @return string $cruserId
@@ -414,15 +280,6 @@ class Creator extends AbstractEntity implements LoggerAwareInterface
     }
 
     /**
-     * Sets the CruserId
-     *
-     * @param string $cruserId
-     */
-    public function setCruserId($cruserId): void
-    {
-        $this->cruserId = $cruserId;
-    }
-    /**
      * Sourceclass
      *
      * @return string sourcepid
@@ -432,16 +289,6 @@ class Creator extends AbstractEntity implements LoggerAwareInterface
         return (string)$this->sourceclass;
     }
 
-    /**
-     * @param $sourceclass
-     *
-     * @return $this
-     */
-    public function setSourceclass(?string $sourceclass)
-    {
-        $this->sourceclass = $sourceclass;
-        return $this;
-    }
     /**
      * Status
      *
@@ -458,12 +305,7 @@ class Creator extends AbstractEntity implements LoggerAwareInterface
 
     public function getValuemapping(): string
     {
-        return (string)$this->valuemapping;
-    }
-
-    public function setValuemapping(?string $valuemapping): void
-    {
-        $this->valuemapping = (string)$valuemapping;
+        return $this->valuemapping;
     }
 
     public function getValuemappingArray(): array
@@ -482,18 +324,43 @@ class Creator extends AbstractEntity implements LoggerAwareInterface
         return $this->sourceuser;
     }
 
-    public function setSourceuser(int $sourceuser): void
-    {
-        $this->sourceuser = $sourceuser;
-    }
-
     public function getSourcefilemount(): int
     {
         return $this->sourcefilemount;
     }
 
-    public function setSourcefilemount(int $sourcefilemount): void
+    public function getUid(): int
     {
-        $this->sourcefilemount = $sourcefilemount;
+        return $this->uid;
     }
+
+    public function setPid(int $pid): Creator
+    {
+        $this->pid = $pid;
+        return $this;
+    }
+
+    public function getPid(): int
+    {
+        return $this->pid;
+    }
+
+    public function setReduser(string $reduser): Creator
+    {
+        $this->reduser = $reduser;
+        return $this;
+    }
+
+    public function setRedemail(string $redemail): Creator
+    {
+        $this->redemail = $redemail;
+        return $this;
+    }
+
+    public function setRedpass(string $redpass): Creator
+    {
+        $this->redpass = $redpass;
+        return $this;
+    }
+
 }

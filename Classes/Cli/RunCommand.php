@@ -13,6 +13,8 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard\Cli;
 
+use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Driver\Exception;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Repository\CreatorRepository;
 use SUDHAUS7\Sudhaus7Wizard\Services\CreateProcessFactory;
@@ -24,16 +26,17 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
+use TYPO3\CMS\Core\Core\Bootstrap;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Mail\MailMessage;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 
 final class RunCommand extends Command
 {
     public ?ConsoleLogger $logger = null;
     private ?CreatorRepository $repository = null;
-    private ?PersistenceManager $persistenceManager = null;
 
     protected function configure(): void
     {
@@ -49,9 +52,12 @@ final class RunCommand extends Command
     {
         $this->logger = new ConsoleLogger($output);
         $this->repository = GeneralUtility::makeInstance(CreatorRepository::class);
-        $this->persistenceManager = GeneralUtility::makeInstance(PersistenceManager::class);
     }
 
+    /**
+     * @throws \Doctrine\DBAL\Driver\Exception
+     * @throws DBALException
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $mapFolder = null;
@@ -62,28 +68,34 @@ final class RunCommand extends Command
         switch ($input->getArgument('mode')) {
             case 'info':
                 if ($input->getOption('id')) {
+                    $force = false;
                     if ($input->getOption('force')) {
-                        $this->forceVisible($input->getOption('id'));
+                        $force = true;
                     }
-                    $o = $this->repository->findByIdentifier($input->getOption('id'));
+                    $o = $this->repository->findByIdentifier($input->getOption('id'), $force);
                     if ($o instanceof Creator) {
                         $this->getInfo($o, $input, $output);
+                        return Command::SUCCESS;
+                    } else {
+                        $output->writeln('<info>Not found</info>');
                     }
                 } else {
                     $o = $this->repository->findNext();
                     if ($o instanceof Creator) {
                         $this->getInfo($o, $input, $output);
+                        return Command::SUCCESS;
                     }
                 }
                 break;
             case 'single':
                 if ($input->getOption('id')) {
+                    $force = false;
                     if ($input->getOption('force')) {
-                        $this->forceVisible($input->getOption('id'));
+                        $force = true;
                     }
-                    $o = $this->repository->findByIdentifier($input->getOption('id'));
+                    $o = $this->repository->findByIdentifier($input->getOption('id'), $force);
                     if ($o instanceof Creator) {
-                        $this->create($o, $input, $output, $mapFolder);
+                        return $this->create($o, $input, $output, $mapFolder);
                     }
                 }
                 return 0;
@@ -97,9 +109,11 @@ final class RunCommand extends Command
                 $o = $this->repository->findNext();
                 if ($o instanceof Creator) {
                     if (!$this->repository->isRunning()) {
-                        $this->create($o, $input, $output, $mapfolder);
+                        $this->create($o, $input, $output, $mapFolder);
                     }
-                    return 0;
+                } else {
+                    $output->writeln('<info>🎆 No wizard jobs to process 🎆</info>');
+                    return Command::SUCCESS;
                 }
                 break;
             default:
@@ -135,11 +149,16 @@ final class RunCommand extends Command
         }
     }
 
-    public function create(Creator $creator, InputInterface $input, OutputInterface $output, $mapfolder = null): void
+    /**
+     * @throws ExtensionConfigurationPathDoesNotExistException
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws Exception
+     */
+    public function create(Creator $creator, InputInterface $input, OutputInterface $output, $mapfolder = null): int
     {
+        Bootstrap::initializeBackendAuthentication();
         $creator->setStatus(15);
-        $this->persistenceManager->update($creator);
-        $this->persistenceManager->persistAll();
+        $this->repository->updateStatus($creator);
         $this->getInfo($creator, $input, $output);
         //$output->write(implode("\n",)."\n");
 
@@ -147,14 +166,19 @@ final class RunCommand extends Command
             $output->write("Fertig\n", true);
             $creator->setStatus(20);
 
-            $this->persistenceManager->update($creator);
-            $this->persistenceManager->persistAll();
+            $this->repository->updateStatus($creator);
+            $this->repository->updatePid($creator);
 
-            $user = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('be_users')->select(
-                ['*'],
-                'be_users',
-                ['uid' => $creator->getCruserId()]
-            )
+            $user = GeneralUtility::makeInstance(ConnectionPool::class)
+                ->getConnectionForTable('be_users')
+                ->select(
+                    ['*'],
+                    'be_users',
+                    ['uid' => $creator->getCruserId()],
+                    [],
+                    [],
+                    1
+                )
                 ->fetchAssociative();
 
             if (!empty($user['email'])) {
@@ -170,7 +194,14 @@ final class RunCommand extends Command
                 $mail->send();
                 $output->write("E-Mail versendet\n");
             }
+
+            return Command::SUCCESS;
         }
+
+        $creator->setStatus(5);
+        $this->repository->updateStatus($creator);
+
+        return Command::FAILURE;
     }
 
     public function getStatus(InputInterface $input, OutputInterface $output): void

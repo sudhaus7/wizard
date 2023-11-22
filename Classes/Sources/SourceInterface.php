@@ -75,7 +75,8 @@ interface SourceInterface extends LoggerAwareInterface
         int $pid,
         array $oldRow,
         array $columnConfig,
-        array $pidList = []
+        array $pidList = [],
+        string $column = ''
     ): array;
 
     /**

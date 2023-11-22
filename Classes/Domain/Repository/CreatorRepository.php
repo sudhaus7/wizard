@@ -13,42 +13,155 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard\Domain\Repository;
 
-use TYPO3\CMS\Extbase\Persistence\Generic\Query;
-use TYPO3\CMS\Extbase\Persistence\Repository;
+use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Driver\Exception;
+use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
+use TYPO3\CMS\Core\Database\Connection;
+use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\DataHandling\DataHandler;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * Class CreatorRepository
  */
-class CreatorRepository extends Repository
+class CreatorRepository
 {
-    public function findAll()
+    protected static string $table = 'tx_sudhaus7wizard_domain_model_creator';
+
+    /**
+     * @return Creator[]
+     * @throws DBALException
+     * @throws Exception
+     */
+    public function findAll(): array
     {
-        /** @var Query $query */
-        $query = $this->createQuery();
-        $querySettings = $query->getQuerySettings();
-        $querySettings->setRespectStoragePage(false);
-        $query->setQuerySettings($querySettings);
-        return $query->execute();
+        $db = GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getQueryBuilderForTable(self::$table);
+        $statement = $db
+            ->select('*')
+            ->from(self::$table);
+        $found = [];
+
+        $result = $statement->executeQuery();
+
+        while ($row = $result->fetchAssociative()) {
+            $found[] = Creator::createFromDatabaseRow($row);
+        }
+
+        return $found;
     }
 
-    public function findNext()
+    /**
+     * @throws Exception
+     * @throws DBALException
+     */
+    public function findNext(): ?Creator
     {
-        /** @var Query $query */
-        $query = $this->createQuery();
-        $querySettings = $query->getQuerySettings();
-        $querySettings->setRespectStoragePage(false);
-        $query->setQuerySettings($querySettings);
-        $query->matching($query->equals('status', 10));
-        return $query->execute()->getFirst();
+        $db = GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getQueryBuilderForTable(self::$table);
+        $statement = $db
+            ->select('*')
+            ->from(self::$table)
+            ->where(
+                $db->expr()->eq(
+                    'status',
+                    $db->createNamedParameter(10, Connection::PARAM_INT)
+                )
+            )
+            ->setMaxResults(1);
+        $found = null;
+
+        $result = $statement->executeQuery();
+
+        if ($row = $result->fetchAssociative()) {
+            $found = Creator::createFromDatabaseRow($row);
+        }
+
+        return $found;
     }
 
+    /**
+     * @throws Exception
+     * @throws DBALException
+     */
+    public function findByIdentifier(int|string $identifier, bool $force = false): ?Creator
+    {
+        $db = GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getQueryBuilderForTable(self::$table);
+        if ($force) {
+            $db->getRestrictions()->removeAll();
+        }
+        $statement = $db
+            ->select('*')
+            ->from(self::$table)
+            ->where(
+                $db->expr()->eq(
+                    'uid',
+                    $db->createNamedParameter($identifier, Connection::PARAM_INT)
+                )
+            )
+            ->setMaxResults(1);
+        $found = null;
+
+        $result = $statement->executeQuery();
+
+        if ($row = $result->fetchAssociative()) {
+            $found = Creator::createFromDatabaseRow($row);
+        }
+
+        return $found;
+    }
+
+    /**
+     * @throws DBALException
+     */
     public function isRunning(): bool
     {
-        $query = $this->createQuery();
-        $querySettings = $query->getQuerySettings();
-        $querySettings->setRespectStoragePage(false);
-        $query->setQuerySettings($querySettings);
-        $query->matching($query->equals('status', 15));
-        return $query->count() > 0;
+        $db = GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getQueryBuilderForTable(self::$table);
+        $statement = $db
+            ->select('*')
+            ->from(self::$table)
+            ->where(
+                $db->expr()->eq(
+                    'status',
+                    $db->createNamedParameter(15, Connection::PARAM_INT)
+                )
+            )
+            ->setMaxResults(1);
+
+        $result = $statement->executeQuery();
+
+        return $result->columnCount() > 0;
+    }
+
+    public function updateStatus(Creator $creator): void
+    {
+        $data = [
+            self::$table => [
+                $creator->getUid() => [
+                    'status' => $creator->getStatus(),
+                ],
+            ],
+        ];
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start($data, []);
+        $dataHandler->process_datamap();
+    }
+
+    public function updatePid(Creator $creator): void
+    {
+        $cmd = [
+            self::$table => [
+                $creator->getUid() => [
+                    'move' => $creator->getPid(),
+                ],
+            ],
+        ];
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start([], $cmd);
+        $dataHandler->process_cmdmap();
     }
 }

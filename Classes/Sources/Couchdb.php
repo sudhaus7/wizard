@@ -494,8 +494,18 @@ function(doc) {
         return $rows;
     }
 
-    public function getIrre($table, $uid, $pid, array $oldRow, array $columnConfig, $pidList = []): array
-    {
+    /**
+     * @inheritDoc
+     */
+    public function getIrre(
+        string $table,
+        int $uid,
+        int $pid,
+        array $oldRow,
+        array $columnConfig,
+        array $pidList = [],
+        string $column = ''
+    ): array {
         $where = [
             $columnConfig['config']['foreign_field'] => $uid,
         ];
