@@ -54,7 +54,7 @@ Registering a theme or template
 
    Now you have to register your process class with the wizard, by crating a file :lit:`Configuration/TCA/Overrides/wizard.php` in your theme-extension/sitepackage and add the following lines :
 
-   .. code-block:php::
+   .. code-block:: php
 
       use SUDHAUS7\Sudhaus7Template\Wizard\WizardProcess;
       use SUDHAUS7\Sudhaus7Wizard\Tools;
@@ -64,15 +64,19 @@ Registering a theme or template
           Tools::registerWizardProcess(WizardProcess::class);
       }
 
+
    the :php:`WizardProcess` class is of course your class you implemented in the previous step
 
    From this point on your theme will be available in the Themes drop down inside a :ref:`task record<taskrecord>` as an option, and you can start to clone sites implementing this theme.
 
-   As a last step your WizardProcess Class needs to be known to the wizard extension itself by adding the following line to your sitepackages ext_localconf.php (or any other place you can add to `$GLOBALS['TYPO3_CONF_VARS'])
+#. Registering the WizardProcess Class
 
-   .. code-block:php::
+   As a last step your WizardProcess Class needs to be known to the wizard extension itself by adding the following line to your sitepackages ext_localconf.php (or any other place you can add to :php:`$GLOBALS['TYPO3_CONF_VARS'])`
+
+   .. code-block:: php
 
       $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['Sudhaus7Wizard']['registeredTemplateExtentions']['SITEPACKAGE_EXTENSION'] = WizardProcess::class;
+
 
    the :php:`WizardProcess` class is of course again your class you implemented in the previous step, and :php:`SITEPACKAGE_EXTENSION` is the extension name for your sitepackage.
 
