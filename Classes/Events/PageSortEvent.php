@@ -35,7 +35,7 @@ final class PageSortEvent implements WizardEventInterface
      */
     public function __construct(int $oldpid, array $record, CreateProcess $create_process)
     {
-        $this->create_process = $create_process;
+        $this->createProcess = $create_process;
         $this->oldpid = $oldpid;
         $this->record = $record;
     }
