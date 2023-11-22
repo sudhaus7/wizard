@@ -19,12 +19,12 @@ use TYPO3\CMS\Core\Configuration\FlexForm\FlexFormTools;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class Tools
+final class Tools
 {
     /**
-     * @return mixed
+     * @return array<array-key, mixed>|null
      */
-    public static function getRegisteredExtentions()
+    public static function getRegisteredExtensions(): ?array
     {
         return $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['Sudhaus7Wizard']['registeredTemplateExtentions'];
     }
@@ -41,9 +41,9 @@ class Tools
     }
 
     /**
-     * @param $class
+     * @param class-string $class
      */
-    public static function registerWizardProcess($class): void
+    public static function registerWizardProcess(string $class): void
     {
         if (!in_array(WizardProcessInterface::class, class_implements($class))) {
             return;
@@ -70,9 +70,9 @@ class Tools
         }
     }
 
-    public static function generateslug($str): ?string
+    public static function generateSlug(string $str): ?string
     {
-        $str = mb_strtolower(trim((string)$str));
+        $str = mb_strtolower(trim($str));
         $str = str_replace(
             [
                 'ß',
@@ -93,20 +93,29 @@ class Tools
         if (function_exists('iconv')) {
             $str = iconv('utf-8', 'us-ascii//TRANSLIT', $str);
         }
-        $str = preg_replace('/[^a-z0-9-]/', '-', $str);
+        $str = preg_replace('/[^a-z0-9-]/', '-', (string)$str);
 
-        return preg_replace('/-+/', '-', $str);
+        return preg_replace('/-+/', '-', (string)$str);
     }
 
-    public static function array2xml($a)
+    /**
+     * @param array<array-key, mixed> $a
+     */
+    public static function array2xml(array $a): string
     {
-        /** @var $flexObj FlexFormTools */
         $flexObj = GeneralUtility::makeInstance(FlexFormTools::class);
         return $flexObj->flexArray2Xml($a, true);
     }
 
-    public static function resolveFieldConfigurationAndRespectColumnsOverrides(string $table, string $field, array $record): array
-    {
+    /**
+     * @param array<array-key, mixed> $record
+     * @return array<array-key, mixed>
+     */
+    public static function resolveFieldConfigurationAndRespectColumnsOverrides(
+        string $table,
+        string $field,
+        array $record
+    ): array {
         $tcaFieldConf = $GLOBALS['TCA'][$table]['columns'][$field]['config'];
         $recordType = BackendUtility::getTCAtypeValue($table, $record);
         $columnsOverridesConfigOfField = $GLOBALS['TCA'][$table]['types'][$recordType]['columnsOverrides'][$field]['config'] ?? null;

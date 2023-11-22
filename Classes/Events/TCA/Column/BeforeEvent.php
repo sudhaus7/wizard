@@ -21,44 +21,44 @@ use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventWriteableRecordInterface;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventWriteableRecordTrait;
 
-class BeforeEvent implements WizardEventInterface, WizardEventWriteableRecordInterface
+final class BeforeEvent implements WizardEventInterface, WizardEventWriteableRecordInterface
 {
     use EventTrait;
     use EventWriteableRecordTrait;
-    /**
-     * @var string the tablename
-     */
-    protected string $table;
-    /**
-     * @var string the TCA column
-     */
+
     protected string $column;
-    /**
-     * @var array the TCA Config
-     */
+
     protected array $columnConfig;
+
     /**
-     * @var array the record to work on
-     */
-    protected array $record;
-    /**
-     * @var array configuration array:
-     * [
-        'table'  => $table,
-        'olduid' => $olduid,
-        'oldpid' => $oldpid,
-        'newpid' => $newpid,
-        'pObj'   => $this,
-        ]
+     * @var array{
+     *     table: string,
+     *     olduid: string|int,
+     *     oldpid: string|int,
+     *     newpid: string|int,
+     *     pObj: object
+     * } configuration array
      */
     protected array $parameters;
-    public function __construct(string $table, string $column, array $columnConfig, array $record, array $parameters, CreateProcess $create_process)
-    {
+
+    /**
+     * @param array<array-key, mixed> $columnConfig
+     * @param array<array-key, mixed> $record
+     * @param array<array-key, mixed> $parameters
+     */
+    public function __construct(
+        string $table,
+        string $column,
+        array $columnConfig,
+        array $record,
+        array $parameters,
+        CreateProcess $createProcess
+    ) {
         $this->table = $table;
         $this->column = $column;
         $this->record = $record;
         $this->parameters = $parameters;
-        $this->create_process = $create_process;
+        $this->createProcess = $createProcess;
         $this->columnConfig = $columnConfig;
     }
 
@@ -71,7 +71,7 @@ class BeforeEvent implements WizardEventInterface, WizardEventWriteableRecordInt
     }
 
     /**
-     * @return array
+     * @return array<array-key, mixed>
      */
     public function getColumnConfig(): array
     {
@@ -79,7 +79,7 @@ class BeforeEvent implements WizardEventInterface, WizardEventWriteableRecordInt
     }
 
     /**
-     * @return array
+     * @return array<array-key, mixed>
      */
     public function getParameters(): array
     {

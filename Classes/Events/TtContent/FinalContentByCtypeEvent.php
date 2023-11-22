@@ -19,21 +19,27 @@ use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventWriteableRecordInterface;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventWriteableRecordTrait;
 
-class FinalContentByCtypeEvent implements WizardEventInterface, WizardEventWriteableRecordInterface
+final class FinalContentByCtypeEvent implements WizardEventInterface, WizardEventWriteableRecordInterface
 {
     use EventTrait;
     use EventWriteableRecordTrait;
+
     protected string $ctype;
     protected ?string $listType;
-    protected array $record;
-    protected CreateProcess $create_process;
 
-    public function __construct(string $ctype, ?string $listType, array $record, CreateProcess $create_process)
-    {
-        $this->ctype = $ctype;
+    /**
+     * @param array<array-key, mixed> $record
+     */
+    public function __construct(
+        string $cType,
+        ?string $listType,
+        array $record,
+        CreateProcess $createProcess
+    ) {
+        $this->ctype = $cType;
         $this->listType = $listType;
         $this->record = $record;
-        $this->create_process = $create_process;
+        $this->createProcess = $createProcess;
     }
 
     /**

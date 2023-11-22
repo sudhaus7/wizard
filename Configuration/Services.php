@@ -21,7 +21,7 @@ use SUDHAUS7\Sudhaus7Wizard\EventHandlers\FinalTTContentFormFrameworkListener;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\PreSysFileReferenceEventHandler;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\SysFileReferenceHandleLinkFieldListener;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\TypoLinkinRichTextFieldsEvent;
-use SUDHAUS7\Sudhaus7Wizard\Sources\Localdatabase;
+use SUDHAUS7\Sudhaus7Wizard\Sources\LocalDatabase;
 use SUDHAUS7\Sudhaus7Wizard\Sources\SourceInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
@@ -40,30 +40,30 @@ return static function (ContainerConfigurator $containerConfigurator, ContainerB
                  __DIR__ . '/../Classes/Backend/',
              ]);
 
-    $services->alias(SourceInterface::class, Localdatabase::class);
+    $services->alias(SourceInterface::class, LocalDatabase::class);
     $services->set(RunCommand::class)
         ->tag('console.command', [
-            'command'=>'sudhaus7:wizard',
-            'description'=>'run wizard tasks',
-            'schedulable'=>true,
+            'command' => 'sudhaus7:wizard',
+            'description' => 'run wizard tasks',
+            'schedulable' => true,
         ]);
 
     $services->set(PreSysFileReferenceEventHandler::class)
-             ->tag('event.listener', ['identifier'=>'s7wizardBaseHandleSysFileReferences']);
+             ->tag('event.listener', ['identifier' => 's7wizardBaseHandleSysFileReferences']);
 
     $services->set(DefaultSiteSorterListener::class)
-        ->tag('event.listener', ['identifier'=>'s7wizardDefaultSiteSorterListener']);
+        ->tag('event.listener', ['identifier' => 's7wizardDefaultSiteSorterListener']);
 
     $services->set(FinalTTContentFormFrameworkListener::class)
-             ->tag('event.listener', ['identifier'=>'s7wizardBaseFinalTTContentFormFrameworkListener']);
+             ->tag('event.listener', ['identifier' => 's7wizardBaseFinalTTContentFormFrameworkListener']);
 
     $services->set(TypoLinkinRichTextFieldsEvent::class)
-             ->tag('event.listener', ['identifier'=>'s7wizardTypoLinkinRichTextFieldsEventListener']);
+             ->tag('event.listener', ['identifier' => 's7wizardTypoLinkinRichTextFieldsEventListener']);
 
     $services->set(TxNewsPluginHandlerEvent::class)
-             ->tag('event.listener', ['identifier'=>'s7wizardTxNewsPluginHandlerEvent']);
+             ->tag('event.listener', ['identifier' => 's7wizardTxNewsPluginHandlerEvent']);
     $services->set(TxNewsFixRecordHandler::class)
-             ->tag('event.listener', ['identifier'=>'s7wizardTxNewsFixRecordHandler']);
+             ->tag('event.listener', ['identifier' => 's7wizardTxNewsFixRecordHandler']);
     $services->set(SysFileReferenceHandleLinkFieldListener::class)
-             ->tag('event.listener', ['identifier'=>'s7wizardSysFileReferenceHandleLinkFieldListener']);
+             ->tag('event.listener', ['identifier' => 's7wizardSysFileReferenceHandleLinkFieldListener']);
 };

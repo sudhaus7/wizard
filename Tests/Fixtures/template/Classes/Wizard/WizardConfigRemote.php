@@ -48,8 +48,8 @@ class WizardConfigRemote implements WizardTemplateConfigInterface
         $TCA['types']['template_remote']['showitem']         = 'status,base,sourceclass,sourcepid,valuemapping,projektname,longname,shortname,domainname,contact,email,--div--;Benutzer,reduser,redpass,redemail,--div--;Template Konfigurationen,flexinfo';
         $TCA['types']['template_remote']['columnsOverrides'] = [
             'valuemapping' => [
-                'config'=>[
-                    'items'=>[['EKBO Mapping', 'EXT:template/Resources/Private/Mapping/Ekbo.yaml']],
+                'config' => [
+                    'items' => [['EKBO Mapping', 'EXT:template/Resources/Private/Mapping/Ekbo.yaml']],
                 ],
             ],
             'sourcepid'   => [
@@ -60,7 +60,7 @@ class WizardConfigRemote implements WizardTemplateConfigInterface
                     'max'           => 1,
                     'size'          => 1,
                     'multi'         => false,
-                    'eval'=>'trim',
+                    'eval' => 'trim',
                     'itemsProcFunc' => RemoteSites::class . '->itemsProcFunc',
                 ],
             ],

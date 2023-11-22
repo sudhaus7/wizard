@@ -13,6 +13,7 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard\Sources;
 
+use Doctrine\DBAL\Driver\Exception;
 use Psr\Log\LoggerAwareTrait;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use SUDHAUS7\Sudhaus7Wizard\Services\FolderService;
@@ -22,6 +23,10 @@ use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
+use TYPO3\CMS\Core\Resource\Exception\ExistingTargetFolderException;
+use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderAccessPermissionsException;
+use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderReadPermissionsException;
+use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderWritePermissionsException;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -30,9 +35,26 @@ abstract class RestWizardServerSource implements SourceInterface
     use DbTrait;
     use LoggerAwareTrait;
 
+    /**
+     * @var array<array-key, mixed>
+     */
     protected array $remoteTables = [];
+
     protected ?Creator $creator = null;
+
+    /**
+     * @var array<array-key, mixed>
+     */
     private array $tree = [];
+
+    /**
+     * @var array<array-key, mixed>
+     */
+    protected array $rowCache = [];
+
+    /**
+     * @var array<array-key, mixed>
+     */
     public array $siteconfig = [
         'base'          => 'domainname',
         'baseVariants'  => [],
@@ -68,7 +90,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 ',
                     ],
             ],
-        'imports'=>[
+        'imports' => [
 
         ],
     ];
@@ -100,17 +122,15 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
             // no harm done
             $x = 1;
         } catch (\Exception $e) {
-            $x =1;
+            $x = 1;
         }
         return $this->siteconfig;
     }
 
-    protected $rowCache = [];
-
     /**
      * @inheritDoc
      */
-    public function getRow($table, $where = [])
+    public function getRow(string $table, array $where = []): mixed
     {
         if (!empty($this->remoteTables) && !\in_array($table, $this->remoteTables)) {
             return [];
@@ -139,8 +159,9 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 
     /**
      * @inheritDoc
+     * @throws \Exception
      */
-    public function getRows($table, $where = [])
+    public function getRows(string $table, array $where = []): array
     {
         if (!empty($this->remoteTables) && !\in_array($table, $this->remoteTables)) {
             return [];
@@ -167,19 +188,19 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 
     /**
      * @inheritDoc
+     * @throws \Exception
      */
-    public function getTree($start)
+    public function getTree(int $start): array
     {
         $endpoint = sprintf('tree/%d', $start);
         $this->logger->debug('getTree ' . $endpoint);
-        $content = $this->getAPI()->request($endpoint);
-        return $content;
+        return $this->getAPI()->request($endpoint);
     }
 
     /**
      * @inheritDoc
      */
-    public function ping()
+    public function ping(): void
     {
         // TODO: Implement ping() method.
     }
@@ -187,7 +208,14 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     /**
      * @inheritDoc
      */
-    public function getIrre($table, $uid, $pid, array $oldrow, array $columnconfig, $pidlist = [])
+    public function getIrre(
+        string $table,
+        int    $uid,
+        int    $pid,
+        array  $oldRow,
+        array  $columnConfig,
+        array $pidList = []
+    ): array
     {
         if (!empty($this->remoteTables) && !\in_array($table, $this->remoteTables)) {
             return [];
@@ -196,73 +224,75 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
             return [];
         }
         $where = [
-            $columnconfig['config']['foreign_field']=>$uid,
+            $columnConfig['config']['foreign_field'] => $uid,
         ];
-        if (isset($columnconfig['config']['foreign_table_field'])) {
-            $where[$columnconfig['config']['foreign_table_field']] = $table;
+        if (isset($columnConfig['config']['foreign_table_field'])) {
+            $where[$columnConfig['config']['foreign_table_field']] = $table;
         }
 
-        if (isset($columnconfig['config']['foreign_match_fields']) && !empty($columnconfig['config']['foreign_match_fields'])) {
-            foreach ($columnconfig['config']['foreign_match_fields'] as $ff => $vv) {
-                $where[$ff]=$vv;
+        if (!empty($columnConfig['config']['foreign_match_fields'])) {
+            foreach ($columnConfig['config']['foreign_match_fields'] as $ff => $vv) {
+                $where[$ff] = $vv;
             }
         }
 
-        $endpoint = sprintf('content/%s', $columnconfig['config']['foreign_table']);
+        $endpoint = sprintf('content/%s', $columnConfig['config']['foreign_table']);
 
         $this->logger->debug('getIRRE ' . $endpoint . ' ' . \json_encode($where));
-        $content = $this->getAPI()->post($endpoint, $where);
-        return $content;
+        return $this->getAPI()->post($endpoint, $where);
     }
 
     /**
      * @inheritDoc
+     * @throws Exception
+     * @throws ExistingTargetFolderException
+     * @throws InsufficientFolderAccessPermissionsException
+     * @throws InsufficientFolderReadPermissionsException
+     * @throws InsufficientFolderWritePermissionsException
+     * @throws \Exception
      */
-    public function handleFile(array $sys_file, $newidentifier)
+    public function handleFile(array $sysFile, string $newIdentifier): array
     {
-        $this->logger->debug('handleFile ' . $newidentifier . ' START');
+        $this->logger->debug('handleFile ' . $newIdentifier . ' START');
 
-        $folder = GeneralUtility::makeInstance(FolderService::class)->getOrCreateFromIdentifier(dirname($newidentifier));
+        $folder = GeneralUtility::makeInstance(FolderService::class)->getOrCreateFromIdentifier(dirname($newIdentifier));
 
-        $newfilename = $folder->getStorage()->sanitizeFileName(basename($newidentifier));
-        $newidentifier = $folder->getIdentifier() . $newfilename;
-        if ($folder->hasFile($newfilename)) {
-            $this->logger->debug('file exists - END' . Environment::getPublicPath() . '/fileadmin' . $newidentifier);
+        $newFileName = $folder->getStorage()->sanitizeFileName(basename($newIdentifier));
+        $newIdentifier = $folder->getIdentifier() . $newFileName;
+        if ($folder->hasFile($newFileName)) {
+            $this->logger->debug('file exists - END' . Environment::getPublicPath() . '/fileadmin' . $newIdentifier);
 
-            $file = $folder->getFile($newfilename);
+            $file = $folder->getFile($newFileName);
 
-            $res = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('sys_file')
-                                 ->select(
-                                     [ '*' ],
-                                     'sys_file',
-                                     ['uid'=>$file->getUid()]
-                                 );
-            $sys_file = $res->fetchAssociative();
-            if (!$sys_file) {
-                return ['uid'=>0];
-            }
-            return $sys_file;
+            $res = GeneralUtility::makeInstance(ConnectionPool::class)
+                ->getConnectionForTable('sys_file')
+                ->select(
+                    [ '*' ],
+                    'sys_file',
+                    ['uid' => $file->getUid()]
+                );
+            return $res->fetchAssociative() ?: ['uid' => 0];
         }
 
-        $this->logger->debug('fetching ' . $this->getAPI()->getAPIHOST() . 'fileadmin/' . trim($sys_file['identifier'], '/'));
+        $this->logger->debug('fetching ' . $this->getAPI()->getAPIHOST() . 'fileadmin/' . trim($sysFile['identifier'], '/'));
 
-        $buf = @\file_get_contents($this->getAPI()->getAPIHOST() . 'fileadmin' . $sys_file['identifier']);
+        $buf = @\file_get_contents($this->getAPI()->getAPIHOST() . 'fileadmin' . $sysFile['identifier']);
         if (!$buf) {
-            $this->logger->error('fetch failed' . $this->getAPI()->getAPIHOST() . 'fileadmin/' . trim($sys_file['identifier'], '/'));
-            return ['uid'=>0];
+            $this->logger->error('fetch failed' . $this->getAPI()->getAPIHOST() . 'fileadmin/' . trim($sysFile['identifier'], '/'));
+            return ['uid' => 0];
         }
 
-        $tempfile = \tempnam(\sys_get_temp_dir(), 'wizarddl');
-        \file_put_contents($tempfile, $buf);
+        $tempFile = \tempnam(\sys_get_temp_dir(), 'wizarddl');
+        \file_put_contents($tempFile, $buf);
 
-        $file = $folder->addFile($tempfile, basename($newidentifier));
-        @unlink($tempfile);
+        $file = $folder->addFile($tempFile, basename($newIdentifier));
+        @unlink($tempFile);
 
-        $this->logger->debug('wrote file ' . Environment::getPublicPath() . '/fileadmin' . $newidentifier);
+        $this->logger->debug('wrote file ' . Environment::getPublicPath() . '/fileadmin' . $newIdentifier);
 
-        $olduid = $sys_file['uid'];
+        $olduid = $sysFile['uid'];
 
-        unset($sys_file['uid']);
+        unset($sysFile['uid']);
 
         $uid = $file->getUid();
 
@@ -270,7 +300,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
             $endpoint = sprintf('content/%s/file/%d', 'sys_file_metadata', $olduid);
             $this->logger->debug('FILE metadata fetching ' . $endpoint);
             $content  = $this->getAPI()->request($endpoint);
-            if (\is_array($content) && !empty($content) && !empty($content[0])) {
+            if (!empty($content) && !empty($content[0])) {
                 $sys_file_metadata = $content[0];
                 unset($sys_file_metadata['uid']);
                 $sys_file_metadata['file'] = $uid;
@@ -279,40 +309,38 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         } catch (\Exception $e) {
             $this->logger->error('FILE fetching ' . $endpoint . ' : ' . $e->getMessage());
         }
-        $sys_file = BackendUtility::getRecord('sys_file', $uid);
-        $this->logger->debug('handleFile ' . $newidentifier . ' END');
-        return $sys_file;
+        $sysFile = BackendUtility::getRecord('sys_file', $uid);
+        $this->logger->debug('handleFile ' . $newIdentifier . ' END');
+        return $sysFile ?? ['uid' => 0];
     }
 
     /**
      * @inheritDoc
+     * @throws \Exception
      */
-    public function getMM($mmtable, $uid, $tablename)
+    public function getMM(string $mmTable, int|string $uid, string $tableName): array
     {
-        if (!empty($this->remoteTables) && !\in_array($mmtable, $this->remoteTables)) {
+        if (!empty($this->remoteTables) && !\in_array($mmTable, $this->remoteTables)) {
             return [];
         }
-        $endpoint = sprintf('content/%s/uid_local/%d', $mmtable, $uid);
+        $endpoint = sprintf('content/%s/uid_local/%d', $mmTable, $uid);
         $this->logger->debug('getMM ' . $endpoint);
-        $content  = $this->getAPI()->request($endpoint);
-        if (\is_array($content)) {
-            return $content;
-        }
-        return [];
+        return $this->getAPI()->request($endpoint);
     }
 
     /**
      * @inheritDoc
      */
-    public function sourcePid()
+    public function sourcePid(): int
     {
         return $this->creator->getSourcepid();
     }
 
     /**
      * @inheritDoc
+     * @throws \Exception
      */
-    public function getTables()
+    public function getTables(): array
     {
         $this->logger->debug('getTables');
         if (empty($this->remoteTables)) {
@@ -321,25 +349,35 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         return \array_intersect(array_keys($GLOBALS['TCA']), $this->remoteTables);
     }
 
-    public function getSites()
+    /**
+     * @return array<array-key, mixed>
+     * @throws \Exception
+     */
+    public function getSites(): array
     {
         $endpoint = 'content/pages/is_siteroot/1';
         $this->logger->debug('getSites ' . $endpoint);
-        $content = $this->getAPI()->request($endpoint);
-        return $content;
+        return $this->getAPI()->request($endpoint);
     }
 
+    /**
+     * @throws \Exception
+     */
     public function getAPI(): RestWizardRequest
     {
         throw new \Exception('implement the getAPI method first', 1696870054);
     }
 
+    /**
+     * @inheritDoc
+     * @throws \Exception
+     */
     public function filterByPid(string $table, array $pidList): array
     {
         $preList = array_filter($pidList, function ($v) { return (int)$v > 0; });
 
         $filteredList = [];
-        if (count($preList)>0) {
+        if (count($preList) > 0) {
             $endpoint = sprintf('filter/%s/pid', $table);
             $this->logger->debug('filterByPid ' . $endpoint);
             $filteredList = $this->getAPI()->post($endpoint, [ 'values' => implode(',', $preList) ]);

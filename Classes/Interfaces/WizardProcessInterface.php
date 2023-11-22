@@ -26,20 +26,20 @@ interface WizardProcessInterface
 
     /**
      * Checks if the template has been configured correctly
-     * @param array $data
+     * @param array<array-key, mixed> $data
      * @return bool
      */
     public static function checkWizardConfig(array $data): bool;
 
     /**
      * Returns the be_users Record for the template Backend User to clone
-     * @return array
+     * @return array<array-key, mixed>
      */
     public function getTemplateBackendUser(CreateProcess $pObj): array;
 
     /**
      * Returns the be_groups record for the template backend group to clone
-     * @return array
+     * @return array<array-key, mixed>
      */
     public function getTemplateBackendUserGroup(CreateProcess $pObj): array;
 

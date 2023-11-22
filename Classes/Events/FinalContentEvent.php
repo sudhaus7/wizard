@@ -19,25 +19,18 @@ use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventWriteableRecordInterface;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventWriteableRecordTrait;
 
-class FinalContentEvent implements WizardEventInterface, WizardEventWriteableRecordInterface
+final class FinalContentEvent implements WizardEventInterface, WizardEventWriteableRecordInterface
 {
     use EventTrait;
     use EventWriteableRecordTrait;
 
-    protected string $tablename;
-    protected array $record;
-    public function __construct(string $tablename, array $record, CreateProcess $create_process)
+    /**
+     * @param array<array-key, mixed> $record
+     */
+    public function __construct(string $table, array $record, CreateProcess $createProcess)
     {
         $this->record = $record;
-        $this->tablename = $tablename;
-        $this->create_process = $create_process;
-    }
-
-    /**
-     * @return string
-     */
-    public function getTable(): string
-    {
-        return $this->tablename;
+        $this->table = $table;
+        $this->createProcess = $createProcess;
     }
 }

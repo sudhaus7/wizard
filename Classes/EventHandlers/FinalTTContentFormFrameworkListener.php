@@ -20,9 +20,9 @@ use SUDHAUS7\Sudhaus7Wizard\Tools;
 use TYPO3\CMS\Core\Crypto\Random;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class FinalTTContentFormFrameworkListener
+final class FinalTTContentFormFrameworkListener
 {
-    public function __invoke(FinalContentByCtypeEvent $event)
+    public function __invoke(FinalContentByCtypeEvent $event): void
     {
         if ($event->getListType() === 'formframework') {
             $row = $event->getRecord();
@@ -31,7 +31,7 @@ class FinalTTContentFormFrameworkListener
 
                 /** @var Random $rnd */
                 $rnd = GeneralUtility::makeInstance(Random::class);
-                foreach ($flex['data'] as $key=>$config) {
+                foreach ($flex['data'] as $key => $config) {
                     if ($key !== 'sDEF') {
                         foreach ($config as $subconfig) {
                             if (isset($subconfig['settings.finishers.Redirect.pageUid'])) {
@@ -39,17 +39,17 @@ class FinalTTContentFormFrameworkListener
                             }
                             if (isset($subconfig['settings.finishers.EmailToReceiver.recipients'])) {
                                 $flex['data'][$key]['lDEF']['settings.finishers.EmailToReceiver.recipients']['el'] = [
-                                    $rnd->generateRandomBytes(22)=>[
-                                        '_arrayContainer'=>[
-                                            'el'=>[
-                                                'email'=>[
-                                                    'vDEF'=>$event->getCreateProcess()->getTask()->getContact(),
+                                    $rnd->generateRandomBytes(22) => [
+                                        '_arrayContainer' => [
+                                            'el' => [
+                                                'email' => [
+                                                    'vDEF' => $event->getCreateProcess()->getTask()->getContact(),
                                                 ],
-                                                'name'=>[
-                                                    'vDEF'=>$event->getCreateProcess()->getTask()->getLongname(),
+                                                'name' => [
+                                                    'vDEF' => $event->getCreateProcess()->getTask()->getLongname(),
                                                 ],
                                             ],
-                                            '_TOGGLE'=>0,
+                                            '_TOGGLE' => 0,
                                         ],
                                     ],
                                 ];
@@ -60,8 +60,8 @@ class FinalTTContentFormFrameworkListener
                     }
                 }
 
-                $flex['data']['sDEF']['lDEF']['settings.persistenceIdentifier']['vDEF']='1:/mediapool/Formulare/Allgemeines-Formular.form.yaml';
-                $flex['data']['sDEF']['lDEF']['settings.overrideFinishers']['vDEF']=1;
+                $flex['data']['sDEF']['lDEF']['settings.persistenceIdentifier']['vDEF'] = '1:/mediapool/Formulare/Allgemeines-Formular.form.yaml';
+                $flex['data']['sDEF']['lDEF']['settings.overrideFinishers']['vDEF'] = 1;
                 //$flex['data']['sDEF']['lDEF']['settings.overrideFinishers']['vDEV']=1;
 
                 $row['pi_flexform'] = Tools::array2xml($flex);

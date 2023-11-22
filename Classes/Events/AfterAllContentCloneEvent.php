@@ -20,14 +20,15 @@ use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventInterface;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
 
-class AfterAllContentCloneEvent implements LoggerAwareInterface, WizardEventInterface
+final class AfterAllContentCloneEvent implements LoggerAwareInterface, WizardEventInterface
 {
     use LoggerAwareTrait;
     use EventTrait;
-    public function __construct(CreateProcess $create_process)
+
+    public function __construct(CreateProcess $createProcess)
     {
-        $this->create_process = $create_process;
-        $this->logger = $create_process->getLogger();
+        $this->createProcess = $createProcess;
+        $this->logger = $createProcess->getLogger();
     }
 
     public function getLogger(): LoggerInterface

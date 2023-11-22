@@ -16,12 +16,12 @@ namespace SUDHAUS7\Sudhaus7Wizard\Interfaces;
 interface WizardEventWriteableRecordInterface
 {
     /**
-     * @return array
+     * @return array<array-key, mixed>
      */
     public function getRecord(): array;
 
     /**
-     * @param array $record
+     * @param array<array-key, mixed> $record
      */
     public function setRecord(array $record): void;
 

@@ -17,21 +17,27 @@ use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventInterface;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
 
-class BeforeUserCreationUCDefaultsEvent implements WizardEventInterface
+final class BeforeUserCreationUCDefaultsEvent implements WizardEventInterface
 {
     use EventTrait;
 
-    protected CreateProcess $create_process;
+    protected CreateProcess $createProcess;
+    /**
+     * @var array<array-key, mixed>
+     */
     private array $uc;
 
-    public function __construct(array $uc, CreateProcess $create_process)
+    /**
+     * @param array<array-key, mixed> $uc
+     */
+    public function __construct(array $uc, CreateProcess $createProcess)
     {
-        $this->create_process = $create_process;
+        $this->createProcess = $createProcess;
         $this->uc = $uc;
     }
 
     /**
-     * @return array
+     * @return array<array-key, mixed>
      */
     public function getUc(): array
     {
@@ -39,7 +45,7 @@ class BeforeUserCreationUCDefaultsEvent implements WizardEventInterface
     }
 
     /**
-     * @param array $uc
+     * @param array<array-key, mixed> $uc
      */
     public function setUc(array $uc): void
     {

@@ -22,20 +22,24 @@ use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventInterface;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
 
-class AfterClonedTreeInsertEvent implements LoggerAwareInterface, WizardEventInterface
+final class AfterClonedTreeInsertEvent implements LoggerAwareInterface, WizardEventInterface
 {
     use LoggerAwareTrait;
     use EventTrait;
 
-    protected string|int $oldid;
+    protected string|int $oldId;
+
     /**
-     * @var array the page Record
+     * @var array<array-key, mixed> the page Record
      */
     protected array $record;
-    public function __construct(string|int $oldid, array $record, CreateProcess $create_process)
-    {
-        $this->create_process = $create_process;
-        $this->oldid = $oldid;
+    public function __construct(
+        string|int    $oldId,
+        array         $record,
+        CreateProcess $create_process
+    ) {
+        $this->createProcess = $create_process;
+        $this->oldId = $oldId;
         $this->record = $record;
         $this->logger = $create_process->getLogger();
     }
@@ -43,9 +47,9 @@ class AfterClonedTreeInsertEvent implements LoggerAwareInterface, WizardEventInt
     /**
      * @return int|string
      */
-    public function getOldid(): int|string
+    public function getOldId(): int|string
     {
-        return $this->oldid;
+        return $this->oldId;
     }
 
     /**

@@ -17,19 +17,28 @@ use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventInterface;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
 
-class BeforeSiteConfigWriteEvent implements WizardEventInterface
+final class BeforeSiteConfigWriteEvent implements WizardEventInterface
 {
     use EventTrait;
-    protected CreateProcess $create_process;
+
+    protected CreateProcess $createProcess;
+
+    /**
+     * @var array<array-key, mixed>
+     */
     protected array $siteconfig;
-    public function __construct(array $siteconfig, CreateProcess $create_process)
+
+    /**
+     * @param array<array-key, mixed> $siteConfig
+     */
+    public function __construct(array $siteConfig, CreateProcess $createProcess)
     {
-        $this->create_process = $create_process;
-        $this->siteconfig = $siteconfig;
+        $this->createProcess = $createProcess;
+        $this->siteconfig = $siteConfig;
     }
 
     /**
-     * @return array
+     * @return array<array-key, mixed>
      */
     public function getSiteconfig(): array
     {
@@ -37,7 +46,7 @@ class BeforeSiteConfigWriteEvent implements WizardEventInterface
     }
 
     /**
-     * @param array $siteconfig
+     * @param array<array-key, mixed> $siteconfig
      */
     public function setSiteconfig(array $siteconfig): void
     {

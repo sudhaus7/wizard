@@ -107,17 +107,12 @@ class Creator extends AbstractEntity implements LoggerAwareInterface
         return $this;
     }
 
-    /**
-     * Sourcepid
-     *
-     * @return string|null sourcepid
-     */
-    public function getSourcepid(): ?string
+    public function getSourcepid(): int
     {
         if (\str_starts_with((string)$this->sourcepid, 't3://')) {
-            return (string)GeneralUtility::trimExplode('=', $this->sourcepid)[1];
+            return (int)GeneralUtility::trimExplode('=', $this->sourcepid)[1];
         }
-        return $this->sourcepid;
+        return (int)$this->sourcepid;
     }
 
     /**
@@ -125,7 +120,7 @@ class Creator extends AbstractEntity implements LoggerAwareInterface
      *
      * @return $this
      */
-    public function setSourcepid(?string $sourcepid)
+    public function setSourcepid(null|string|int $sourcepid)
     {
         $this->sourcepid = $sourcepid;
         return $this;
@@ -430,11 +425,11 @@ class Creator extends AbstractEntity implements LoggerAwareInterface
     /**
      * Sourceclass
      *
-     * @return string|null sourcepid
+     * @return string sourcepid
      */
-    public function getSourceclass(): ?string
+    public function getSourceclass(): string
     {
-        return $this->sourceclass;
+        return (string)$this->sourceclass;
     }
 
     /**

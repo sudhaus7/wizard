@@ -1,53 +1,53 @@
 {
-  "name": "sudhaus7/sudhaus7-wizard",
-  "description": "(Sudhaus7) Wizard to copy Typo3 Website Trees",
-  "type": "typo3-cms-extension",
-  "license": "MIT",
-  "config": {
-	"vendor-dir": ".Build/vendor",
-	"bin-dir": ".Build/bin",
-    "platform": {
-      "php": "8.1.5"
-    },
-    "allow-plugins": {
-      "typo3/cms-composer-installers": true,
-      "typo3/class-alias-loader": true,
-      "php-http/discovery": true
-    }
-  },
-  "authors": [
-    {
-      "name": "Frank Berger",
-      "role": "Developer"
-    }
-  ],
+	"name": "sudhaus7/sudhaus7-wizard",
+	"description": "(Sudhaus7) Wizard to copy Typo3 Website Trees",
+	"type": "typo3-cms-extension",
+	"license": "MIT",
+	"config": {
+		"vendor-dir": ".Build/vendor",
+		"bin-dir": ".Build/bin",
+		"allow-plugins": {
+			"typo3/cms-composer-installers": true,
+			"typo3/class-alias-loader": true,
+			"php-http/discovery": true
+		}
+	},
+	"authors": [
+		{
+			"name": "Frank Berger",
+			"role": "Developer"
+		}
+	],
 	"repositories": [
 		{
 			"type": "path",
 			"url": "Tests/Fixtures/*"
 		}
 	],
-  "require": {
-    "php": "8.0.*||8.1.*||8.2.*",
-    "typo3/cms-core": "11.5.*"
-  },
-  "require-dev": {
-    "typo3/cms-backend": "^11.5",
-    "typo3/cms-frontend": "^11.5",
-    "typo3/cms-tstemplate": "^11.5",
-    "typo3/cms-install": "^11.5",
-    "typo3/cms-info": "^11.5",
-	  "typo3/cms-beuser": "^11.5",
-    "friendsoftypo3/phpstan-typo3": "^0.9",
-    "typo3/cms-lowlevel": "^11.5",
-    "helhum/typo3-console": "*",
-    "typo3/coding-standards": "^0.5",
-    "ssch/typo3-rector": "^1.1",
-    "georgringer/news": "^11.0",
-    "typo3/cms-introduction": "^4.4",
-	  "sudhaus7/template": "@dev",
-    "typo3/testing-framework": "^7.0"
-  },
+	"require": {
+		"ext-curl": "*",
+		"php": "8.0.*||8.1.*||8.2.*",
+		"typo3/cms-core": "11.5.*"
+	},
+	"require-dev": {
+		"typo3/cms-backend": "^11.5",
+		"typo3/cms-frontend": "^11.5",
+		"typo3/cms-tstemplate": "^11.5",
+		"typo3/cms-install": "^11.5",
+		"typo3/cms-info": "^11.5",
+		"typo3/cms-beuser": "^11.5",
+		"friendsoftypo3/phpstan-typo3": "^0.9",
+		"typo3/cms-lowlevel": "^11.5",
+		"helhum/typo3-console": "*",
+		"typo3/coding-standards": "^0.5",
+		"ssch/typo3-rector": "^1.1",
+		"saschaegerer/phpstan-typo3": "^1.9",
+		"georgringer/news": "^11.0",
+		"typo3/cms-introduction": "^4.4",
+		"sudhaus7/template": "@dev",
+		"typo3/testing-framework": "^7.0",
+		"typo3/cms-composer-installers": "^3.0"
+	},
 	"autoload": {
 		"psr-4": {
 			"SUDHAUS7\\Sudhaus7Wizard\\": "Classes/"
@@ -61,33 +61,27 @@
 			"SUDHAUS7\\Sudhaus7Template\\": "Tests/Fixtures/template/Classes/"
 		}
 	},
-  "extra": {
-    "typo3/cms": {
-      "extension-key": "sudhaus7_wizard",
-      "cms-package-dir": "{$vendor-dir}/typo3/cms",
-      "web-dir": ".Build/public"
-    }
-  },
-  "scripts": {
-    "pre-autoload-dump": [
-      "mkdir -p .Build/public/typo3conf/ext/",
-      "[ -L .Build/public/typo3conf/ext/sudhaus7_wizard ] && rm .Build/public/typo3conf/ext/sudhaus7_wizard; exit 0"
-    ],
-    "post-autoload-dump": [
-      "mkdir -p .Build/public/typo3conf/ext/",
-      "[ -L .Build/public/typo3conf/ext/sudhaus7_wizard ] || ln -snvf ../../../../. .Build/public/typo3conf/ext/sudhaus7_wizard; exit 0"
-    ],
-    "pre-install-cmd": [
-      "@add-local-git-config"
-    ],
-    "pre-update-cmd": [
-      "@add-local-git-config"
-    ],
-    "add-local-git-config": "git config --local include.path ../.gitconfig",
-    "cmscacheflush": "@php .Build/bin/typo3cms cache:flush",
-    "csfixer": "@php .Build/bin/php-cs-fixer fix",
-    "psalm": "@php .Build/bin/psalm --no-cache  --show-info=true --php-version=8.1",
-    "phpstan": "@php .Build/bin/phpstan analyze -l 9 ./Classes",
-  	"test:php:unit": ".Build/bin/phpunit --colors=always --configuration Build/phpunit/UnitTests.xml"
-  }
+	"extra": {
+		"typo3/cms": {
+			"extension-key": "sudhaus7_wizard",
+			"cms-package-dir": "{$vendor-dir}/typo3/cms",
+			"web-dir": ".Build/public"
+		}
+	},
+	"scripts": {
+		"pre-autoload-dump": [
+			"mkdir -p .Build/public/typo3conf/ext/",
+			"[ -L .Build/public/typo3conf/ext/sudhaus7_wizard ] && rm .Build/public/typo3conf/ext/sudhaus7_wizard; exit 0"
+		],
+		"post-autoload-dump": [
+			"mkdir -p .Build/public/typo3conf/ext/",
+			"[ -L .Build/public/typo3conf/ext/sudhaus7_wizard ] || ln -snvf ../../../../. .Build/public/typo3conf/ext/sudhaus7_wizard; exit 0"
+		],
+		"add-local-git-config": "git config --local include.path ../.gitconfig",
+		"cmscacheflush": "@php .Build/bin/typo3cms cache:flush",
+		"csfixer": "@php .Build/bin/php-cs-fixer fix",
+		"psalm": "@php .Build/bin/psalm --no-cache  --show-info=true --php-version=8.1",
+		"phpstan": "@php .Build/bin/phpstan analyze -l 9 ./Classes",
+		"test:php:unit": ".Build/bin/phpunit --colors=always --configuration Build/phpunit/UnitTests.xml"
+	}
 }
