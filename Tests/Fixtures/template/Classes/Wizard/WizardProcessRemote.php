@@ -38,7 +38,17 @@ class WizardProcessRemote implements WizardProcessInterface
      */
     public function getTemplateBackendUser(CreateProcess $pObj): array
     {
-        return BackendUtility::getRecord('be_users', 3) ?? [];
+        if ($pObj->getTask()->getSourceuser() > 0) {
+            $user = $pObj->getSource()->getRow('be_users', ['uid'=>$pObj->getTask()->getSourceuser()]);
+            $pObj->getTask()->setReduser($user['username']);
+            if (!empty($user['email'])) {
+                $pObj->getTask()->setRedemail($user['email']);
+            }
+            $pObj->getTask()->setRedpass($user['password']);
+        } else {
+            $user = BackendUtility::getRecord('be_users', 3);
+        }
+        return $user ?? [];
     }
 
     /**
