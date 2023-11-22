@@ -38,26 +38,26 @@ class Creator implements LoggerAwareInterface
     ];
 
     protected function __construct(
-        protected readonly int $uid,
+        protected int $uid,
         protected int $pid,
-        protected readonly int $cruserId, // @todo cruser is removed by default in v12, if needed, handle in other ways
-        protected readonly string $sourcepid,
-        protected readonly string $base,
-        protected readonly string $projektname,
-        protected readonly string $longname,
-        protected readonly string $shortname,
-        protected readonly string $domainname,
-        protected readonly string $contact,
-        protected readonly string $reduser,
-        protected readonly string $redemail,
-        protected readonly string $redpass,
+        protected int $cruserId, // @todo cruser is removed by default in v12, if needed, handle in other ways
+        protected string $sourcepid,
+        protected string $base,
+        protected string $projektname,
+        protected string $longname,
+        protected string $shortname,
+        protected string $domainname,
+        protected string $contact,
+        protected string $reduser,
+        protected string $redemail,
+        protected string $redpass,
         protected int $status,
         protected string $flexinfo,
-        protected readonly string $email,
-        protected readonly string $valuemapping,
-        protected readonly int $sourceuser,
-        protected readonly int $sourcefilemount,
-        protected readonly string $sourceclass,
+        protected string $email,
+        protected string $valuemapping,
+        protected int $sourceuser,
+        protected int $sourcefilemount,
+        protected string $sourceclass,
         private array $valuemappingcache = []
     ) {}
 
@@ -344,4 +344,23 @@ class Creator implements LoggerAwareInterface
     {
         return $this->pid;
     }
+
+    public function setReduser(string $reduser): Creator
+    {
+        $this->reduser = $reduser;
+        return $this;
+    }
+
+    public function setRedemail(string $redemail): Creator
+    {
+        $this->redemail = $redemail;
+        return $this;
+    }
+
+    public function setRedpass(string $redpass): Creator
+    {
+        $this->redpass = $redpass;
+        return $this;
+    }
+
 }

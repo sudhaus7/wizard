@@ -18,7 +18,6 @@ use Doctrine\DBAL\Driver\Exception;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -29,14 +28,6 @@ class CreatorRepository
 {
     protected static string $table = 'tx_sudhaus7wizard_domain_model_creator';
 
-    protected QueryBuilder $queryBuilder;
-
-    public function __construct(
-        ConnectionPool $connection
-    ) {
-        $this->queryBuilder = $connection->getQueryBuilderForTable(self::$table);
-    }
-
     /**
      * @return Creator[]
      * @throws DBALException
@@ -44,7 +35,9 @@ class CreatorRepository
      */
     public function findAll(): array
     {
-        $statement = $this->queryBuilder
+        $db = GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getQueryBuilderForTable(self::$table);
+        $statement = $db
             ->select('*')
             ->from(self::$table);
         $found = [];
@@ -64,13 +57,15 @@ class CreatorRepository
      */
     public function findNext(): ?Creator
     {
-        $statement = $this->queryBuilder
+        $db = GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getQueryBuilderForTable(self::$table);
+        $statement = $db
             ->select('*')
             ->from(self::$table)
             ->where(
-                $this->queryBuilder->expr()->eq(
+                $db->expr()->eq(
                     'status',
-                    $this->queryBuilder->createNamedParameter(10, Connection::PARAM_INT)
+                    $db->createNamedParameter(10, Connection::PARAM_INT)
                 )
             )
             ->setMaxResults(1);
@@ -91,16 +86,18 @@ class CreatorRepository
      */
     public function findByIdentifier(int|string $identifier, bool $force = false): ?Creator
     {
+        $db = GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getQueryBuilderForTable(self::$table);
         if ($force) {
-            $this->queryBuilder->getRestrictions()->removeAll();
+            $db->getRestrictions()->removeAll();
         }
-        $statement = $this->queryBuilder
+        $statement = $db
             ->select('*')
             ->from(self::$table)
             ->where(
-                $this->queryBuilder->expr()->eq(
+                $db->expr()->eq(
                     'uid',
-                    $this->queryBuilder->createNamedParameter($identifier, Connection::PARAM_INT)
+                    $db->createNamedParameter($identifier, Connection::PARAM_INT)
                 )
             )
             ->setMaxResults(1);
@@ -120,13 +117,15 @@ class CreatorRepository
      */
     public function isRunning(): bool
     {
-        $statement = $this->queryBuilder
+        $db = GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getQueryBuilderForTable(self::$table);
+        $statement = $db
             ->select('*')
             ->from(self::$table)
             ->where(
-                $this->queryBuilder->expr()->eq(
+                $db->expr()->eq(
                     'status',
-                    $this->queryBuilder->createNamedParameter(15, Connection::PARAM_INT)
+                    $db->createNamedParameter(15, Connection::PARAM_INT)
                 )
             )
             ->setMaxResults(1);
