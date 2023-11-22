@@ -132,7 +132,7 @@ class CreatorRepository
 
         $result = $statement->executeQuery();
 
-        return $result->columnCount() > 0;
+        return $result->rowCount() > 0;
     }
 
     public function updateStatus(Creator $creator): void
