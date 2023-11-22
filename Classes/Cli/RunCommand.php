@@ -32,13 +32,11 @@ use TYPO3\CMS\Core\Core\Bootstrap;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Mail\MailMessage;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 
 final class RunCommand extends Command
 {
     public ?ConsoleLogger $logger = null;
     private ?CreatorRepository $repository = null;
-    private ?PersistenceManager $persistenceManager = null;
 
     protected function configure(): void
     {
@@ -54,7 +52,6 @@ final class RunCommand extends Command
     {
         $this->logger = new ConsoleLogger($output);
         $this->repository = GeneralUtility::makeInstance(CreatorRepository::class);
-        $this->persistenceManager = GeneralUtility::makeInstance(PersistenceManager::class);
     }
 
     /**
