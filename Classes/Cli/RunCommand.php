@@ -112,7 +112,7 @@ final class RunCommand extends Command
                 $o = $this->repository->findNext();
                 if ($o instanceof Creator) {
                     if (!$this->repository->isRunning()) {
-                        $this->create($o, $input, $output, $mapfolder);
+                        $this->create($o, $input, $output, $mapFolder);
                     }
                 } else {
                     $output->writeln('<info>🎆 No wizard jobs to process 🎆</info>');

@@ -63,11 +63,8 @@ class CreatorRepository
      * @throws Exception
      * @throws DBALException
      */
-    public function findNext(bool $force = false): ?Creator
+    public function findNext(): ?Creator
     {
-        if ($force) {
-            $this->queryBuilder->getRestrictions()->removeAll();
-        }
         $statement = $this->queryBuilder
             ->select('*')
             ->from(self::$table)
@@ -119,6 +116,28 @@ class CreatorRepository
         return $found;
     }
 
+    /**
+     * @throws DBALException
+     */
+    public function isRunning(): bool
+    {
+        $statement = $this->queryBuilder
+            ->select('*')
+            ->from(self::$table)
+            ->where(
+                $this->queryBuilder->expr()->eq(
+                    'status',
+                    $this->queryBuilder->createNamedParameter(15, Connection::PARAM_INT)
+                )
+            )
+            ->setMaxResults(1);
+        $found = null;
+
+        $result = $statement->executeQuery();
+
+        return $result->columnCount() > 0;
+    }
+
     public function updateStatus(Creator $creator): void
     {
         $data = [
@@ -133,15 +152,5 @@ class CreatorRepository
         $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
         $dataHandler->start($data, []);
         $dataHandler->process_datamap();
-    }
-
-    public function isRunning(): bool
-    {
-        $query = $this->createQuery();
-        $querySettings = $query->getQuerySettings();
-        $querySettings->setRespectStoragePage(false);
-        $query->setQuerySettings($querySettings);
-        $query->matching($query->equals('status', 15));
-        return $query->count() > 0;
     }
 }
