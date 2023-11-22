@@ -31,7 +31,7 @@ class CreateProcessTest extends UnitTestCase
             2 => 20,
             3 => 30,
         ];
-        $this->create_process->contentmap = [
+        $this->create_process->contentMap = [
             'pages' => $this->create_process->pageMap,
             'tt_content' => $this->create_process->pageMap,
             'sys_category' => [

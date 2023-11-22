@@ -19,9 +19,9 @@ use SUDHAUS7\Sudhaus7Wizard\Events\TtContent\FinalContentByCtypeEvent;
 use SUDHAUS7\Sudhaus7Wizard\Tools;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class TxNewsPluginHandlerEvent
+final class TxNewsPluginHandlerEvent
 {
-    public function __invoke(FinalContentByCtypeEvent $event)
+    public function __invoke(FinalContentByCtypeEvent $event): void
     {
         if ($event->getCtype() === 'news_pi1') {
             $process = $event->getCreateProcess();

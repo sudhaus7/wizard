@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the TYPO3 project.
  *
@@ -15,9 +17,9 @@ namespace SUDHAUS7\Sudhaus7Wizard\EventHandlers;
 
 use SUDHAUS7\Sudhaus7Wizard\Events\TCA\Inlines\CleanEvent;
 
-class SysFileReferenceHandleLinkFieldListener
+final class SysFileReferenceHandleLinkFieldListener
 {
-    public function __invoke(CleanEvent $event)
+    public function __invoke(CleanEvent $event): void
     {
         if ($event->getTable() === 'sys_file_reference') {
             $record = $event->getRecord();

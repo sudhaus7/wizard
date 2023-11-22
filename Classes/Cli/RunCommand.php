@@ -30,36 +30,92 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Object\Exception;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 
-class RunCommand extends Command
+final class RunCommand extends Command
 {
+    public ?ConsoleLogger $logger = null;
     private ?CreatorRepository $repository = null;
     private ?PersistenceManager $persistenceManager = null;
 
-    public ?ConsoleLogger $logger = null;
-
-    public function mystatus(InputInterface $input, OutputInterface $output): void
+    protected function configure(): void
     {
-        //$this->mylist($input, $output);
-        $output->writeln([
-            '-------------------------------------',
-            print_r(Tools::getRegisteredExtentions(), true),
-            print_r(Tools::getCreatorConfig(), true),
-
-        ], $output::VERBOSITY_NORMAL);
+        $this->setDescription('Baukasten Wizard');
+        $this->setHelp('vendor/bin/typo3 sudhaus7:wizard status');
+        $this->addArgument('mode', InputArgument::REQUIRED, 'The mode, either status, list, next or single');
+        $this->addOption('id', 'i', InputOption::VALUE_REQUIRED, 'in mode single, the uid of a specific task');
+        $this->addOption('force', 'f', InputOption::VALUE_NONE, 'force running the task');
+        $this->addOption('mapto', 'm', InputOption::VALUE_REQUIRED, 'write the map to this folder');
     }
 
-    public function mylist(InputInterface $input, OutputInterface $output): void
+    protected function initialize(InputInterface $input, OutputInterface $output): void
     {
-        $table = new Table($output);
-        $table->setHeaderTitle('Todo List');
-        $table->setHeaders(['ID', 'Baukasten', 'Status']);
+        $this->logger = new ConsoleLogger($output);
+        $this->repository = GeneralUtility::makeInstance(CreatorRepository::class);
+        $this->persistenceManager = GeneralUtility::makeInstance(PersistenceManager::class);
+    }
 
-        $list = $this->repository->findAll();
-        /** @var $o Creator */
-        foreach ($list as $o) {
-            $table->addRow([$o->getUid(), $o->getLongname(), $o->getStatusLabel()]);
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        $mapFolder = null;
+        if ($input->getOption('mapto')) {
+            $mapFolder = $input->getOption('mapto');
         }
-        $table->render();
+
+        switch ($input->getArgument('mode')) {
+            case 'info':
+                if ($input->getOption('id')) {
+                    if ($input->getOption('force')) {
+                        $this->forceVisible($input->getOption('id'));
+                    }
+                    $o = $this->repository->findByIdentifier($input->getOption('id'));
+                    if ($o instanceof Creator) {
+                        $this->getInfo($o, $input, $output);
+                    }
+                } else {
+                    $o = $this->repository->findNext();
+                    if ($o instanceof Creator) {
+                        $this->getInfo($o, $input, $output);
+                    }
+                }
+                break;
+            case 'single':
+                if ($input->getOption('id')) {
+                    if ($input->getOption('force')) {
+                        $this->forceVisible($input->getOption('id'));
+                    }
+                    $o = $this->repository->findByIdentifier($input->getOption('id'));
+                    if ($o instanceof Creator) {
+                        $this->create($o, $input, $output, $mapFolder);
+                    }
+                }
+                return 0;
+            case 'status':
+                $this->getStatus($input, $output);
+                return 0;
+            case 'list':
+                $this->getList($input, $output);
+                return 0;
+            case 'next':
+                $o = $this->repository->findNext();
+                if ($o instanceof Creator) {
+                    $this->create($o, $input, $output, $mapFolder);
+                    return 0;
+                }
+                break;
+            default:
+                break;
+        }
+        return 1;
+    }
+
+    private function forceVisible(int $id): void
+    {
+        GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getConnectionForTable('tx_sudhaus7wizard_domain_model_creator')
+            ->update(
+                'tx_sudhaus7wizard_domain_model_creator',
+                ['uid' => $id],
+                ['hidden' => 0, 'deleted' => 0, 'status' => 10]
+            );
     }
 
     public function getInfo(Creator $o, InputInterface $input, OutputInterface $output): void
@@ -93,12 +149,12 @@ class RunCommand extends Command
             $this->persistenceManager->update($creator);
             $this->persistenceManager->persistAll();
 
-            $user  = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('be_users')->select(
-                [ '*' ],
+            $user = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('be_users')->select(
+                ['*'],
                 'be_users',
                 ['uid' => $creator->getCruserId()]
             )
-            ->fetchAssociative();
+                ->fetchAssociative();
 
             if (!empty($user['email'])) {
                 // Create the message
@@ -116,96 +172,28 @@ class RunCommand extends Command
         }
     }
 
-    protected function configure()
+    public function getStatus(InputInterface $input, OutputInterface $output): void
     {
-        $this->setDescription('Baukasten Wizard');
-        $this->setHelp('vendor/bin/typo3 sudhaus7:wizard status');
-        $this->addArgument('mode', InputArgument::REQUIRED, 'The mode, either status, list, next or single');
-        $this->addOption('id', 'i', InputOption::VALUE_REQUIRED, 'in mode single, the uid of a specific task');
-        $this->addOption('force', 'f', InputOption::VALUE_NONE, 'force running the task');
-        $this->addOption('mapto', 'm', InputOption::VALUE_REQUIRED, 'write the map to this folder');
+        //$this->mylist($input, $output);
+        $output->writeln([
+            '-------------------------------------',
+            print_r(Tools::getRegisteredExtensions(), true),
+            print_r(Tools::getCreatorConfig(), true),
+
+        ], $output::VERBOSITY_NORMAL);
     }
 
-    /**
-     * @param InputInterface $input
-     * @param OutputInterface $output
-     *
-     * @throws Exception
-     */
-    protected function initialize(InputInterface $input, OutputInterface $output)
+    public function getList(InputInterface $input, OutputInterface $output): void
     {
-        $this->logger = new ConsoleLogger($output);
-        $this->repository = GeneralUtility::makeInstance(CreatorRepository::class);
-        $this->persistenceManager = GeneralUtility::makeInstance(PersistenceManager::class);
-    }
+        $table = new Table($output);
+        $table->setHeaderTitle('Todo List');
+        $table->setHeaders(['ID', 'Baukasten', 'Status']);
 
-    /**
-     * @param InputInterface $input
-     * @param OutputInterface $output
-     *
-     * @return int|void
-     */
-    protected function execute(InputInterface $input, OutputInterface $output)
-    {
-        $mapfolder = null;
-        if ($input->getOption('mapto')) {
-            $mapfolder = $input->getOption('mapto');
+        $list = $this->repository->findAll();
+        /** @var $o Creator */
+        foreach ($list as $o) {
+            $table->addRow([$o->getUid(), $o->getLongname(), $o->getStatusLabel()]);
         }
-
-        switch ($input->getArgument('mode')) {
-            case 'info':
-                if ($input->getOption('id')) {
-                    if ($input->getOption('force')) {
-                        $this->forceVisible($input->getOption('id'));
-                    }
-                    $o = $this->repository->findByIdentifier($input->getOption('id'));
-                    if ($o) {
-                        $this->getInfo($o, $input, $output);
-                    }
-                } else {
-                    $o = $this->repository->findNext();
-                    if ($o) {
-                        $this->getInfo($o, $input, $output);
-                    }
-                }
-                break;
-            case 'single':
-                if ($input->getOption('id')) {
-                    if ($input->getOption('force')) {
-                        $this->forceVisible($input->getOption('id'));
-                    }
-                    $o = $this->repository->findByIdentifier($input->getOption('id'));
-                    if ($o) {
-                        $this->create($o, $input, $output, $mapfolder);
-                    }
-                }
-                return 0;
-            case 'status':
-                $this->mystatus($input, $output);
-                return 0;
-            case 'list':
-                $this->mylist($input, $output);
-                return 0;
-            case 'next':
-                $o = $this->repository->findNext();
-                if ($o) {
-                    $this->create($o, $input, $output, $mapfolder);
-                }
-                return 0;
-            default:
-                break;
-        }
-        return 1;
-    }
-
-    private function forceVisible(int $id): void
-    {
-        GeneralUtility::makeInstance(ConnectionPool::class)
-                      ->getConnectionForTable('tx_sudhaus7wizard_domain_model_creator')
-                      ->update(
-                          'tx_sudhaus7wizard_domain_model_creator',
-                          ['uid' => $id],
-                          ['hidden' => 0, 'deleted' => 0, 'status' => 10]
-                      );
+        $table->render();
     }
 }

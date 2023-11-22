@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the TYPO3 project.
  *
@@ -16,15 +18,15 @@ namespace SUDHAUS7\Sudhaus7Wizard\EventHandlers;
 use SUDHAUS7\Sudhaus7Wizard\Events\TCA\ColumnType\FinalEvent;
 use SUDHAUS7\Sudhaus7Wizard\Tools;
 
-class TypoLinkinRichTextFieldsEvent
+final class TypoLinkinRichTextFieldsEvent
 {
-    public function __invoke(FinalEvent $event)
+    public function __invoke(FinalEvent $event): void
     {
         if ($event->getColumntype() === 'text') {
-            $fieldname = $event->getColumn();
+            $fieldName = $event->getColumn();
             $record = $event->getRecord();
 
-            $config = Tools::resolveFieldConfigurationAndRespectColumnsOverrides($event->getTable(), $fieldname, $record);
+            $config = Tools::resolveFieldConfigurationAndRespectColumnsOverrides($event->getTable(), $fieldName, $record);
             if (
                 (
                     isset($config['enableRichtext']) &&
@@ -36,17 +38,17 @@ class TypoLinkinRichTextFieldsEvent
             ) {
                 $proc = $event->getCreateProcess();
 
-                \preg_match_all('/<a.+href="(t3:\/\/\S+)"/mU', (string)$record[$fieldname], $matches);
+                \preg_match_all('/<a.+href="(t3:\/\/\S+)"/mU', (string)$record[$fieldName], $matches);
                 foreach ($matches[1] as $match) {
                     $replace = $proc->translateT3LinkString($match);
-                    $record[$fieldname] = str_replace($match, $replace, (string)$record[$fieldname]);
+                    $record[$fieldName] = str_replace($match, $replace, (string)$record[$fieldName]);
                 }
 
                 // Legacy? Will man das?
-                \preg_match_all('/<a.+href="(\d+)"/mU', (string)$record[$fieldname], $matches);
+                \preg_match_all('/<a.+href="(\d+)"/mU', (string)$record[$fieldName], $matches);
                 foreach ($matches[1] as $match) {
                     $replace = $proc->getTranslateUid('pages', $match);
-                    $record[$fieldname] = str_replace($match, $replace, (string)$record[$fieldname]);
+                    $record[$fieldName] = str_replace($match, $replace, (string)$record[$fieldName]);
                 }
 
                 $event->setRecord($record);

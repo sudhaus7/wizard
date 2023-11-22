@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the TYPO3 project.
  *
@@ -17,16 +19,16 @@ use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventInterface;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
 
-class NewFileIdentifierEvent implements WizardEventInterface
+final class NewFileIdentifierEvent implements WizardEventInterface
 {
     use EventTrait;
 
-    protected $oldidentifier;
-    protected $newidentifier;
+    protected string $oldidentifier;
+    protected string $newidentifier;
 
-    public function __construct(string $oldidentifier, string $newidentifier, CreateProcess $create_process)
+    public function __construct(string $oldidentifier, string $newidentifier, CreateProcess $createProcess)
     {
-        $this->create_process = $create_process;
+        $this->createProcess = $createProcess;
         $this->oldidentifier  = $oldidentifier;
         $this->newidentifier  = $newidentifier;
     }

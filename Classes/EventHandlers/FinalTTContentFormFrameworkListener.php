@@ -20,9 +20,9 @@ use SUDHAUS7\Sudhaus7Wizard\Tools;
 use TYPO3\CMS\Core\Crypto\Random;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class FinalTTContentFormFrameworkListener
+final class FinalTTContentFormFrameworkListener
 {
-    public function __invoke(FinalContentByCtypeEvent $event)
+    public function __invoke(FinalContentByCtypeEvent $event): void
     {
         if ($event->getListType() === 'formframework') {
             $row = $event->getRecord();

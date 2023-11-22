@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the TYPO3 project.
  *
@@ -15,7 +17,7 @@ namespace SUDHAUS7\Sudhaus7Wizard\Services;
 
 use TYPO3\CMS\Core\Http\RequestFactory;
 
-class RestWizardRequest
+final class RestWizardRequest
 {
     protected string $API_HOST = '';
     protected string $API_URL = '';
@@ -30,7 +32,11 @@ class RestWizardRequest
         $this->requestFactory = $requestFactory;
     }
 
-    // @TODO add paging
+    /**
+     * @return array<array-key, mixed>
+     *
+     * @TODO add paging
+     */
     public function request(string $endpoint): array
     {
         $additionalOptions = [
@@ -68,6 +74,10 @@ class RestWizardRequest
         // Get the content as a string on a successful request
     }
 
+    /**
+     * @param array<array-key, mixed> $body
+     * @return array<array-key, mixed>
+     */
     public function post(string $endpoint, array $body): array
     {
         $additionalOptions = [

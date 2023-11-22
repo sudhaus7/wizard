@@ -24,18 +24,20 @@ use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventWriteableRecordInterface;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventWriteableRecordTrait;
 
-class CreateFilemountEvent implements LoggerAwareInterface, WizardEventInterface, WizardEventWriteableRecordInterface
+final class CreateFilemountEvent implements LoggerAwareInterface, WizardEventInterface, WizardEventWriteableRecordInterface
 {
     use LoggerAwareTrait;
     use EventTrait;
     use EventWriteableRecordTrait;
 
-    protected array $row;
-    public function __construct(array $row, CreateProcess $create_process)
+    /**
+     * @param array<array-key, mixed> $record
+     */
+    public function __construct(array $record, CreateProcess $createProcess)
     {
-        $this->record = $row;
-        $this->create_process = $create_process;
-        $this->logger = $create_process->getLogger();
+        $this->record = $record;
+        $this->createProcess = $createProcess;
+        $this->logger = $createProcess->getLogger();
         $this->table = 'sys_filemounts';
     }
 

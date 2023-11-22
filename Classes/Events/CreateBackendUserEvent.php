@@ -24,17 +24,20 @@ use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventWriteableRecordInterface;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventWriteableRecordTrait;
 
-class CreateBackendUserEvent implements LoggerAwareInterface, WizardEventInterface, WizardEventWriteableRecordInterface
+final class CreateBackendUserEvent implements LoggerAwareInterface, WizardEventInterface, WizardEventWriteableRecordInterface
 {
     use LoggerAwareTrait;
     use EventTrait;
     use EventWriteableRecordTrait;
-    protected array $record;
-    public function __construct(array $record, CreateProcess $create_process)
+
+    /**
+     * @param array<array-key, mixed> $record
+     */
+    public function __construct(array $record, CreateProcess $createProcess)
     {
-        $this->create_process = $create_process;
+        $this->createProcess = $createProcess;
         $this->record         = $record;
-        $this->logger = $create_process->getLogger();
+        $this->logger = $createProcess->getLogger();
     }
 
     public function getLogger(): LoggerInterface

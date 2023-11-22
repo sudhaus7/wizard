@@ -21,7 +21,7 @@ use SUDHAUS7\Sudhaus7Wizard\EventHandlers\FinalTTContentFormFrameworkListener;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\PreSysFileReferenceEventHandler;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\SysFileReferenceHandleLinkFieldListener;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\TypoLinkinRichTextFieldsEvent;
-use SUDHAUS7\Sudhaus7Wizard\Sources\Localdatabase;
+use SUDHAUS7\Sudhaus7Wizard\Sources\LocalDatabase;
 use SUDHAUS7\Sudhaus7Wizard\Sources\SourceInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
@@ -40,7 +40,7 @@ return static function (ContainerConfigurator $containerConfigurator, ContainerB
                  __DIR__ . '/../Classes/Backend/',
              ]);
 
-    $services->alias(SourceInterface::class, Localdatabase::class);
+    $services->alias(SourceInterface::class, LocalDatabase::class);
     $services->set(RunCommand::class)
         ->tag('console.command', [
             'command' => 'sudhaus7:wizard',

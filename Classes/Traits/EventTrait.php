@@ -18,14 +18,15 @@ use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardProcessInterface;
 
 trait EventTrait
 {
-    protected CreateProcess $create_process;
+    protected CreateProcess $createProcess;
+
     public function getExtensionKey(): string
     {
-        return $this->getCreateProcess()->getTemplatekey() ?? $this->getTemplateConfig()->getWizardConfig()->getExtension();
+        return $this->getCreateProcess()->getTemplateKey() ?? $this->getTemplateConfig()->getWizardConfig()->getExtension();
     }
     public function getCreateProcess(): CreateProcess
     {
-        return $this->create_process;
+        return $this->createProcess;
     }
     public function getTemplateConfig(): WizardProcessInterface
     {

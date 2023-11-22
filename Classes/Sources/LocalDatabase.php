@@ -13,6 +13,8 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard\Sources;
 
+use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Driver\Exception;
 use Psr\Log\LoggerAwareTrait;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use SUDHAUS7\Sudhaus7Wizard\Services\FolderService;
@@ -26,14 +28,26 @@ use TYPO3\CMS\Core\Database\Query\Restriction\EndTimeRestriction;
 use TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
 use TYPO3\CMS\Core\Database\Query\Restriction\StartTimeRestriction;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
+use TYPO3\CMS\Core\Resource\Exception\ExistingTargetFolderException;
+use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderAccessPermissionsException;
+use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderReadPermissionsException;
+use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderWritePermissionsException;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class Localdatabase implements SourceInterface
+class LocalDatabase implements SourceInterface
 {
     use LoggerAwareTrait;
     use DbTrait;
+
+    /**
+     * @var array<array-key, mixed>
+     */
     private array $tree = [];
+
+    /**
+     * @var array<array-key, mixed>
+     */
     public array $siteconfig = [
         'base'          => 'domainname',
         'baseVariants'  => [],
@@ -92,8 +106,37 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $this->creator = $creator;
     }
 
-    public function __construct() {}
+    /**
+     * @inheritDoc
+     * @throws DBALException
+     * @throws Exception
+     */
+    public function getTree(int $start): array
+    {
+        /** @var QueryBuilder $query */
+        $query = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('pages');
+        $query->getRestrictions()->removeAll();
+        $query->getRestrictions()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
 
+        $stmt = $query->select('uid')
+            ->from('pages')
+            ->where(
+                $query->expr()->eq('pid', $start)
+            )
+            ->execute();
+
+        while ($p = $stmt->fetchNumeric()) {
+            if (!\in_array($p[0], $this->tree)) {
+                $this->tree[] = $p[0];
+                $this->getTree($p[0]);
+            }
+        }
+        return $this->tree;
+    }
+
+    /**
+     * @return array<array-key, mixed>
+     */
     public function getSiteConfig(mixed $id): array
     {
         $siteFinder = GeneralUtility::makeInstance(SiteFinder::class);
@@ -109,30 +152,6 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         return $this->siteconfig;
     }
 
-    public function getTree($start): array
-    {
-        /** @var QueryBuilder $query */
-        $query = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('pages');
-        $query->getRestrictions()->removeAll();
-        $query->getRestrictions()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
-
-        $stmt = $query->select('uid')
-                      ->from('pages')
-                      ->where(
-                          $query->expr()->eq('pid', $start)
-                      )
-                      ->execute();
-
-        while ($p = $stmt->fetchNumeric()) {
-            if (!\in_array($p[0], $this->tree)) {
-                $this->tree[] = $p[0];
-                $this->getTree($p[0]);
-            }
-        }
-        //}
-        return $this->tree;
-    }
-
     public function ping(): void
     {
         $db = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionByName('Default');
@@ -141,85 +160,100 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         }
     }
 
-    public function getIrre($table, $uid, $pid, array $oldrow, array $columnconfig, $pidlist = [])
+    /**
+     * @inheritDoc
+     * @throws Exception
+     * @throws DBALException
+     */
+    public function getIrre(
+        string $table,
+        int    $uid,
+        int    $pid,
+        array  $oldRow,
+        array  $columnConfig,
+        array $pidList = []
+    ): array
     {
-        $query = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($columnconfig['config']['foreign_table']);
+        $query = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($columnConfig['config']['foreign_table']);
 
         $query->getRestrictions()->removeAll();
         $query->getRestrictions()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
 
         $where = [
-            $query->expr()->eq($columnconfig['config']['foreign_field'], $uid),
-            $query->expr()->in('pid', $pidlist),
+            $query->expr()->eq($columnConfig['config']['foreign_field'], $uid),
+            $query->expr()->in('pid', $pidList),
         ];
 
-        if (isset($columnconfig['config']['foreign_table_field'])) {
-            $where[] = $query->expr()->eq($columnconfig['config']['foreign_table_field'], $query->createNamedParameter($table));
+        if (isset($columnConfig['config']['foreign_table_field'])) {
+            $where[] = $query->expr()->eq($columnConfig['config']['foreign_table_field'], $query->createNamedParameter($table));
         }
-        if (isset($columnconfig['config']['foreign_match_fields']) && !empty($columnconfig['config']['foreign_match_fields'])) {
-            foreach ($columnconfig['config']['foreign_match_fields'] as $ff => $vv) {
+        if (!empty($columnConfig['config']['foreign_match_fields'])) {
+            foreach ($columnConfig['config']['foreign_match_fields'] as $ff => $vv) {
                 $where[] = $query->expr()->eq($ff, $query->createNamedParameter($vv));
             }
         }
 
-        if (isset($columnconfig['config']['foreign_table_where'])) {
-            $tmp = $columnconfig['config']['foreign_table_where'];
+        if (isset($columnConfig['config']['foreign_table_where'])) {
+            $tmp = $columnConfig['config']['foreign_table_where'];
             $tmp = str_replace('###CURRENT_PID###', $pid, (string)$tmp);
             $tmp = str_replace('###THIS_UID###', $uid, $tmp);
-            foreach (array_keys($GLOBALS['TCA'][$columnconfig['config']['foreign_table']]['columns']) as $key) {
-                $tmp = str_replace('###REC_FIELD_' . $key . '###', $oldrow[$key], $tmp);
+            foreach (array_keys($GLOBALS['TCA'][$columnConfig['config']['foreign_table']]['columns']) as $key) {
+                $tmp = str_replace('###REC_FIELD_' . $key . '###', $oldRow[$key], $tmp);
             }
-            //$sql .= ' '.$tmp;
         }
 
-        $stmt = $query->select('*')
-                      ->from($columnconfig['config']['foreign_table'])
-                      ->where(...$where)
-                      ->execute();
+        $stmt = $query
+            ->select('*')
+            ->from($columnConfig['config']['foreign_table'])
+            ->where(...$where)
+            ->executeQuery();
 
-        $ret = $stmt->fetchAllAssociative();
-        return $ret ?? [];
+        return $stmt->fetchAllAssociative() ?: [];
     }
 
     /**
-     * @param string $newidentifier
-     * @return array
+     * @inheritDoc
+     * @throws Exception
+     * @throws ExistingTargetFolderException
+     * @throws InsufficientFolderAccessPermissionsException
+     * @throws InsufficientFolderReadPermissionsException
+     * @throws InsufficientFolderWritePermissionsException
      */
-    public function handleFile(array $sys_file, $newidentifier)
+    public function handleFile(array $sysFile, $newIdentifier): array
     {
-        $this->logger->debug('handleFile ' . $newidentifier . ' START');
+        $this->logger->debug('handleFile ' . $newIdentifier . ' START');
 
-        $folder = GeneralUtility::makeInstance(FolderService::class)->getOrCreateFromIdentifier(dirname($newidentifier));
+        $folder = GeneralUtility::makeInstance(FolderService::class)
+            ->getOrCreateFromIdentifier(dirname($newIdentifier));
 
-        $newfilename = $folder->getStorage()->sanitizeFileName(basename($newidentifier));
-        $newidentifier = $folder->getIdentifier() . $newfilename;
-        if ($folder->hasFile($newfilename)) {
-            $this->logger->debug('file exists - END' . Environment::getPublicPath() . '/fileadmin' . $newidentifier);
-            $res = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('sys_file')
-                                 ->select(
-                                     [ '*' ],
-                                     'sys_file',
-                                     ['identifier' => $newidentifier]
-                                 );
-            return $res->fetchAssociative();
+        $newFileName = $folder->getStorage()->sanitizeFileName(basename($newIdentifier));
+        $newIdentifier = $folder->getIdentifier() . $newFileName;
+        if ($folder->hasFile($newFileName)) {
+            $this->logger->debug('file exists - END' . Environment::getPublicPath() . '/fileadmin' . $newIdentifier);
+            $res = GeneralUtility::makeInstance(ConnectionPool::class)
+                ->getConnectionForTable('sys_file')
+                ->select(
+                    [ '*' ],
+                    'sys_file',
+                    ['identifier' => $newIdentifier]
+                );
+            return $res->fetchAssociative() ?: [];
         }
 
-        $this->logger->notice('cp ' . Environment::getPublicPath() . '/fileadmin' . $sys_file['identifier'] . ' ' . Environment::getPublicPath() . '/fileadmin' . $newidentifier);
+        $this->logger->notice('cp ' . Environment::getPublicPath() . '/fileadmin' . $sysFile['identifier'] . ' ' . Environment::getPublicPath() . '/fileadmin' . $newIdentifier);
 
-        $oldfile = $folder->getStorage()->getFileByIdentifier($sys_file['identifier']);
+        $oldfile = $folder->getStorage()->getFileByIdentifier($sysFile['identifier']);
         $file = $oldfile->copyTo($folder);
 
-        $newidentifier = $file->getIdentifier();
+        $newIdentifier = $file->getIdentifier();
 
         $uid = $file->getUid();
 
-        /** @var \TYPO3\CMS\Core\Database\Connection $query */
         $query = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('sys_file_metadata');
-        /** @var \Doctrine\DBAL\Result $res */
         $res = $query->select(
             [ '*' ],
             'sys_file_metadata',
-            ['file' => $sys_file['uid']]
+            ['file' => $sysFile['uid']]
         );
         $sys_file_metadata = $res->fetchAssociative();
         if (!empty($sys_file_metadata)) {
@@ -231,73 +265,86 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         return   BackendUtility::getRecord('sys_file', $uid);
     }
 
-    public function getMM($mmtable, $uid, $tablename)
+    /**
+     * @inheritDoc
+     * @throws Exception
+     */
+    public function getMM($mmTable, $uid, $tableName): array
     {
-        $query = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($mmtable);
+        $query = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($mmTable);
         $res = $query->select(
             [ '*' ],
-            $mmtable,
+            $mmTable,
             ['uid_local' => $uid]
         );
 
-        //$sql = 'select * from '.$mmtable.' where uid_local='.$uid;
-        //$testres = Globals::db()->sql_query('show columns from '.$mmtable.'  like \'tablenames\'');
-        //$test = Globals::db()->sql_fetch_row($testres);
-        //if (!empty($test)) {
-        //$sql .= ' and (tablenames="'.$tablename.'" or tablenames="")';
-        //}
         $ret = $res->fetchAllAssociative();
         return $ret ?? [];
     }
 
-    public function sourcePid(): ?string
+    public function sourcePid(): int
     {
         return $this->creator->getSourcepid();
     }
 
+    /**
+     * @inheritDoc
+     */
     public function getTables(): array
     {
         return array_keys($GLOBALS['TCA']);
     }
 
-    public function getRow($table, $where = [])
+    /**
+     * @inheritDoc
+     * @throws DBALException
+     * @throws Exception
+     */
+    public function getRow($table, $where = []): array
     {
-        /** @var \TYPO3\CMS\Core\Database\Query\QueryBuilder $query */
         $query = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
-        $query->getRestrictions()->removeByType(HiddenRestriction::class);
-        $query->getRestrictions()->removeByType(StartTimeRestriction::class);
-        $query->getRestrictions()->removeByType(EndTimeRestriction::class);
+        $query
+            ->getRestrictions()
+            ->removeByType(HiddenRestriction::class)
+            ->removeByType(StartTimeRestriction::class)
+            ->removeByType(EndTimeRestriction::class);
+        $query = $query->select('*')
+            ->from($table)
+            ->setMaxResults(1);
+        foreach ($where as $identifier => $value) {
+            $query->andWhere($query->expr()->eq($identifier, $query->createNamedParameter($value)));
+        }
+        $result = $query->executeQuery();
+        return $result->fetchAssociative() ?: [];
+    }
+
+    /**
+     * @inheritDoc
+     * @throws Exception
+     * @throws DBALException
+     */
+    public function getRows($table, $where = []): array
+    {
+        $query = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
+        $query
+            ->getRestrictions()
+            ->removeByType(HiddenRestriction::class)
+            ->removeByType(StartTimeRestriction::class)
+            ->removeByType(EndTimeRestriction::class);
         $query = $query->select('*')
             ->from($table);
         foreach ($where as $identifier => $value) {
             $query->andWhere($query->expr()->eq($identifier, $query->createNamedParameter($value)));
         }
-        $result = $query->execute();
-        if ($result) {
-            return $result->fetchAssociative();
-        }
-        return [];
+        $result = $query->executeQuery();
+        return $result->fetchAllAssociative() ?: [];
     }
 
-    public function getRows($table, $where = [])
-    {
-        /** @var \TYPO3\CMS\Core\Database\Query\QueryBuilder $query */
-        $query = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
-        $query->getRestrictions()->removeByType(HiddenRestriction::class);
-        $query->getRestrictions()->removeByType(StartTimeRestriction::class);
-        $query->getRestrictions()->removeByType(EndTimeRestriction::class);
-        $query = $query->select('*')
-            ->from($table);
-        foreach ($where as $identifier => $value) {
-            $query->andWhere($query->expr()->eq($identifier, $query->createNamedParameter($value)));
-        }
-        $result = $query->execute();
-        if ($result) {
-            return $result->fetchAllAssociative();
-        }
-        return [];
-    }
-
+    /**
+     * @inheritDoc
+     * @throws Exception
+     * @throws DBALException
+     */
     public function filterByPid(string $table, array $pidList): array
     {
         $preList = array_filter($pidList, function ($v) { return (int)$v > 0; });
@@ -305,12 +352,13 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $filteredPidList = [];
         if (count($preList) > 0) {
             $query = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
-            $stmt  = $query->selectLiteral('distinct pid')
-                           ->from($table)
-                           ->where(
-                               $query->expr()->in('pid', $pidList)
-                           )
-                           ->execute();
+            $stmt  = $query
+                ->selectLiteral('distinct pid')
+                ->from($table)
+                ->where(
+                    $query->expr()->in('pid', $pidList)
+                )
+                ->executeQuery();
             while ($row = $stmt->fetchAssociative()) {
                 $filteredPidList[] = $row['pid'];
             }

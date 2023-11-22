@@ -19,22 +19,21 @@ use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventInterface;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
 
-class ModifyCloneInlinesSkipTablesEvent implements WizardEventInterface
+final class ModifyCloneInlinesSkipTablesEvent implements WizardEventInterface
 {
     use EventTrait;
 
     /**
-     * @var array|string[]
+     * @var string[]
      */
     protected array $skipList;
 
     /**
      * @param string[] $skipList
-     * @param CreateProcess $create_process
      */
-    public function __construct(array $skipList, CreateProcess $create_process)
+    public function __construct(array $skipList, CreateProcess $createProcess)
     {
-        $this->create_process = $create_process;
+        $this->createProcess = $createProcess;
         $this->skipList       = $skipList;
     }
 

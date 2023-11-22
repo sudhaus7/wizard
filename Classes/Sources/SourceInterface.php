@@ -27,87 +27,73 @@ interface SourceInterface extends LoggerAwareInterface
      *
      * @param mixed $id
      *
-     * @return array
+     * @return array<array-key, mixed>
      */
     public function getSiteConfig(mixed $id): array;
 
     /**
-     * @param $table
-     * @param $uid
-     * @param array $where
-     *
-     * @return mixed
+     * @param array<array-key, mixed> $where
      */
-    public function getRow($table, $where = []);
+    public function getRow(string $table, array $where = []): mixed;
 
     /**
-     * @param $table
-     * @param $pid
-     * @param array $where
-     *
-     * @return mixed
+     * @param array<array-key, mixed> $where
+     * @return array<array-key, mixed>
      */
-    public function getRows($table, $where = []);
+    public function getRows(string $table, array $where = []): array;
 
     /**
      * Filters the possible PIDs for a given table. This Method expects all p
      * possible pid and should return the pids which actually have rows
      *
-     * @param string $table
-     * @param array $pidList
+     * @param array<array-key, mixed> $pidList
      *
-     * @return array
+     * @return array<array-key, mixed>
      */
     public function filterByPid(string $table, array $pidList): array;
 
     /**
-     * @param $start
-     *
-     * @return mixed
+     * @return array<array-key, mixed>
      */
-    public function getTree($start);
+    public function getTree(int $start): array;
 
     /**
      * Ping the Source
      */
-    public function ping();
+    public function ping(): void;
 
     /**
-     * @param $table
-     * @param $uid
-     * @param $pid
-     * @param array $oldrow
-     * @param array $columnconfig
-     * @param array $pidlist
+     * @param array<array-key, mixed> $oldRow
+     * @param array<array-key, mixed> $columnConfig
+     * @param array<array-key, mixed> $pidList
      *
-     * @return array
+     * @return array<array-key, mixed>
      */
-    public function getIrre($table, $uid, $pid, array $oldrow, array $columnconfig, $pidlist = []);
+    public function getIrre(
+        string $table,
+        int    $uid,
+        int    $pid,
+        array  $oldRow,
+        array  $columnConfig,
+        array $pidList = []
+    ): array;
 
     /**
-     * @param array $sys_file
-     * @param string $newidentifier
+     * @param array<array-key, mixed> $sysFile
      *
-     * @return array
+     * @return array<array-key, mixed>
      */
-    public function handleFile(array $sys_file, $newidentifier);
+    public function handleFile(array $sysFile, string $newIdentifier): array;
 
     /**
-     * @param $mmtable
-     * @param $uid
-     * @param $tablename
-     *
-     * @return array
+     * @return array<array-key, mixed>
      */
-    public function getMM($mmtable, $uid, $tablename);
+    public function getMM(string $mmTable, int|string $uid, string $tableName): array;
+
+    public function sourcePid(): int;
 
     /**
-     * @return mixed
+     * @return array<array-key, mixed>
      */
-    public function sourcePid();
-
-    /**
-     * @return array
-     */
-    public function getTables();
+    public function getTables(): array;
 }

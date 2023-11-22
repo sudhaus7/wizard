@@ -20,7 +20,7 @@ use SUDHAUS7\Sudhaus7Wizard\Services\TyposcriptService;
 
 class SysTemplateListener
 {
-    public function __invoke(FinalContentEvent $event)
+    public function __invoke(FinalContentEvent $event): void
     {
         if ($event->getCreateProcess()->getTemplate() instanceof
             WizardProcess && $event->getExtensionKey() === 'template' && $event->getTable() === 'sys_template') {

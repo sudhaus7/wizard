@@ -16,7 +16,7 @@ namespace SUDHAUS7\Sudhaus7Wizard\Backend\TCA\Types;
 use SUDHAUS7\Sudhaus7Wizard\Sources\RestWizardServerSource;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class RemoteSites
+final class RemoteSites
 {
     public function itemsProcFunc(&$params)
     {

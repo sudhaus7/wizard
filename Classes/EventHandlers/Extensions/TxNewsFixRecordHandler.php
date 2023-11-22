@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the TYPO3 project.
  *
@@ -15,9 +17,9 @@ namespace SUDHAUS7\Sudhaus7Wizard\EventHandlers\Extensions;
 
 use SUDHAUS7\Sudhaus7Wizard\Events\BeforeContentCloneEvent;
 
-class TxNewsFixRecordHandler
+final class TxNewsFixRecordHandler
 {
-    public function __invoke(BeforeContentCloneEvent $event)
+    public function __invoke(BeforeContentCloneEvent $event): void
     {
         if ($event->getTable() === 'tx_news_domain_model_news') {
             $record = $event->getRecord();

@@ -17,15 +17,25 @@ use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventInterface;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
 
-class GenerateSiteIdentifierEvent implements WizardEventInterface
+final class GenerateSiteIdentifierEvent implements WizardEventInterface
 {
     use EventTrait;
+
+    /**
+     * @var array<array-key, mixed>
+     */
     protected array $siteconfig;
+
     protected string $identifier;
+
     protected string $basepath;
-    public function __construct(array $siteconfig, string $basepath, CreateProcess $create_process)
+
+    /**
+     * @param array<array-key, mixed> $siteconfig
+     */
+    public function __construct(array $siteconfig, string $basepath, CreateProcess $createProcess)
     {
-        $this->create_process = $create_process;
+        $this->createProcess = $createProcess;
         $this->siteconfig = $siteconfig;
         $this->basepath = $basepath;
         $this->identifier = '';

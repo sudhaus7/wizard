@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the TYPO3 project.
  *
@@ -16,14 +18,15 @@ namespace SUDHAUS7\Sudhaus7Wizard\Services;
 use Psr\Log\LoggerInterface;
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
-use SUDHAUS7\Sudhaus7Wizard\Sources\Localdatabase;
+use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardProcessInterface;
+use SUDHAUS7\Sudhaus7Wizard\Sources\LocalDatabase;
 use SUDHAUS7\Sudhaus7Wizard\Sources\SourceInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * @internal
  */
-class CreateProcessFactory
+final class CreateProcessFactory
 {
     /**
      * @internal
@@ -38,18 +41,21 @@ class CreateProcessFactory
             $tsk->setLogger($logger);
         }
         $tsk->setTask($creator);
-        $tsk->setTemplatekey($creator->getBase());
-        $cls              = $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['Sudhaus7Wizard']['registeredTemplateExtentions'][ $tsk->getTemplatekey() ];
-        $tsk->setTemplate(GeneralUtility::makeInstance($cls));
-        $sourceclassname = $creator->getSourceclass();
-        if (\class_exists($sourceclassname)) {
-            $sourceclass = GeneralUtility::makeInstance(ltrim($sourceclassname, '\\'));
-            $tsk->source = $sourceclass instanceof SourceInterface ? $sourceclass : GeneralUtility::makeInstance(Localdatabase::class);
+        $tsk->setTemplateKey($creator->getBase());
+        /** @var class-string $processInterface */
+        $processInterface              = $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['Sudhaus7Wizard']['registeredTemplateExtentions'][ $tsk->getTemplateKey() ];
+        /** @var WizardProcessInterface $wizardProcess */
+        $wizardProcess = GeneralUtility::makeInstance($processInterface);
+        $tsk->setTemplate($wizardProcess);
+        $sourceClassName = $creator->getSourceclass();
+        if (\class_exists($sourceClassName)) {
+            $sourceClass = GeneralUtility::makeInstance(ltrim($sourceClassName, '\\'));
+            $tsk->setSource($sourceClass instanceof SourceInterface ? $sourceClass : GeneralUtility::makeInstance(LocalDatabase::class));
             $tsk->getSource()->setCreator($creator);
-            $tsk->source->setLogger($logger);
+            $tsk->getSource()->setLogger($logger);
         }
         $pid = $creator->getSourcepid();
-        $tsk->setSiteconfig($tsk->source->getSiteConfig($pid));
+        $tsk->setSiteConfig($tsk->getSource()->getSiteConfig($pid));
         return $tsk;
     }
 }

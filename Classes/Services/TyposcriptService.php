@@ -18,12 +18,16 @@ use Psr\Log\LoggerAwareTrait;
 use TYPO3\CMS\Core\TypoScript\Parser\TypoScriptParser;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class TyposcriptService implements LoggerAwareInterface
+final class TyposcriptService implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
     public const INDENT = '  ';
-    public static function parse($s)
+
+    /**
+     * @return array<array-key, mixed>
+     */
+    public static function parse(string $s):array
     {
         /** @var  TypoScriptParser $oTSparser */
         $oTSparser = GeneralUtility::makeInstance(TypoScriptParser::class);
@@ -31,7 +35,10 @@ class TyposcriptService implements LoggerAwareInterface
         return $oTSparser->setup;
     }
 
-    public static function fold(array $a, $i = 0, $keys = ''): string
+    /**
+     * @param array<array-key, mixed> $a
+     */
+    public static function fold(array $a, int $i = 0, string $keys = ''): string
     {
         $c = '';
         foreach ($a as $k => $v) {
@@ -63,10 +70,14 @@ class TyposcriptService implements LoggerAwareInterface
         return $c . "\n";
     }
 
-    public static function cleanArray($a)
+    /**
+     * @param array<array-key, mixed> $a
+     * @return array<array-key, mixed>
+     */
+    public static function cleanArray(array $a): array
     {
         foreach ($a as $k => $v) {
-            if (substr($k, -1, 1) == '.') {
+            if (str_ends_with($k, '.')) {
                 $k = substr($k, 0, -1);
             }
             $a[$k] = is_array($v) ? self::cleanArray($v) : $v;
