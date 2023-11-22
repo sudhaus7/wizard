@@ -234,7 +234,8 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         int $pid,
         array $oldRow,
         array $columnConfig,
-        array $pidList = []
+        array $pidList = [],
+        string $column = ''
     ): array {
         if (!empty($this->remoteTables) && !\in_array($table, $this->remoteTables)) {
             return [];
