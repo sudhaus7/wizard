@@ -22,6 +22,7 @@ use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Loader\YamlFileLoader;
 use TYPO3\CMS\Core\Service\FlexFormService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use function str_starts_with;
 
 /**
  * Model Creator
@@ -44,18 +45,18 @@ class Creator implements LoggerAwareInterface
         protected int $cruserId, // @todo cruser is removed by default in v12, if needed, handle in other ways
         protected string $sourcepid,
         protected string $base,
-        protected string $projektname,
-        protected string $longname,
-        protected string $shortname,
-        protected string $domainname,
-        protected string $contact,
-        protected string $reduser,
-        protected string $redemail,
-        protected string $redpass,
+        protected ?string $projektname,
+        protected ?string $longname,
+        protected ?string $shortname,
+        protected ?string $domainname,
+        protected ?string $contact,
+        protected ?string $reduser,
+        protected ?string $redemail,
+        protected ?string $redpass,
         protected int $status,
-        protected string $flexinfo,
-        protected string $email,
-        protected string $valuemapping,
+        protected ?string $flexinfo,
+        protected ?string $email,
+        protected ?string $valuemapping,
         protected int $sourceuser,
         protected int $sourcefilemount,
         protected string $sourceclass,
@@ -113,7 +114,7 @@ class Creator implements LoggerAwareInterface
 
     public function getSourcepid(): int
     {
-        if (\str_starts_with((string)$this->sourcepid, 't3://')) {
+        if ( str_starts_with((string)$this->sourcepid, 't3://')) {
             return (int)GeneralUtility::trimExplode('=', $this->sourcepid)[1];
         }
         return (int)$this->sourcepid;
