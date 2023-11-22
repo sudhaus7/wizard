@@ -24,23 +24,26 @@ use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventWriteableRecordInterface;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventWriteableRecordTrait;
 
-class BeforeClonedTreeInsertEvent implements LoggerAwareInterface, WizardEventInterface, WizardEventWriteableRecordInterface
+final class BeforeClonedTreeInsertEvent implements LoggerAwareInterface, WizardEventInterface, WizardEventWriteableRecordInterface
 {
     use LoggerAwareTrait;
     use EventTrait;
     use EventWriteableRecordTrait;
 
     protected string|int $oldid;
+
     /**
-     * @var array the page Record
+     * @param array<array-key, mixed> $record
      */
-    protected array $record;
-    public function __construct(string|int $oldid, array $record, CreateProcess $create_process)
-    {
-        $this->create_process = $create_process;
+    public function __construct(
+        string|int $oldid,
+        array $record,
+        CreateProcess $createProcess
+    ) {
+        $this->createProcess = $createProcess;
         $this->oldid = $oldid;
         $this->record = $record;
-        $this->logger = $create_process->getLogger();
+        $this->logger = $createProcess->getLogger();
     }
 
     /**

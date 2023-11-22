@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the TYPO3 project.
  *
@@ -13,9 +15,13 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard\Services;
 
-class FlexformService
+final class FlexformService
 {
-    public static function flatten($data): array
+    /**
+     * @param array<array-key, mixed> $data
+     * @return array<array-key, mixed>
+     */
+    public static function flatten(array $data): array
     {
         $tmp = $data['data'];
         $data = [];
@@ -31,12 +37,12 @@ class FlexformService
     }
 
     /**
-     * @param $data
+     * @param array<array-key, mixed> $data
      * @deprecated
      * @interal
-     * @return array[]
+     * @return array<array-key, mixed>
      */
-    public static function blowup($data)
+    public static function blowup(array $data): array
     {
         $ret = [];
 

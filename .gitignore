@@ -105,3 +105,7 @@ fabric.properties
 /.php-cs-fixer.cache
 !/Tests/Unit/
 /Documentation-GENERATED-temp/
+/composer.json.orig
+/composer.json.testing
+/.cache/
+/Build/testing-docker/.env

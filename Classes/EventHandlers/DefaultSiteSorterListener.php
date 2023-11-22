@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the TYPO3 project.
  *
@@ -13,18 +15,26 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard\EventHandlers;
 
+use Doctrine\DBAL\Exception;
 use SUDHAUS7\Sudhaus7Wizard\Events\PageSortEvent;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class DefaultSiteSorterListener
+final class DefaultSiteSorterListener
 {
-    public function __invoke(PageSortEvent $event)
+    /**
+     * @throws ExtensionConfigurationPathDoesNotExistException
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws Exception
+     */
+    public function __invoke(PageSortEvent $event): void
     {
-        $globalconf = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('sudhaus7_wizard');
+        $globalConf = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('sudhaus7_wizard');
 
-        if (isset($globalconf['defaultSiteSorter']) && $globalconf['defaultSiteSorter']) {
+        if (isset($globalConf['defaultSiteSorter']) && $globalConf['defaultSiteSorter']) {
             $page = $event->getRecord();
             $query = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('pages');
 

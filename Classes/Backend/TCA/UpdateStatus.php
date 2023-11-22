@@ -18,11 +18,11 @@ use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class Updatestatus
+final class UpdateStatus
 {
     public function processDatamap_postProcessFieldArray($status, $table, $id, &$fieldArray, &$pObj): void
     {
-        $globalconf = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('sudhaus7_wizard');
+        $globalConf = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('sudhaus7_wizard');
         if ($table == 'tx_sudhaus7wizard_domain_model_creator') {
             if ($status == 'new') {
                 $fieldArray['status'] = 0;
@@ -50,7 +50,7 @@ class Updatestatus
                 }
 
                 if (!empty($row['shortname'])) {
-                    if ($globalconf['unifyshortname']) {
+                    if ($globalConf['unifyshortname']) {
                         $s = str_replace([' ', '-'], ['_', '_'], (string)$row['shortname']);
                         $a = GeneralUtility::trimExplode('_', $s);
                         if ((is_countable($a) ? count($a) : 0) == 1) {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the TYPO3 project.
  *
@@ -17,11 +19,15 @@ use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventInterface;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
 
-class PageSortEvent implements WizardEventInterface
+final class PageSortEvent implements WizardEventInterface
 {
     use EventTrait;
 
+    /**
+     * @var array<array-key, mixed>
+     */
     protected array $record;
+
     protected int $oldpid;
 
     public function __construct(int $oldpid, array $record, CreateProcess $create_process)
@@ -34,14 +40,24 @@ class PageSortEvent implements WizardEventInterface
     /**
      * gets the current record for the given table from the database
      *
-     * @return array
+     * @return array<array-key, mixed>
      */
     public function getRecord(): array
     {
         return $this->record;
     }
+
     public function getOldpid(): int
     {
         return $this->oldpid;
+    }
+
+    /**
+     * @param array<array-key, mixed> $record
+     */
+    public function __construct(int $oldpid, array $record)
+    {
+        $this->record = $record;
+        $this->oldpid = $oldpid;
     }
 }

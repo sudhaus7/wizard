@@ -28,11 +28,11 @@ return [
         'enablecolumns'     => [
             'disabled' => 'hidden',
         ],
-        'type'=>'base',
+        'type' => 'base',
         'searchFields' => 'projektname,longname,domainname,',
         'dynamicConfigFile' => \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('sudhaus7_wizard') . 'Configuration/TCA/tx_sudhaus7wizard_domain_model_creator.php',
         'iconfile' => 'EXT:sudhaus7_wizard/Resources/Public/Icons/icon.svg',
-        'subtype_value_field'=>'sourceclass',
+        'subtype_value_field' => 'sourceclass',
     ],
     'types' => [
         '1' => ['showitem' => 'base'],
@@ -46,7 +46,7 @@ return [
             'displayCond' => 'FIELD:t3ver_label:REQ:true',
             'label' => 'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.versionLabel',
             'config' => [
-                'type'=>'none',
+                'type' => 'none',
                 'cols' => 27,
             ],
         ],
@@ -62,9 +62,9 @@ return [
             'displayCond' => 'FIELD:status:<:10',
             'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.source',
             'config' => [
-                'eval'=>'trim,required',
+                'eval' => 'trim,required',
                 'type' => 'input',
-                'softref'=>'typo3link',
+                'softref' => 'typo3link',
                 'default' => '',
                 'size' => 50,
                 'renderType' => 'inputLink',
@@ -73,32 +73,32 @@ return [
             ],
         ],
 
-        'base'=>[
+        'base' => [
             'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.base',
 
             'displayCond' => 'FIELD:status:<:10',
-            'config'=>[
-                'type'=>'select',
+            'config' => [
+                'type' => 'select',
                 'renderType' => 'selectSingle',
-                'default'=>'1',
-                'items'=> [
+                'default' => '1',
+                'items' => [
                     ['Bitte wählen', 1],
                 ],
             ],
             'onChange' => 'reload',
         ],
 
-        'sourceclass'=>[
+        'sourceclass' => [
             'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.sourcetype',
             'exclude' => 1,
             'displayCond' => 'FIELD:status:<:10',
             'onChange' => 'reload',
-            'config'=>[
-                'type'=>'select',
+            'config' => [
+                'type' => 'select',
                 'renderType' => 'selectSingle',
-                'default'=>'\\' . \SUDHAUS7\Sudhaus7Wizard\Sources\Localdatabase::class,
-                'items'=> [
-                    ['LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.sourcetype.localdb', '\\' . \SUDHAUS7\Sudhaus7Wizard\Sources\Localdatabase::class],
+                'default' => '\\' . \SUDHAUS7\Sudhaus7Wizard\Sources\LocalDatabase::class,
+                'items' => [
+                    ['LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.sourcetype.localdb', '\\' . \SUDHAUS7\Sudhaus7Wizard\Sources\LocalDatabase::class],
 
                     //['Remote Server with WizardServer component', '\\' . \SUDHAUS7\Sudhaus7Wizard\Sources\RestWizardServer::class],
                     //['Umzugs-service', '\\' . \SUDHAUS7\Sudhaus7Wizard\Sources\Couchdb::class],
@@ -145,8 +145,8 @@ return [
             'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.valuemapping',
             'config' => [
                 'type' => 'select',
-                'renderType'=>'selectSingle',
-                'items'=> [
+                'renderType' => 'selectSingle',
+                'items' => [
                     ['Bitte wählen', ''],
                 ],
             ],
@@ -210,9 +210,9 @@ return [
         'status' => [
             'exclude' => 0,
             'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.status',
-            'config'=>[
+            'config' => [
                 'default' => '0',
-                'type'=>'select',
+                'type' => 'select',
                 'renderType' => 'selectSingle',
                 'items' => \SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator::getStatusTca(),
             ],
@@ -220,13 +220,13 @@ return [
 
         'flexinfo' => [
             'displayCond' => 'FIELD:status:<:10',
-            'label'=>'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.flexinfo',
-            'config'=>[
-                'ds'=>[
-                    'default'=>'FILE:EXT:sudhaus7_wizard/Configuration/Flexforms/Wizard.xml',
+            'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.flexinfo',
+            'config' => [
+                'ds' => [
+                    'default' => 'FILE:EXT:sudhaus7_wizard/Configuration/Flexforms/Wizard.xml',
                 ],
-                'ds_pointerField'=>'base',
-                'type'=>'flex',
+                'ds_pointerField' => 'base',
+                'type' => 'flex',
             ],
         ],
 
@@ -252,17 +252,17 @@ return [
             ],
         ],
 
-        'sourceuser'=>[
-            'label'=>'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.sourceuser',
-            'config'=>[
-                'type'=>'input',
+        'sourceuser' => [
+            'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.sourceuser',
+            'config' => [
+                'type' => 'input',
             ],
         ],
 
-        'sourcefilemount'=>[
-            'label'=>'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.sourcefilemount',
-            'config'=>[
-                'type'=>'input',
+        'sourcefilemount' => [
+            'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.sourcefilemount',
+            'config' => [
+                'type' => 'input',
             ],
         ],
 

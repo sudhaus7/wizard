@@ -22,7 +22,7 @@ use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventInterface;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
 
-class ModifyCloneContentSkipTableEvent implements LoggerAwareInterface, WizardEventInterface
+final class ModifyCloneContentSkipTableEvent implements LoggerAwareInterface, WizardEventInterface
 {
     use LoggerAwareTrait;
     use EventTrait;
@@ -38,7 +38,7 @@ class ModifyCloneContentSkipTableEvent implements LoggerAwareInterface, WizardEv
      */
     public function __construct(array $skipList, CreateProcess $create_process)
     {
-        $this->create_process = $create_process;
+        $this->createProcess = $create_process;
         $this->skipList       = $skipList;
         $this->logger         = $create_process->getLogger();
     }

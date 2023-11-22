@@ -25,19 +25,28 @@ class WizardProcess implements WizardProcessInterface
         return new WizardConfigRemote();
     }
 
+    /**
+     * @param array<array-key, mixed> $data
+     */
     public static function checkWizardConfig(array $data): bool
     {
         return true;
     }
 
+    /**
+     * @return array<array-key, mixed>
+     */
     public function getTemplateBackendUser(CreateProcess $pObj): array
     {
-        return BackendUtility::getRecord('be_users', 3);
+        return BackendUtility::getRecord('be_users', 3) ?? [];
     }
 
+    /**
+     * @return array<array-key, mixed>
+     */
     public function getTemplateBackendUserGroup(CreateProcess $pObj): array
     {
-        return BackendUtility::getRecord('be_groups', 4);
+        return BackendUtility::getRecord('be_groups', 4) ?? [];
     }
 
     public function getMediaBaseDir(): string

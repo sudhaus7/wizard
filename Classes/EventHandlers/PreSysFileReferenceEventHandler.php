@@ -21,13 +21,13 @@ use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class PreSysFileReferenceEventHandler
+final class PreSysFileReferenceEventHandler
 {
-    public function __invoke(BeforeContentCloneEvent $event)
+    public function __invoke(BeforeContentCloneEvent $event): void
     {
         if ($event->getTable() === 'sys_file_reference') {
             $row = $event->getRecord();
-            $sys_file = $event->getCreateProcess()->getSource()->getRow('sys_file', ['uid'=>$row['uid_local']]);
+            $sys_file = $event->getCreateProcess()->getSource()->getRow('sys_file', ['uid' => $row['uid_local']]);
 
             if (empty($sys_file)) {
                 $row['uid_local'] = 0;
@@ -35,21 +35,21 @@ class PreSysFileReferenceEventHandler
                 return;
             }
 
-            $newidentifier = '/' . trim($event->getCreateProcess()->getFilemount()['path'] . $sys_file['name'], '/');
+            $newIdentifier = '/' . trim($event->getCreateProcess()->getFilemount()['path'] . $sys_file['name'], '/');
 
             $subEventDispatcher = GeneralUtility::makeInstance(EventDispatcher::class);
-            $subEvent = new NewFileIdentifierEvent($sys_file['identifier'], $newidentifier, $event->getCreateProcess());
+            $subEvent = new NewFileIdentifierEvent($sys_file['identifier'], $newIdentifier, $event->getCreateProcess());
             $subEventDispatcher->dispatch($subEvent);
-            $newidentifier = $subEvent->getNewidentifier();
+            $newIdentifier = $subEvent->getNewidentifier();
 
-            $test = BackendUtility::getRecord('sys_file', $newidentifier, 'identifier');
+            $test = BackendUtility::getRecord('sys_file', $newIdentifier, 'identifier');
             if (!empty($test)) {
-                $event->getCreateProcess()->log('Using File ' . $newidentifier);
+                $event->getCreateProcess()->log('Using File ' . $newIdentifier);
                 $row['uid_local'] = $test['uid'];
             } else {
-                $event->getCreateProcess()->log('Create File ' . $newidentifier);
+                $event->getCreateProcess()->log('Create File ' . $newIdentifier);
                 try {
-                    $new_sys_file = $event->getCreateProcess()->getSource()->handleFile($sys_file, $newidentifier);
+                    $new_sys_file = $event->getCreateProcess()->getSource()->handleFile($sys_file, $newIdentifier);
                     $event->getCreateProcess()->addContentMap('sys_file', $sys_file['uid'], $new_sys_file['uid']);
                     $row['uid_local'] = $new_sys_file['uid'];
                 } catch (\Exception $e) {

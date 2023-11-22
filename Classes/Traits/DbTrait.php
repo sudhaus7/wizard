@@ -22,9 +22,9 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 trait DbTrait
 {
-    public static function getQueryBuilderWithoutRestriction(string $tablename): QueryBuilder
+    public static function getQueryBuilderWithoutRestriction(string $tableName): QueryBuilder
     {
-        $query = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($tablename);
+        $query = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($tableName);
 
         $query->getRestrictions()->removeAll();
         $query->getRestrictions()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
@@ -32,38 +32,34 @@ trait DbTrait
     }
 
     /**
-     * @param string $tablename
-     * @param array $data
-     * @param array $where
-     *
-     * @return int the number of affected rows
+     * @param array<array-key, mixed> $data
+     * @param array<array-key, mixed> $where
      */
-    public static function updateRecord(string $tablename, array $data, array $where): int
+    public static function updateRecord(string $tableName, array $data, array $where): int
     {
-        $data = self::cleanFieldsBeforeInsert($tablename, $data);
+        $data = self::cleanFieldsBeforeInsert($tableName, $data);
 
-        return GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($tablename)->update($tablename, $data, $where);
+        return GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($tableName)->update($tableName, $data, $where);
     }
 
     /**
-     * @param string $tablename
-     * @param array $data
+     * @param array<array-key, mixed> $data
      *
-     * @return int[] the number of affected rows, the new uid
+     * @return array<int, int|string> the number of affected rows, the new uid
      */
-    public static function insertRecord(string $tablename, array $data): array
+    public static function insertRecord(string $tableName, array $data): array
     {
-        $data = self::cleanFieldsBeforeInsert($tablename, $data);
-        $conn = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($tablename);
-        $rows =$conn->insert($tablename, $data);
-        $newid = $conn->lastInsertId($tablename);
+        $data = self::cleanFieldsBeforeInsert($tableName, $data);
+        $conn = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($tableName);
+        $rows = $conn->insert($tableName, $data);
+        $newid = $conn->lastInsertId($tableName);
         return [$rows, $newid];
     }
 
-    public static function tableHasField(string $tablename, string $field): bool
+    public static function tableHasField(string $tableName, string $field): bool
     {
-        $conn = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($tablename);
-        $columns = $conn->getSchemaManager()->listTableColumns($tablename);
+        $conn = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($tableName);
+        $columns = $conn->getSchemaManager()->listTableColumns($tableName);
         foreach ($columns as $column) {
             if ($column->getName() === $field) {
                 return true;
@@ -72,24 +68,28 @@ trait DbTrait
         return false;
     }
 
-    public static function cleanFieldsBeforeInsert(string $tablename, array $row): array
+    /**
+     * @param array<array-key, mixed> $row
+     * @return array<array-key, mixed>
+     */
+    public static function cleanFieldsBeforeInsert(string $tableName, array $row): array
     {
         if (!isset($GLOBALS['localtables'])) {
             $GLOBALS['localtables'] = [];
         }
-        if (!isset($GLOBALS['localtables'][$tablename])) {
-            $GLOBALS['localtables'][$tablename] = [];
-            $res = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($tablename);
+        if (!isset($GLOBALS['localtables'][$tableName])) {
+            $GLOBALS['localtables'][$tableName] = [];
+            $res = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($tableName);
             $schema = $res->createSchemaManager();
-            $columns = $schema->listTableColumns($tablename);
-            $GLOBALS['localtables'][$tablename] = [];
+            $columns = $schema->listTableColumns($tableName);
+            $GLOBALS['localtables'][$tableName] = [];
             foreach ($columns as $column) {
-                $GLOBALS['localtables'][$tablename][] = $column->getName();
+                $GLOBALS['localtables'][$tableName][] = $column->getName();
             }
         }
 
-        foreach ($row as $field=>$value) {
-            if (!\in_array($field, $GLOBALS['localtables'][$tablename])) {
+        foreach ($row as $field => $value) {
+            if (!\in_array($field, $GLOBALS['localtables'][$tableName])) {
                 unset($row[$field]);
             }
         }

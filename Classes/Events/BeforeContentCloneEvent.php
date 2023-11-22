@@ -24,25 +24,31 @@ use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventWriteableRecordInterface;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventWriteableRecordTrait;
 
-class BeforeContentCloneEvent implements LoggerAwareInterface, WizardEventInterface, WizardEventWriteableRecordInterface
+final class BeforeContentCloneEvent implements LoggerAwareInterface, WizardEventInterface, WizardEventWriteableRecordInterface
 {
     use LoggerAwareTrait;
     use EventTrait;
     use EventWriteableRecordTrait;
 
-    protected string $table;
     protected int $olduid;
     protected int $oldpid;
 
-    protected array $record;
-    public function __construct(string $table, int $olduid, int $oldpid, array $record, CreateProcess $create_process)
-    {
+    /**
+     * @param array<array-key, mixed> $record
+     */
+    public function __construct(
+        string $table,
+        int $olduid,
+        int $oldpid,
+        array $record,
+        CreateProcess $createProcess
+    ) {
         $this->table = $table;
         $this->olduid = $olduid;
         $this->oldpid = $oldpid;
-        $this->create_process = $create_process;
+        $this->createProcess = $createProcess;
         $this->record         = $record;
-        $this->logger = $create_process->getLogger();
+        $this->logger = $createProcess->getLogger();
     }
 
     /**

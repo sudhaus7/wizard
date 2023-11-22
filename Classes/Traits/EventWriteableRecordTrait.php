@@ -15,13 +15,17 @@ namespace SUDHAUS7\Sudhaus7Wizard\Traits;
 
 trait EventWriteableRecordTrait
 {
+    /**
+     * @var array<array-key, mixed>
+     */
     protected array $record;
+
     protected string $table;
 
     /**
      * gets the current record for the given table from the database
      *
-     * @return array
+     * @return array<array-key, mixed>
      */
     public function getRecord(): array
     {
@@ -31,7 +35,7 @@ trait EventWriteableRecordTrait
     /**
      * write the record back to the event
      *
-     * @param array $record
+     * @param array<array-key, mixed> $record
      */
     public function setRecord(array $record): void
     {
