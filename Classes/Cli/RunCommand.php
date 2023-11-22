@@ -122,6 +122,9 @@ final class RunCommand extends Command
         return 1;
     }
 
+    /**
+     * @deprecated
+     */
     private function forceVisible(int $id): void
     {
         GeneralUtility::makeInstance(ConnectionPool::class)
@@ -149,11 +152,6 @@ final class RunCommand extends Command
         }
     }
 
-    /**
-     * @throws ExtensionConfigurationPathDoesNotExistException
-     * @throws ExtensionConfigurationExtensionNotConfiguredException
-     * @throws Exception
-     */
     public function create(Creator $creator, InputInterface $input, OutputInterface $output, $mapfolder = null): int
     {
         Bootstrap::initializeBackendAuthentication();
@@ -162,43 +160,47 @@ final class RunCommand extends Command
         $this->getInfo($creator, $input, $output);
         //$output->write(implode("\n",)."\n");
 
-        if (CreateProcessFactory::get($creator, $this->logger)->run($mapfolder)) {
-            $output->write("Fertig\n", true);
-            $creator->setStatus(20);
+        try {
+            if (CreateProcessFactory::get($creator, $this->logger)->run($mapfolder)) {
+                $output->write("Fertig\n", true);
+                $creator->setStatus(20);
 
-            $this->repository->updateStatus($creator);
-            $this->repository->updatePid($creator);
+                $this->repository->updateStatus($creator);
+                $this->repository->updatePid($creator);
 
-            $user = GeneralUtility::makeInstance(ConnectionPool::class)
-                ->getConnectionForTable('be_users')
-                ->select(
-                    ['*'],
-                    'be_users',
-                    ['uid' => $creator->getCruserId()],
-                    [],
-                    [],
-                    1
-                )
-                ->fetchAssociative();
+                $user = GeneralUtility::makeInstance(ConnectionPool::class)
+                    ->getConnectionForTable('be_users')
+                    ->select(
+                        ['*'],
+                        'be_users',
+                        ['uid' => $creator->getCruserId()],
+                        [],
+                        [],
+                        1
+                    )
+                    ->fetchAssociative();
 
-            if (!empty($user['email'])) {
-                // Create the message
-                /** @var MailMessage $mail */
-                $mail = GeneralUtility::makeInstance(MailMessage::class);
+                if (!empty($user['email'])) {
+                    // Create the message
+                    /** @var MailMessage $mail */
+                    $mail = GeneralUtility::makeInstance(MailMessage::class);
 
-                // Prepare and send the message
-                $mail->setSubject(sprintf('[Wizard] %s ist fertig', $creator->getProjektname()))
-                    ->setFrom($user['email'])
-                    ->setTo($user['email'])
-                    ->text(sprintf('Der neue Baukasten %s wurde angelegt', $creator->getProjektname()));
-                $mail->send();
-                $output->write("E-Mail versendet\n");
+                    // Prepare and send the message
+                    $mail->setSubject(sprintf('[Wizard] %s ist fertig', $creator->getProjektname()))
+                        ->setFrom($user['email'])
+                        ->setTo($user['email'])
+                        ->text(sprintf('Der neue Baukasten %s wurde angelegt', $creator->getProjektname()));
+                    $mail->send();
+                    $output->write("E-Mail versendet\n");
+                }
+
+                return Command::SUCCESS;
             }
-
-            return Command::SUCCESS;
+        } catch (Exception|ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException $e) {
+            $this->logger->warning($e->getMessage(), $e->getTrace());
         }
 
-        $creator->setStatus(5);
+        $creator->setStatus(17);
         $this->repository->updateStatus($creator);
 
         return Command::FAILURE;

@@ -34,6 +34,7 @@ class Creator implements LoggerAwareInterface
         5 => 'Not ready',
         10 => 'ready',
         15 => 'processing',
+        17 => 'failed',
         20 => 'done',
     ];
 
