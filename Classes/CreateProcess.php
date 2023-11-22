@@ -1156,7 +1156,7 @@ final class CreateProcess implements LoggerAwareInterface
             }
 
             $pidList = array_keys($this->pageMap);
-            $inlines = $this->source->getIrre($table, $oldUid, $oldPid, $oldRow, $columnConfig, $pidList);
+            $inlines = $this->source->getIrre($table, $oldUid, $oldPid, $oldRow, $columnConfig, $pidList, $column);
             foreach ($inlines as $inline) {
                 $inlineUid = $inline['uid'];
                 $test = null;

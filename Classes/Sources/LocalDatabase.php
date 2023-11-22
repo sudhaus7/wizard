@@ -171,7 +171,8 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         int    $pid,
         array  $oldRow,
         array  $columnConfig,
-        array $pidList = []
+        array $pidList = [],
+        string $column = ''
     ): array
     {
         $query = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($columnConfig['config']['foreign_table']);
@@ -180,9 +181,13 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $query->getRestrictions()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
 
         $where = [
-            $query->expr()->eq($columnConfig['config']['foreign_field'], $uid),
             $query->expr()->in('pid', $pidList),
         ];
+        if (isset($columnConfig['config']['foreign_field'])) {
+            $where[] = $query->expr()->eq($columnConfig['config']['foreign_field'], $uid);
+        } else if (!empty($column)) {
+            $where[] = $query->expr()->in('uid', GeneralUtility::intExplode(',', $oldRow[$column]));
+        }
 
         if (isset($columnConfig['config']['foreign_table_field'])) {
             $where[] = $query->expr()->eq($columnConfig['config']['foreign_table_field'], $query->createNamedParameter($table));
