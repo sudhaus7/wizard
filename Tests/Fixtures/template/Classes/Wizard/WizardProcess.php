@@ -22,7 +22,7 @@ class WizardProcess implements WizardProcessInterface
 {
     public static function getWizardConfig(): WizardTemplateConfigInterface
     {
-        return new WizardConfigRemote();
+        return new WizardConfig();
     }
 
     /**

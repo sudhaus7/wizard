@@ -1157,9 +1157,14 @@ final class CreateProcess implements LoggerAwareInterface
 
             $pidList = array_keys($this->pageMap);
             $inlines = $this->source->getIrre($table, $oldUid, $oldPid, $oldRow, $columnConfig, $pidList, $column);
+
+            // this is for the case we don't have a foreign_field, which means the list is stored in a varchar field in the db
+            $csvInlineNewIds = [];
+
             foreach ($inlines as $inline) {
                 $inlineUid = $inline['uid'];
                 $test = null;
+
                 if (isset($this->contentMap[$columnConfig['config']['foreign_table']][$inlineUid])) {
                     $this->source->ping();
 
@@ -1192,7 +1197,12 @@ final class CreateProcess implements LoggerAwareInterface
                             $update[$k] = $v;
                         }
                     }
-                    $update[$columnConfig['config']['foreign_field']] = $newUid;
+
+                    if (isset($columnConfig['config']['foreign_field']) && !empty($columnConfig['config']['foreign_field'])) {
+                        $update[$columnConfig['config']['foreign_field']] = $newUid;
+                    } else {
+                        $csvInlineNewIds[] = $test['uid'];
+                    }
                     unset($update['uid']);
                     unset($update['pid']);
 
@@ -1202,6 +1212,9 @@ final class CreateProcess implements LoggerAwareInterface
                         self::updateRecord($columnConfig['config']['foreign_table'], $update, ['uid' => $orig['uid']]);
                     }
                 } else {
+                    // this seems an inline element we have not discovered yet
+                    // we will create it now and add it to the clean-up stack again
+
                     if (self::tableHasField($columnConfig['config']['foreign_table'], 't3_origuid')) {
                         $inline['t3_origuid'] = $inlineUid;
                     }
@@ -1257,6 +1270,12 @@ final class CreateProcess implements LoggerAwareInterface
                         $this->eventDispatcher->dispatch(new AfterContentCloneEvent($columnConfig['config']['foreign_table'], $inlineUid, $oldPid, $newInlineUid, $inline, $this));
                     }
                 }
+            }
+
+            if (!isset($columnConfig['config']['foreign_field']) && !empty($csvInlineNewIds)) {
+                $translated = $this->translateIDlist($columnConfig['config']['foreign_table'], $row[$column]);
+                self::updateRecord($table, [ $column=>$translated ], ['uid'=>$newUid]);
+                $row[$column] = $translated;
             }
         } else {
             $this->log('No t3_origuid in Table ' . $table . ' - skipped');
