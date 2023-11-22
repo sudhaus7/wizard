@@ -30,6 +30,9 @@ final class PageSortEvent implements WizardEventInterface
 
     protected int $oldpid;
 
+    /**
+     * @param array<array-key, mixed> $record
+     */
     public function __construct(int $oldpid, array $record, CreateProcess $create_process)
     {
         $this->create_process = $create_process;
@@ -50,14 +53,5 @@ final class PageSortEvent implements WizardEventInterface
     public function getOldpid(): int
     {
         return $this->oldpid;
-    }
-
-    /**
-     * @param array<array-key, mixed> $record
-     */
-    public function __construct(int $oldpid, array $record)
-    {
-        $this->record = $record;
-        $this->oldpid = $oldpid;
     }
 }

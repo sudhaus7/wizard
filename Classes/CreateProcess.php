@@ -789,6 +789,12 @@ final class CreateProcess implements LoggerAwareInterface
                     $this->eventDispatcher->dispatch($event);
                     $row = $event->getRecord();
 
+                    if (isset($columnconfig['config']['renderType']) && $columnconfig['config']['renderType'] === 'inputLink') {
+                        $row = $this->cloneContent_final_wizards_link($column, $columnconfig, $row, $parameters);
+                    } elseif (isset($columnconfig['config']['softref']) && $columnconfig['config']['softref'] === 'typolink') {
+                        $row = $this->cloneContent_final_wizards_link($column, $columnconfig, $row, $parameters);
+                    }
+
                     if (isset($columnConfig['config']['wizards'])) {
                         foreach ($columnConfig['config']['wizards'] as $wizard => $wizardConfig) {
                             $row = $this->cloneContent_final_wizards_link($wizard, $wizardConfig, $row, $parameters);
@@ -1506,8 +1512,7 @@ final class CreateProcess implements LoggerAwareInterface
     {
         $old = $this->source->sourcePid();
         $new = $this->pageMap[$old];
-
-        $this->eventDispatcher->dispatch(new PageSortEvent($old, BackendUtility::getRecord('pages', $new)));
+        $this->eventDispatcher->dispatch(new PageSortEvent($old, BackendUtility::getRecord('pages', $new), $this));
     }
 
     private function finalGroup(): void

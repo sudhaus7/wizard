@@ -69,7 +69,7 @@ Registering a theme or template
 
    From this point on your theme will be available in the Themes drop down inside a :ref:`task record<taskrecord>` as an option, and you can start to clone sites implementing this theme.
 
-#. Registering the WizardProcess Class
+#. Registering the WizardProcess Class in ext_localconf.php
 
    As a last step your WizardProcess Class needs to be known to the wizard extension itself by adding the following line to your sitepackages ext_localconf.php (or any other place you can add to :php:`$GLOBALS['TYPO3_CONF_VARS'])`
 
