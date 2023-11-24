@@ -25,12 +25,14 @@ final class NewFileIdentifierEvent implements WizardEventInterface
 
     protected string $oldidentifier;
     protected string $newidentifier;
+    protected int $storage;
 
-    public function __construct(string $oldidentifier, string $newidentifier, CreateProcess $createProcess)
+    public function __construct(string $oldidentifier, string $newidentifier, int $storage, CreateProcess $createProcess)
     {
         $this->createProcess = $createProcess;
         $this->oldidentifier  = $oldidentifier;
         $this->newidentifier  = $newidentifier;
+        $this->storage = $storage;
     }
 
     public function getOldidentifier(): string
@@ -46,5 +48,10 @@ final class NewFileIdentifierEvent implements WizardEventInterface
     public function setNewidentifier(string $newidentifier): void
     {
         $this->newidentifier = $newidentifier;
+    }
+
+    public function getStorage(): int
+    {
+        return $this->storage;
     }
 }
