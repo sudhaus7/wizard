@@ -27,6 +27,7 @@ use TYPO3\CMS\Core\Resource\Exception\ExistingTargetFolderException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderAccessPermissionsException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderReadPermissionsException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderWritePermissionsException;
+use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -282,7 +283,9 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     {
         $this->logger->debug('handleFile ' . $newIdentifier . ' START');
 
-        $folder = GeneralUtility::makeInstance(FolderService::class)->getOrCreateFromIdentifier(dirname($newIdentifier));
+        $storage = GeneralUtility::makeInstance(ResourceFactory::class)->getStorageObject($sysFile['storage']);
+
+        $folder = GeneralUtility::makeInstance(FolderService::class)->getOrCreateFromIdentifier(dirname($newIdentifier), $storage);
 
         $newFileName = $folder->getStorage()->sanitizeFileName(basename($newIdentifier));
         $newIdentifier = $folder->getIdentifier() . $newFileName;

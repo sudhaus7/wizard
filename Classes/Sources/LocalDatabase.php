@@ -32,6 +32,7 @@ use TYPO3\CMS\Core\Resource\Exception\ExistingTargetFolderException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderAccessPermissionsException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderReadPermissionsException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderWritePermissionsException;
+use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -167,14 +168,13 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
      */
     public function getIrre(
         string $table,
-        int    $uid,
-        int    $pid,
-        array  $oldRow,
-        array  $columnConfig,
+        int $uid,
+        int $pid,
+        array $oldRow,
+        array $columnConfig,
         array $pidList = [],
         string $column = ''
-    ): array
-    {
+    ): array {
         $query = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($columnConfig['config']['foreign_table']);
 
         $query->getRestrictions()->removeAll();
@@ -185,7 +185,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         ];
         if (isset($columnConfig['config']['foreign_field'])) {
             $where[] = $query->expr()->eq($columnConfig['config']['foreign_field'], $uid);
-        } else if (!empty($column)) {
+        } elseif (!empty($column)) {
             $where[] = $query->expr()->in('uid', GeneralUtility::intExplode(',', $oldRow[$column]));
         }
 
@@ -228,8 +228,10 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     {
         $this->logger->debug('handleFile ' . $newIdentifier . ' START');
 
+        $storage = GeneralUtility::makeInstance(ResourceFactory::class)->getStorageObject($sysFile['storage']);
+
         $folder = GeneralUtility::makeInstance(FolderService::class)
-            ->getOrCreateFromIdentifier(dirname($newIdentifier));
+            ->getOrCreateFromIdentifier(dirname($newIdentifier), $storage);
 
         $newFileName = $folder->getStorage()->sanitizeFileName(basename($newIdentifier));
         $newIdentifier = $folder->getIdentifier() . $newFileName;
