@@ -836,18 +836,24 @@ final class CreateProcess implements LoggerAwareInterface
         $tca = $GLOBALS['TCA'][$table];
         $TCAType = $tca['ctrl']['type'] ?? 'type';
         $tcaTypeValue = $record[$TCAType] ?? 0;
-        if (isset($tca['types'][$tcaTypeValue]) && \is_array($tca['types'][$tcaTypeValue]['showitem'])) {
+        if (isset($tca['types'][$tcaTypeValue]) &&  isset($tca['types'][$tcaTypeValue]['showitem'])) {
             $showitem = $tca['types'][$tcaTypeValue]['showitem'];
-        } elseif ($tcaTypeValue === 0 && isset($tca['types'][1]) && \is_array($tca['types'][1]['showitem'])) {
+        } elseif ($tcaTypeValue === 0 && isset($tca['types'][0]) && isset($tca['types'][0]['showitem'])) {
+            $tcaTypeValue = 1;
+            $showitem = $tca['types'][$tcaTypeValue]['showitem'];
+        } elseif ($tcaTypeValue === 0 && isset($tca['types'][1]) && isset($tca['types'][1]['showitem'])) {
             $tcaTypeValue = 1;
             $showitem = $tca['types'][$tcaTypeValue]['showitem'];
         } else {
-            return true;
+            return false;
         }
 
         $fields = GeneralUtility::trimExplode(',', $showitem, true);
         foreach ($fields as $field) {
             if (\str_starts_with($field, '--div--')) {
+                continue;
+            }
+            if (\str_starts_with($field, '--linebreak--')) {
                 continue;
             }
             if (\str_starts_with($field, '--palette--')) {
@@ -879,8 +885,8 @@ final class CreateProcess implements LoggerAwareInterface
         $tca = $GLOBALS['TCA'][$table];
         $TCAType = $tca['ctrl']['type'] ?? 'type';
         $tcaTypeValue = $record[$TCAType] ?? 0;
-        if (isset($tca['types'][$tcaTypeValue]) && isset($tca['types'][$tcaTypeValue]['columnsOverrides']) && isset($tca['types'][$tcaTypeValue]['columnsOverrides'][$column])) {
-            $columnConfig = \array_merge_recursive($columnConfig, $tca['types'][$tcaTypeValue]['columnsOverrides'][$column]);
+        if (isset($tca['types'][$tcaTypeValue]) && isset($tca['types'][$tcaTypeValue]['columnsOverrides']) && isset($tca['types'][$tcaTypeValue]['columnsOverrides'][$column]) && isset($tca['types'][$tcaTypeValue]['columnsOverrides'][$column]['config'])) {
+            $columnConfig['config'] = \array_merge($columnConfig['config'], $tca['types'][$tcaTypeValue]['columnsOverrides'][$column]['config']);
         }
         return $columnConfig;
     }
