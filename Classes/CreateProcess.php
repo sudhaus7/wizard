@@ -750,7 +750,7 @@ final class CreateProcess implements LoggerAwareInterface
             if (!$this->isTCAFieldActiveForThisRecord($parameters['table'], $column, $row)) {
                 continue;
             }
-
+            $columnConfig = $this->applyTCAFieldOverrideIfNecessary($parameters['table'], $column, $columnConfig, $row);
             //$this->out('runTCA '.$state.' '.$parameters['table'].' '.$column);
             $columnType = strtolower($columnConfig['config']['type']);
             switch ($state) {
@@ -868,6 +868,21 @@ final class CreateProcess implements LoggerAwareInterface
             }
         }
         return false;
+    }
+
+    public function applyTCAFieldOverrideIfNecessary(
+        string $table,
+        string $column,
+        array $columnConfig,
+        array $record
+    ): array {
+        $tca = $GLOBALS['TCA'][$table];
+        $TCAType = $tca['ctrl']['type'] ?? 'type';
+        $tcaTypeValue = $record[$TCAType] ?? 0;
+        if (isset($tca['types'][$tcaTypeValue]) && isset($tca['types'][$tcaTypeValue]['columnsOverrides']) && isset($tca['types'][$tcaTypeValue]['columnsOverrides'][$column])) {
+            $columnConfig = \array_merge_recursive($columnConfig, $tca['types'][$tcaTypeValue]['columnsOverrides'][$column]);
+        }
+        return $columnConfig;
     }
 
     /**
