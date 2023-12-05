@@ -838,10 +838,10 @@ final class CreateProcess implements LoggerAwareInterface
         $tcaTypeValue = $record[$TCAType] ?? 0;
         if (isset($tca['types'][$tcaTypeValue]) &&  isset($tca['types'][$tcaTypeValue]['showitem'])) {
             $showitem = $tca['types'][$tcaTypeValue]['showitem'];
-        } elseif ($tcaTypeValue === 0 && isset($tca['types'][0]) && isset($tca['types'][0]['showitem'])) {
-            $tcaTypeValue = 1;
+        } elseif (isset($tca['types'][0]) && isset($tca['types'][0]['showitem'])) { //fallback 0
+            $tcaTypeValue = 0;
             $showitem = $tca['types'][$tcaTypeValue]['showitem'];
-        } elseif ($tcaTypeValue === 0 && isset($tca['types'][1]) && isset($tca['types'][1]['showitem'])) {
+        } elseif (isset($tca['types'][1]) && isset($tca['types'][1]['showitem'])) { //fallback 1
             $tcaTypeValue = 1;
             $showitem = $tca['types'][$tcaTypeValue]['showitem'];
         } else {
