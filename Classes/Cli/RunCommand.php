@@ -17,7 +17,7 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Repository\CreatorRepository;
-use SUDHAUS7\Sudhaus7Wizard\Services\CreateProcessFactory;
+use SUDHAUS7\Sudhaus7Wizard\Services\CreateProcessFactoryInterface;
 use SUDHAUS7\Sudhaus7Wizard\Tools;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
@@ -37,6 +37,13 @@ final class RunCommand extends Command
 {
     public ?ConsoleLogger $logger = null;
     private ?CreatorRepository $repository = null;
+    private CreateProcessFactoryInterface $createProcessFactory;
+
+    public function __construct(CreateProcessFactoryInterface $createProcessFactory)
+    {
+        parent::__construct();
+        $this->createProcessFactory = $createProcessFactory;
+    }
 
     protected function configure(): void
     {
@@ -76,9 +83,8 @@ final class RunCommand extends Command
                     if ($o instanceof Creator) {
                         $this->getInfo($o, $input, $output);
                         return Command::SUCCESS;
-                    } else {
-                        $output->writeln('<info>Not found</info>');
                     }
+                    $output->writeln('<info>Not found</info>');
                 } else {
                     $o = $this->repository->findNext();
                     if ($o instanceof Creator) {
@@ -161,7 +167,7 @@ final class RunCommand extends Command
         //$output->write(implode("\n",)."\n");
 
         try {
-            if (CreateProcessFactory::get($creator, $this->logger)->run($mapfolder)) {
+            if ($this->createProcessFactory->get($creator, $this->logger)->run($mapfolder)) {
                 $output->write("Fertig\n", true);
                 $creator->setStatus(20);
 
