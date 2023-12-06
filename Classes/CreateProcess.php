@@ -1581,7 +1581,7 @@ final class CreateProcess implements LoggerAwareInterface
 
     private function finalUser(): void
     {
-        $list = $this->translateIDlist('pages', $this->user['db_mountpoints']);
+        $list = $this->translateIDlist('pages', (string)$this->user['db_mountpoints']);
         if ($list == $this->user['db_mountpoints']) {
             $list = $this->siteRootId;
         } else {
