@@ -21,6 +21,8 @@ use SUDHAUS7\Sudhaus7Wizard\EventHandlers\FinalTTContentFormFrameworkListener;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\PreSysFileReferenceEventHandler;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\SysFileReferenceHandleLinkFieldListener;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\TypoLinkinRichTextFieldsEvent;
+use SUDHAUS7\Sudhaus7Wizard\Services\CreateProcessFactory;
+use SUDHAUS7\Sudhaus7Wizard\Services\CreateProcessFactoryInterface;
 use SUDHAUS7\Sudhaus7Wizard\Sources\LocalDatabase;
 use SUDHAUS7\Sudhaus7Wizard\Sources\SourceInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -29,6 +31,7 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigura
 return static function (ContainerConfigurator $containerConfigurator, ContainerBuilder $containerBuilder): void {
     $services = $containerConfigurator->services();
     $services->defaults()
+             // @todo public as default is a bad practice - change this and declare only required services public.
              ->public()
              ->autowire()
              ->autoconfigure();
@@ -40,6 +43,7 @@ return static function (ContainerConfigurator $containerConfigurator, ContainerB
                  __DIR__ . '/../Classes/Backend/',
              ]);
 
+    $services->alias(CreateProcessFactoryInterface::class, CreateProcessFactory::class);
     $services->alias(SourceInterface::class, LocalDatabase::class);
     $services->set(RunCommand::class)
         ->tag('console.command', [
