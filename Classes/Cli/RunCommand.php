@@ -32,7 +32,6 @@ use TYPO3\CMS\Core\Core\Bootstrap;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Mail\MailMessage;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 
 final class RunCommand extends Command
 {
@@ -164,13 +163,6 @@ final class RunCommand extends Command
         Bootstrap::initializeBackendAuthentication();
         $creator->setStatus(15);
         $this->repository->updateStatus($creator);
-
-        // we need to persist here. If this process runs longer than the next
-        // cronjob timeslot, the same task would be picked up run again, because
-        // the status has not been updated yet...
-        $pm = GeneralUtility::makeInstance(PersistenceManager::class);
-        $pm->update($creator);
-        $pm->persistAll();
 
         $this->getInfo($creator, $input, $output);
         //$output->write(implode("\n",)."\n");
