@@ -142,13 +142,12 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     {
         $siteFinder = GeneralUtility::makeInstance(SiteFinder::class);
         try {
-            $site = $siteFinder->getSiteByPageId((int)$id);
+            $site = $siteFinder->getSiteByRootPageId((int)$id);
             return $site->getConfiguration();
         } catch (SiteNotFoundException $e) {
-            // no harm done
-            $x = 1;
+            $this->logger->debug($e->getMessage(), [$id]);
         } catch (\Exception $e) {
-            $x = 1;
+            $this->logger->debug($e->getMessage(), [$id]);
         }
         return $this->siteconfig;
     }

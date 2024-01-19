@@ -60,8 +60,6 @@ use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Crypto\PasswordHashing\InvalidPasswordHashException;
 use TYPO3\CMS\Core\Crypto\PasswordHashing\PasswordHashFactory;
 use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Exception\SiteNotFoundException;
-use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 final class CreateProcess implements LoggerAwareInterface
@@ -149,14 +147,6 @@ final class CreateProcess implements LoggerAwareInterface
 
         $this->log('Start', 'INFO', 'Start');
 
-        $this->log('Read original Site config');
-        try {
-            $originalSite = GeneralUtility::makeInstance(SiteFinder::class)
-                ->getSiteByRootPageId($this->source->sourcePid());
-            $this->siteConfig = $originalSite->getConfiguration();
-        } catch (SiteNotFoundException $e) {
-            $this->debug('Original Site not found');
-        }
         $this->createFilemount();
         $this->createGroup();
         $this->createUser();

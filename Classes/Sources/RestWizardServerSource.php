@@ -22,13 +22,11 @@ use SUDHAUS7\Sudhaus7Wizard\Traits\DbTrait;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Resource\Exception\ExistingTargetFolderException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderAccessPermissionsException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderReadPermissionsException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderWritePermissionsException;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
-use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 abstract class RestWizardServerSource implements SourceInterface
@@ -112,18 +110,9 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
      */
     public function getSiteConfig(mixed $id): array
     {
-        // something differen? domain?
-
-        $siteFinder = GeneralUtility::makeInstance(SiteFinder::class);
-
-        try {
-            $site = $siteFinder->getSiteByPageId((int)$id);
-            return $site->getConfiguration();
-        } catch (SiteNotFoundException $e) {
-            // no harm done
-            $x = 1;
-        } catch (\Exception $e) {
-            $x = 1;
+        $result = $this->getAPI()->request('/siteconfig/' . $id);
+        if (\is_array($result) && isset($result['rootPageId'])) {
+            return $result;
         }
         return $this->siteconfig;
     }
