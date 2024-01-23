@@ -29,7 +29,9 @@ final class FlexformService
             foreach ($a as $aa) {
                 //$data = array_merge($data,$aa);
                 foreach ($aa as $name => $value) {
-                    $data[$name] = $value['vDEF'];
+                    if (isset($value['vDEF'])) {
+                        $data[ $name ] = $value['vDEF'];
+                    }
                 }
             }
         }
