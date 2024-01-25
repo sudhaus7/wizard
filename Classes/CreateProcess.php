@@ -44,6 +44,7 @@ use SUDHAUS7\Sudhaus7Wizard\Events\PageSortEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\TCA\Column;
 use SUDHAUS7\Sudhaus7Wizard\Events\TCA\ColumnType;
 use SUDHAUS7\Sudhaus7Wizard\Events\TCA\Inlines;
+use SUDHAUS7\Sudhaus7Wizard\Events\TCAFieldActiveForThisRecordEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\TtContent\FinalContentByCtypeEvent;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardProcessInterface;
 use SUDHAUS7\Sudhaus7Wizard\Services\TyposcriptService;
@@ -863,7 +864,11 @@ final class CreateProcess implements LoggerAwareInterface
                 }
             }
         }
-        return false;
+
+        $event = new TCAFieldActiveForThisRecordEvent($table, $column, $record, $this);
+        $this->eventDispatcher->dispatch($event);
+
+        return $event->isAllowed();
     }
 
     public function applyTCAFieldOverrideIfNecessary(
