@@ -1064,6 +1064,9 @@ final class CreateProcess implements LoggerAwareInterface
         $s = trim($s);
         $a = str_getcsv($s, ' ', 'dasdhasdsalkdjsalk13');
         $id = $a[0];
+        if ($id === null) {
+            return $s;
+        }
         $aID = explode(':', $id);
         if (count($aID) > 1) {
             switch ($aID[0]) {
