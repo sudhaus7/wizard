@@ -508,15 +508,14 @@ final class CreateProcess implements LoggerAwareInterface
 
             $this->source->ping();
 
-            if ((int)$page['pid'] > 0 || ((int)$page['pid'] === 0 && $page['is_siteroot'])) {
-                [$rowsAffected, $newPageId] = self::insertRecord('pages', $page);
-                if (!$rowsAffected) {
-                    throw new \Exception('Create page failed', 1700484228392);
-                }
-                $this->pageMap[$old] = $newPageId;
-                $this->addContentMap('pages', $old, $newPageId);
-                $this->addCleanupInline('pages', $newPageId);
+            [$rowsAffected, $newPageId] = self::insertRecord('pages', $page);
+            if (!$rowsAffected) {
+                throw new \Exception('Create page failed', 1700484228392);
             }
+            $this->pageMap[$old] = $newPageId;
+            $this->addContentMap('pages', $old, $newPageId);
+            $this->addCleanupInline('pages', $newPageId);
+
             if ($page['is_siteroot']) {
                 $this->createDomain($this->pageMap[$old]);
                 $this->siteRootId = $this->pageMap[$old];
