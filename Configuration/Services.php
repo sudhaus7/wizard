@@ -41,6 +41,7 @@ return static function (ContainerConfigurator $containerConfigurator, ContainerB
                  __DIR__ . '/../Classes/Domain/Model/',
                  __DIR__ . '/../Classes/Events/',
                  __DIR__ . '/../Classes/Backend/',
+                 __DIR__ . '/../Classes/Logger/',
              ]);
 
     $services->alias(CreateProcessFactoryInterface::class, CreateProcessFactory::class);

@@ -17,6 +17,7 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Repository\CreatorRepository;
+use SUDHAUS7\Sudhaus7Wizard\Logger\DebugConsoleLogger;
 use SUDHAUS7\Sudhaus7Wizard\Services\CreateProcessFactoryInterface;
 use SUDHAUS7\Sudhaus7Wizard\Tools;
 use Symfony\Component\Console\Command\Command;
@@ -53,11 +54,16 @@ final class RunCommand extends Command
         $this->addOption('id', 'i', InputOption::VALUE_REQUIRED, 'in mode single, the uid of a specific task');
         $this->addOption('force', 'f', InputOption::VALUE_NONE, 'force running the task');
         $this->addOption('mapto', 'm', InputOption::VALUE_REQUIRED, 'write the map to this folder');
+        $this->addOption('debug', null, InputOption::VALUE_NONE, 'print debug information like runtime and memory usage');
     }
 
     protected function initialize(InputInterface $input, OutputInterface $output): void
     {
-        $this->logger = new ConsoleLogger($output);
+        if ($input->getOption('debug')) {
+            $this->logger = new DebugConsoleLogger($output);
+        } else {
+            $this->logger = new ConsoleLogger($output);
+        }
         $this->repository = GeneralUtility::makeInstance(CreatorRepository::class);
     }
 
