@@ -21,7 +21,6 @@ $EM_CONF[$_EXTKEY] = [
     'author_email' => 'fberger@b-factor.de',
     'author_company' => 'Sudhaus 7',
     'version' => '0.3.13',
-
     '_md5_values_when_last_written' => '',
     'constraints' => [
         'depends' => [
