@@ -262,10 +262,40 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
             ['file' => $sysFile['uid']]
         );
         $sys_file_metadata = $res->fetchAssociative();
+
         if (!empty($sys_file_metadata)) {
-            unset($sys_file_metadata['uid']);
-            $sys_file_metadata['file'] = $uid;
-            self::insertRecord('sys_file_metadata', $sys_file_metadata);
+            $res = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('sys_file_metadata')
+                                 ->select(
+                                     [ '*' ],
+                                     'sys_file_metadata',
+                                     ['file'=>$uid]
+                                 );
+            $newSysFileMetadata = $res->fetchAssociative();
+            if (!empty($newSysFileMetadata)) {
+                $skipFields = [
+                    'uid',
+                    'pid',
+                    'file',
+                    'width', // width is already set by the copy procedure
+                    'height', // height is already set by the copy procedure
+                    'cruser_id',
+                ];
+                $update = [];
+                foreach ($sys_file_metadata as $k=>$v) {
+                    if (!\in_array($k, $skipFields)) {
+                        if (! empty($v) || (int)$v > 0) {
+                            $update[ $k ] = $v;
+                        }
+                    }
+                }
+                if (!empty($update)) {
+                    self::updateRecord('sys_file_metadata', $update, [ 'uid' => $newSysFileMetadata['uid'] ]);
+                }
+            } else {
+                unset($sys_file_metadata['uid']);
+                $sys_file_metadata['file'] = $uid;
+                self::insertRecord('sys_file_metadata', $sys_file_metadata);
+            }
         }
 
         return   BackendUtility::getRecord('sys_file', $uid);
