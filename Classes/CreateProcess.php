@@ -943,6 +943,7 @@ final class CreateProcess implements LoggerAwareInterface
 
     public function getTranslateUidReverse(string $table, int $uid): bool|int|string
     {
+        $newUid = $uid;
         if ($table == 'pages') {
             if (in_array($uid, $this->pageMap)) {
                 $newUid = array_search($uid, $this->pageMap);
@@ -987,6 +988,7 @@ final class CreateProcess implements LoggerAwareInterface
             $uid = array_pop($x);
             $table = implode('_', $x);
         }
+        $newuid = $uid;
         if ($table == 'pages') {
             if (isset($this->pageMap[(int)$uid])) {
                 $newuid = (int)$this->pageMap[(int)$uid] > 0 ? (int)$this->pageMap[(int)$uid] : (int)$uid;
