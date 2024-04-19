@@ -954,10 +954,7 @@ final class CreateProcess implements LoggerAwareInterface
 
         $event = new TranslateUidReverseEvent($table, (int)$uid, (int)$newUid);
         $this->eventDispatcher->dispatch($event);
-        if ($event->getFoundUid() > 0 && $event->getFoundUid() !== $uid) {
-            return $event->getFoundUid();
-        }
-        return $uid;
+        return $event->getFoundUid();
     }
 
     public function fixMMRelation(
