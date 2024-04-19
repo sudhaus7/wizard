@@ -952,7 +952,7 @@ final class CreateProcess implements LoggerAwareInterface
             $newUid = array_search($uid, $this->contentMap[$table]);
         }
 
-        $event = new TranslateUidReverseEvent($table, $uid, (int)$newUid);
+        $event = new TranslateUidReverseEvent($table, (int)$uid, (int)$newUid);
         $this->eventDispatcher->dispatch($event);
         if ($event->getFoundUid() > 0 && $event->getFoundUid() !== $uid) {
             return $event->getFoundUid();
@@ -997,11 +997,11 @@ final class CreateProcess implements LoggerAwareInterface
             $newuid = (int)$this->contentMap[$table][(int)$uid] > 0 ? (int)$this->contentMap[$table][(int)$uid] : (int)$uid;
         }
 
-        $event = new TranslateUidEvent($table, $uid, (int)$newuid);
+        $event = new TranslateUidEvent($table, (int)$uid, (int)$newuid);
         $this->eventDispatcher->dispatch($event);
         $uid = $event->getFoundUid();
         //return (int)$uid;
-        return $tablePrefix ? $table . '_' . $uid : $uid;
+        return $tablePrefix ? $table . '_' . (string)$uid : $uid;
     }
 
     /**
