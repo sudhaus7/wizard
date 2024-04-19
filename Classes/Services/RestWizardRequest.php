@@ -70,7 +70,10 @@ final class RestWizardRequest
         }
         $body = $response->getBody()->getContents();
         $decoded = json_decode($body, true);
-        return $decoded ?? throw new \RuntimeException('No information available');
+        if (\is_array($decoded)) {
+            return $decoded;
+        }
+        throw new \RuntimeException('No information available');
         // Get the content as a string on a successful request
     }
 
@@ -112,7 +115,10 @@ final class RestWizardRequest
 
         $body = $response->getBody()->getContents();
         $decoded = json_decode($body, true);
-        return $decoded ?? throw new \RuntimeException('No information available');
+        if (\is_array($decoded)) {
+            return $decoded;
+        }
+        throw new \RuntimeException('No information available');
     }
 
     public function getAPIHOST(): string
