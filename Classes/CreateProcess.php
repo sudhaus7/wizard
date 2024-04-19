@@ -45,6 +45,8 @@ use SUDHAUS7\Sudhaus7Wizard\Events\TCA\Column;
 use SUDHAUS7\Sudhaus7Wizard\Events\TCA\ColumnType;
 use SUDHAUS7\Sudhaus7Wizard\Events\TCA\Inlines;
 use SUDHAUS7\Sudhaus7Wizard\Events\TCAFieldActiveForThisRecordEvent;
+use SUDHAUS7\Sudhaus7Wizard\Events\TranslateUidEvent;
+use SUDHAUS7\Sudhaus7Wizard\Events\TranslateUidReverseEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\TtContent\FinalContentByCtypeEvent;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardProcessInterface;
 use SUDHAUS7\Sudhaus7Wizard\Services\TyposcriptService;
@@ -943,12 +945,17 @@ final class CreateProcess implements LoggerAwareInterface
     {
         if ($table == 'pages') {
             if (in_array($uid, $this->pageMap)) {
-                return array_search($uid, $this->pageMap);
+                $newUid = array_search($uid, $this->pageMap);
             }
         } elseif (isset($this->contentMap[$table]) && in_array($uid, $this->contentMap[$table])) {
-            return array_search($uid, $this->contentMap[$table]);
+            $newUid = array_search($uid, $this->contentMap[$table]);
         }
 
+        $event = new TranslateUidReverseEvent($table, $uid, (int)$newUid);
+        $this->eventDispatcher->dispatch($event);
+        if ($event->getFoundUid() > 0 && $event->getFoundUid() !== $uid) {
+            return $event->getFoundUid();
+        }
         return $uid;
     }
 
@@ -982,12 +989,15 @@ final class CreateProcess implements LoggerAwareInterface
         }
         if ($table == 'pages') {
             if (isset($this->pageMap[(int)$uid])) {
-                $uid = (int)$this->pageMap[(int)$uid] > 0 ? (int)$this->pageMap[(int)$uid] : (int)$uid;
+                $newuid = (int)$this->pageMap[(int)$uid] > 0 ? (int)$this->pageMap[(int)$uid] : (int)$uid;
             }
         } elseif (isset($this->contentMap[$table][(int)$uid])) {
-            $uid = (int)$this->contentMap[$table][(int)$uid] > 0 ? (int)$this->contentMap[$table][(int)$uid] : (int)$uid;
+            $newuid = (int)$this->contentMap[$table][(int)$uid] > 0 ? (int)$this->contentMap[$table][(int)$uid] : (int)$uid;
         }
 
+        $event = new TranslateUidEvent($table, $uid, (int)$newuid);
+        $this->eventDispatcher->dispatch($event);
+        $uid = $event->getFoundUid();
         //return (int)$uid;
         return $tablePrefix ? $table . '_' . $uid : $uid;
     }
