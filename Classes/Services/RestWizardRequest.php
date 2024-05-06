@@ -139,6 +139,9 @@ final class RestWizardRequest
     public function setAPIURL(string $API_URL): void
     {
         $this->API_URL = trim($API_URL, '/') . '/';
+        if ($this->API_URL === '/') {
+            $this->API_URL = '';
+        }
     }
 
     public function getAPISHAREDSECRET(): string
