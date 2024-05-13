@@ -23,6 +23,8 @@ final class RestWizardRequest
     protected string $API_URL = '';
     protected string $API_SHARED_SECRET = '';
 
+    protected string $API_FILEHOST = '';
+
     private RequestFactory $requestFactory;
     // We need the RequestFactory for creating and sending a request,
     // so we inject it into the class using constructor injection.
@@ -152,5 +154,18 @@ final class RestWizardRequest
     public function setAPISHAREDSECRET(string $API_SHARED_SECRET): void
     {
         $this->API_SHARED_SECRET = $API_SHARED_SECRET;
+    }
+
+    public function getAPIFILEHOST(): string
+    {
+        if (empty($this->API_FILEHOST)) {
+            return $this->getAPIURL();
+        }
+        return $this->API_FILEHOST;
+    }
+
+    public function setAPIFILEHOST(string $API_FILEHOST): void
+    {
+        $this->API_FILEHOST = $API_FILEHOST;
     }
 }

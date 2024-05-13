@@ -293,11 +293,11 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
             return $res->fetchAssociative() ?: ['uid' => 0];
         }
 
-        $this->logger->debug('fetching ' . $this->getAPI()->getAPIHOST() . 'fileadmin/' . trim($sysFile['identifier'], '/'));
+        $this->logger->debug('fetching ' . $this->getAPI()->getAPIFILEHOST() . 'fileadmin/' . trim($sysFile['identifier'], '/'));
 
-        $buf = @\file_get_contents($this->getAPI()->getAPIHOST() . 'fileadmin' . $sysFile['identifier']);
+        $buf = @\file_get_contents($this->getAPI()->getAPIFILEHOST() . 'fileadmin' . $sysFile['identifier']);
         if (!$buf) {
-            $this->logger->error('fetch failed' . $this->getAPI()->getAPIHOST() . 'fileadmin/' . trim($sysFile['identifier'], '/'));
+            $this->logger->error('fetch failed' . $this->getAPI()->getAPIFILEHOST() . 'fileadmin/' . trim($sysFile['identifier'], '/'));
             return ['uid' => 0];
         }
 
