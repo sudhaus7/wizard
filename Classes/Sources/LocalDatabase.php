@@ -17,6 +17,7 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use Psr\Log\LoggerAwareTrait;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
+use SUDHAUS7\Sudhaus7Wizard\Events\FinalContentEvent;
 use SUDHAUS7\Sudhaus7Wizard\Services\FolderService;
 use SUDHAUS7\Sudhaus7Wizard\Traits\DbTrait;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
@@ -27,6 +28,7 @@ use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Database\Query\Restriction\EndTimeRestriction;
 use TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
 use TYPO3\CMS\Core\Database\Query\Restriction\StartTimeRestriction;
+use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Resource\Exception\ExistingTargetFolderException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderAccessPermissionsException;
@@ -264,6 +266,12 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $sys_file_metadata = $res->fetchAssociative();
 
         if (!empty($sys_file_metadata)) {
+            $subEventDispatcher = GeneralUtility::makeInstance(EventDispatcher::class);
+            $subEvent = new FinalContentEvent('sys_file_metadata', $sys_file_metadata, $this->getCreator());
+
+            $subEventDispatcher->dispatch($subEvent);
+            $sys_file_metadata = $subEvent->getRecord();
+
             $res = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('sys_file_metadata')
                                  ->select(
                                      [ '*' ],
