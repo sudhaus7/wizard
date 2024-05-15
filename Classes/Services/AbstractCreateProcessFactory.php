@@ -46,6 +46,7 @@ abstract class AbstractCreateProcessFactory implements CreateProcessFactoryInter
         if (\class_exists($sourceClassName)) {
             $sourceClass = GeneralUtility::makeInstance(ltrim($sourceClassName, '\\'));
             $tsk->setSource($sourceClass instanceof SourceInterface ? $sourceClass : GeneralUtility::makeInstance(LocalDatabase::class));
+            $tsk->getSource()->setCreateProcess($tsk);
             $tsk->getSource()->setCreator($creator);
             $tsk->getSource()->setLogger($logger);
         }

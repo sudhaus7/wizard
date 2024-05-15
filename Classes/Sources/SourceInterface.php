@@ -16,10 +16,13 @@ declare(strict_types=1);
 namespace SUDHAUS7\Sudhaus7Wizard\Sources;
 
 use Psr\Log\LoggerAwareInterface;
+use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 
 interface SourceInterface extends LoggerAwareInterface
 {
+    public function setCreateProcess(CreateProcess $createProcess): void;
+    public function getCreateProcess(): CreateProcess;
     public function setCreator(Creator $creator): void;
     public function getCreator(): ?Creator;
     /**

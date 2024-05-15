@@ -8,6 +8,26 @@
 A TYPO3 Plugin for duplicating Sites
 
 Changelog
+0.4.0
+* breaking change a Source has been defined from SourceInterface. Sources need now a connection to the CreateProcess. Upgrade your source by adding this code-snippet:
+```php
+use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
+
+protected ?CreateProcess $createProcess = null;
+
+public function getCreateProcess(): CreateProcess
+{
+    if ($this->createProcess === null) {
+        throw new \InvalidArgumentException('Create Process must be defined', 1715795482);
+    }
+    return $this->createProcess;
+}
+
+public function setCreateProcess( CreateProcess $createProcess ): void
+{
+    $this->createProcess = $createProcess;
+}
+```
 
 0.2.0
 * Breaking change: Update in WizardProcessInterface - in getTemplateBackendUserGroup and getTemplateBackendUser the CreateProcess Object is now added as a parameter. Please update your implementations for this Interface accordingly

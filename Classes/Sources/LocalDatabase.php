@@ -16,6 +16,7 @@ namespace SUDHAUS7\Sudhaus7Wizard\Sources;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use Psr\Log\LoggerAwareTrait;
+use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use SUDHAUS7\Sudhaus7Wizard\Events\FinalContentEvent;
 use SUDHAUS7\Sudhaus7Wizard\Services\FolderService;
@@ -92,7 +93,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     ];
 
     private ?Creator $creator = null;
-
+    protected ?CreateProcess $createProcess = null;
     /**
      * @return Creator
      */
@@ -266,13 +267,11 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $sys_file_metadata = $res->fetchAssociative();
 
         if (!empty($sys_file_metadata)) {
-            /*
             $subEventDispatcher = GeneralUtility::makeInstance(EventDispatcher::class);
-            $subEvent = new FinalContentEvent('sys_file_metadata', $sys_file_metadata, $this->getCreator());
+            $subEvent = new FinalContentEvent('sys_file_metadata', $sys_file_metadata, $this->getCreateProcess());
 
             $subEventDispatcher->dispatch($subEvent);
             $sys_file_metadata = $subEvent->getRecord();
-            */
 
             $res = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('sys_file_metadata')
                                  ->select(
@@ -411,5 +410,17 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         }
 
         return $filteredPidList;
+    }
+    public function getCreateProcess(): CreateProcess
+    {
+        if ($this->createProcess === null) {
+            throw new \InvalidArgumentException('Create Process must be defined', 1715795482);
+        }
+        return $this->createProcess;
+    }
+
+    public function setCreateProcess(CreateProcess $createProcess): void
+    {
+        $this->createProcess = $createProcess;
     }
 }
