@@ -15,6 +15,7 @@ namespace SUDHAUS7\Sudhaus7Wizard\Sources;
 
 use Doctrine\DBAL\Exception;
 use Psr\Log\LoggerAwareTrait;
+use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use SUDHAUS7\Sudhaus7Wizard\Traits\DbTrait;
 use TYPO3\CMS\Core\Core\Environment;
@@ -724,5 +725,18 @@ function(doc) {
         curl_close($ch);
 
         return \json_decode($response, true, 512, JSON_THROW_ON_ERROR);
+    }
+    protected ?CreateProcess $createProcess = null;
+    public function getCreateProcess(): CreateProcess
+    {
+        if ($this->createProcess === null) {
+            throw new \InvalidArgumentException('Create Process must be defined', 1715795482);
+        }
+        return $this->createProcess;
+    }
+
+    public function setCreateProcess(CreateProcess $createProcess): void
+    {
+        $this->createProcess = $createProcess;
     }
 }
