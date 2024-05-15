@@ -20,7 +20,7 @@ $EM_CONF[$_EXTKEY] = [
     'author' => 'Frank Berger',
     'author_email' => 'fberger@b-factor.de',
     'author_company' => 'Sudhaus 7',
-    'version' => '0.3.23',
+    'version' => '0.3.24',
     '_md5_values_when_last_written' => '',
     'constraints' => [
         'depends' => [
@@ -31,4 +31,5 @@ $EM_CONF[$_EXTKEY] = [
         'suggests' => [
         ],
     ],
+
 ];

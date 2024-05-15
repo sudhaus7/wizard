@@ -266,11 +266,13 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $sys_file_metadata = $res->fetchAssociative();
 
         if (!empty($sys_file_metadata)) {
+            /*
             $subEventDispatcher = GeneralUtility::makeInstance(EventDispatcher::class);
             $subEvent = new FinalContentEvent('sys_file_metadata', $sys_file_metadata, $this->getCreator());
 
             $subEventDispatcher->dispatch($subEvent);
             $sys_file_metadata = $subEvent->getRecord();
+            */
 
             $res = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('sys_file_metadata')
                                  ->select(
