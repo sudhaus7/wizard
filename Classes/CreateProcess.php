@@ -108,7 +108,7 @@ final class CreateProcess implements LoggerAwareInterface
 
     public string $debugSection = 'Init';
 
-    public string $calculatedSiteconfigIdentifier = '';
+    protected string $calculatedSiteconfigIdentifier = '';
 
     public $errorPage = 0;
 
@@ -1876,5 +1876,10 @@ final class CreateProcess implements LoggerAwareInterface
             $config['TYPO3']['CMS']['Form']['persistenceManager']['allowedFileMounts'][$lastkey + 10] = '1:' . $path;
         }
         \file_put_contents(Environment::getPublicPath() . '/fileadmin/bk_form_config.yaml', Yaml::dump($config, 99, 2));
+    }
+
+    public function getCalculatedSiteconfigIdentifier(): string
+    {
+        return $this->calculatedSiteconfigIdentifier;
     }
 }
