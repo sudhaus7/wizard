@@ -48,6 +48,7 @@ use SUDHAUS7\Sudhaus7Wizard\Events\TCAFieldActiveForThisRecordEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\TranslateUidEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\TranslateUidReverseEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\TtContent\FinalContentByCtypeEvent;
+use SUDHAUS7\Sudhaus7Wizard\Events\UpdateBackendUserEvent;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardProcessInterface;
 use SUDHAUS7\Sudhaus7Wizard\Services\TyposcriptService;
 use SUDHAUS7\Sudhaus7Wizard\Sources\SourceInterface;
@@ -394,11 +395,17 @@ final class CreateProcess implements LoggerAwareInterface
             $test['tstamp'] = time();
             $this->source->ping();
 
-            self::updateRecord('be_users', [
+            $tmpl['usergroup'] = implode(',', $groups);
+
+            $event = new UpdateBackendUserEvent([
                 'file_mountpoints' => $test['file_mountpoints'],
                 'usergroup' => $test['usergroup'],
                 'tstamp' => time(),
-            ], ['uid' => $test['uid']]);
+            ], $this);
+            $this->eventDispatcher->dispatch($event);
+            $update = $event->getRecord();
+
+            self::updateRecord('be_users', $update, ['uid' => $test['uid']]);
             $this->user = $test;
 
             return;
