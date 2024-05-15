@@ -108,6 +108,8 @@ final class CreateProcess implements LoggerAwareInterface
 
     public string $debugSection = 'Init';
 
+    public string $calculatedSiteconfigIdentifier = '';
+
     public $errorPage = 0;
 
     protected $pObj;
@@ -1637,6 +1639,7 @@ final class CreateProcess implements LoggerAwareInterface
         $this->eventDispatcher->dispatch($event);
         $this->siteConfig = $event->getSiteconfig();
 
+        $this->calculatedSiteconfigIdentifier = $identifier;
         GeneralUtility::makeInstance(SiteConfiguration::class)->write($identifier, $this->siteConfig);
     }
 
