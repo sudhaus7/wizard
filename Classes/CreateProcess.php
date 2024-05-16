@@ -270,7 +270,7 @@ final class CreateProcess implements LoggerAwareInterface
         /** @var ResourceStorage $storage */
         $storage           = GeneralUtility::makeInstance(StorageRepository::class)->getDefaultStorage();
 
-        $defaultStorageEvent = new GetResourceStorageEvent($this, $storage);
+        $defaultStorageEvent = new GetResourceStorageEvent($storage, $this);
         $this->eventDispatcher->dispatch($defaultStorageEvent);
         $storage = $defaultStorageEvent->getStorage();
 
