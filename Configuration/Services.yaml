@@ -1,0 +1,16 @@
+services:
+  SUDHAUS7\Sudhaus7Wizard\Command\RunWizardCommand:
+    arguments:
+      $name: 'wizard:run'
+    tags:
+      - name: 'console.command'
+        command: 'wizard:run'
+        schedulable: true
+
+  SUDHAUS\Sudhaus7Wizard\Command\ShowInformationCommand:
+    arguments:
+      $name: 'wizard:info'
+    tags:
+      - name: 'console.command'
+        command: 'wizard:info'
+        schedulable: false

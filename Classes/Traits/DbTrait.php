@@ -19,9 +19,15 @@ use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\StringUtility;
 
 trait DbTrait
 {
+    /**
+     * @var array<string, array<int|string, array<non-empty-string, int|string>>>
+     */
+    private static array $data = [];
+
     public static function getQueryBuilderWithoutRestriction(string $tableName): QueryBuilder
     {
         $query = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($tableName);
@@ -49,11 +55,11 @@ trait DbTrait
      */
     public static function insertRecord(string $tableName, array $data): array
     {
+        $newId = StringUtility::getUniqueId('NEW');
         $data = self::cleanFieldsBeforeInsert($tableName, $data);
-        $conn = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($tableName);
-        $rows = $conn->insert($tableName, $data);
-        $newid = $conn->lastInsertId($tableName);
-        return [$rows, $newid];
+        self::$data[$tableName] ??= [];
+        self::$data[$tableName][$newId] = $data;
+        return [1, $newId];
     }
 
     public static function tableHasField(string $tableName, string $field): bool
@@ -74,25 +80,80 @@ trait DbTrait
      */
     public static function cleanFieldsBeforeInsert(string $tableName, array $row): array
     {
-        if (!isset($GLOBALS['localtables'])) {
-            $GLOBALS['localtables'] = [];
-        }
-        if (!isset($GLOBALS['localtables'][$tableName])) {
-            $GLOBALS['localtables'][$tableName] = [];
-            $res = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($tableName);
-            $schema = $res->createSchemaManager();
-            $columns = $schema->listTableColumns($tableName);
-            $GLOBALS['localtables'][$tableName] = [];
-            foreach ($columns as $column) {
-                $GLOBALS['localtables'][$tableName][] = $column->getName();
-            }
+        if (
+            !array_key_exists($tableName, $GLOBALS['TCA'] ?? [])
+            || !is_array($GLOBALS['TCA'][$tableName]['columns'])
+        ) {
+            throw new \RuntimeException(
+                sprintf('Table "%s" not defined in TCA', $tableName),
+                1715700409306
+            );
         }
 
-        foreach ($row as $field => $value) {
-            if (!\in_array($field, $GLOBALS['localtables'][$tableName])) {
-                unset($row[$field]);
+        foreach ($row as $columnName => $value) {
+            if (
+                (
+                    !array_key_exists($columnName, $GLOBALS['TCA'][$tableName]['columns'])
+                    && !in_array($columnName, $GLOBALS['TCA'][$tableName]['ctrl']['enablecolumns'])
+                    && !self::checkForControlField($GLOBALS['TCA'][$tableName]['ctrl'], $columnName)
+                )
+                || self::isAutoSetFieldByDataHandler($GLOBALS['TCA'][$tableName]['ctrl'], $columnName)
+            ) {
+                unset($row[$columnName]);
             }
         }
         return $row;
+    }
+
+    /**
+     * This method checks against auto-created and not configured fields in TCA
+     * control section.
+     * Actually, only sortby is checked, as other fields are set default by
+     * DataHandler such as tstamp, crdate, cruser_id (deprecated)
+     *
+     * If a field is set inside control AND is configured in columns, this
+     * method is not called, as the check for columsn is done before
+     *
+     *
+     * @param array{
+     *     sortby?: string
+     * } $controlSection
+     */
+    private static function checkForControlField(array $controlSection, string $columnName): bool
+    {
+        if ($columnName === ($controlSection['sortby'] ?? '')) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * This method checks if a field is auto-set by DataHandler. In this case
+     * it returns true, so the field can be removed as not needed and auto-set
+     * by DataHandler itself
+     *
+     * @param array{
+     *     cruser_id?: string,
+     *     tstamp?: string,
+     *     crdate?: string
+     * } $controlSection
+     * @param string $columnName
+     * @return bool
+     */
+    private static function isAutoSetFieldByDataHandler(array $controlSection, string $columnName): bool
+    {
+        if (($controlSection['cruser_id'] ?? '') === $columnName) {
+            return true;
+        }
+
+        if (($controlSection['tstamp'] ?? '') === $columnName) {
+            return true;
+        }
+
+        if (($controlSection['crdate'] ?? '') === $columnName) {
+            return true;
+        }
+
+        return false;
     }
 }

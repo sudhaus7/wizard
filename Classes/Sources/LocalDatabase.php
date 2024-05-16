@@ -167,14 +167,13 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
      */
     public function getIrre(
         string $table,
-        int    $uid,
-        int    $pid,
-        array  $oldRow,
-        array  $columnConfig,
+        int $uid,
+        int $pid,
+        array $oldRow,
+        array $columnConfig,
         array $pidList = [],
         string $column = ''
-    ): array
-    {
+    ): array {
         $query = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($columnConfig['config']['foreign_table']);
 
         $query->getRestrictions()->removeAll();
@@ -185,7 +184,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         ];
         if (isset($columnConfig['config']['foreign_field'])) {
             $where[] = $query->expr()->eq($columnConfig['config']['foreign_field'], $uid);
-        } else if (!empty($column)) {
+        } elseif (!empty($column)) {
             $where[] = $query->expr()->in('uid', GeneralUtility::intExplode(',', $oldRow[$column]));
         }
 

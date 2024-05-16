@@ -23,9 +23,9 @@ call_user_func(function (): void {
     );
 
     $GLOBALS['TCA']['tt_content']['columns']['myrelations'] = [
-        'config'=>[
-            'type'=>'inline',
-            'foreign_table'=>'sys_category',
+        'config' => [
+            'type' => 'inline',
+            'foreign_table' => 'sys_category',
 
         ],
     ];

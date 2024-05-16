@@ -17,12 +17,15 @@ namespace SUDHAUS7\Sudhaus7Wizard\Domain\Model;
 
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
+
+use function str_starts_with;
+
+use SUDHAUS7\Sudhaus7Wizard\Enumeration\CreatorStatus;
 use SUDHAUS7\Sudhaus7Wizard\Tools;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Loader\YamlFileLoader;
 use TYPO3\CMS\Core\Service\FlexFormService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use function str_starts_with;
 
 /**
  * Model Creator
@@ -31,12 +34,12 @@ class Creator implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
     public static array $statusList = [
-        0 => 'editing',
-        5 => 'Not ready',
-        10 => 'ready',
-        15 => 'processing',
-        17 => 'failed',
-        20 => 'done',
+        CreatorStatus::STATUS_EDIT => 'editing',
+        CreatorStatus::STATUS_NOT_READY => 'Not ready',
+        CreatorStatus::STATUS_READY => 'ready',
+        CreatorStatus::STATUS_PROCESSING => 'processing',
+        CreatorStatus::STATUS_FAILED => 'failed',
+        CreatorStatus::STATUS_DONE => 'done',
     ];
 
     protected function __construct(
@@ -114,7 +117,7 @@ class Creator implements LoggerAwareInterface
 
     public function getSourcepid(): int
     {
-        if ( str_starts_with((string)$this->sourcepid, 't3://')) {
+        if (str_starts_with((string)$this->sourcepid, 't3://')) {
             return (int)GeneralUtility::trimExplode('=', $this->sourcepid)[1];
         }
         return (int)$this->sourcepid;
@@ -210,11 +213,19 @@ class Creator implements LoggerAwareInterface
         return $this->redpass;
     }
 
+    /**
+     * @todo php:>=8.1 change return to enum
+     * @see CreatorStatus
+     */
     public function getStatus(): int
     {
         return $this->status;
     }
 
+    /**
+     * @todo php:>=8.1 change param to enumeration
+     * @see CreatorStatus
+     */
     public function setStatus(int $status): Creator
     {
         $this->status = $status;
@@ -364,5 +375,4 @@ class Creator implements LoggerAwareInterface
         $this->redpass = $redpass;
         return $this;
     }
-
 }

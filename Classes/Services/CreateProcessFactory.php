@@ -36,26 +36,26 @@ final class CreateProcessFactory
      */
     public static function get(Creator $creator, ?LoggerInterface $logger = null): CreateProcess
     {
-        $tsk              = GeneralUtility::makeInstance(CreateProcess::class);
+        $task = GeneralUtility::makeInstance(CreateProcess::class);
         if ($logger instanceof LoggerInterface) {
-            $tsk->setLogger($logger);
+            $task->setLogger($logger);
         }
-        $tsk->setTask($creator);
-        $tsk->setTemplateKey($creator->getBase());
+        $task->setTask($creator);
+        $task->setTemplateKey($creator->getBase());
         /** @var class-string $processInterface */
-        $processInterface              = $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['Sudhaus7Wizard']['registeredTemplateExtentions'][ $tsk->getTemplateKey() ];
+        $processInterface = $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['Sudhaus7Wizard']['registeredTemplateExtentions'][ $task->getTemplateKey() ];
         /** @var WizardProcessInterface $wizardProcess */
         $wizardProcess = GeneralUtility::makeInstance($processInterface);
-        $tsk->setTemplate($wizardProcess);
+        $task->setTemplate($wizardProcess);
         $sourceClassName = $creator->getSourceclass();
         if (\class_exists($sourceClassName)) {
             $sourceClass = GeneralUtility::makeInstance(ltrim($sourceClassName, '\\'));
-            $tsk->setSource($sourceClass instanceof SourceInterface ? $sourceClass : GeneralUtility::makeInstance(LocalDatabase::class));
-            $tsk->getSource()->setCreator($creator);
-            $tsk->getSource()->setLogger($logger);
+            $task->setSource($sourceClass instanceof SourceInterface ? $sourceClass : GeneralUtility::makeInstance(LocalDatabase::class));
+            $task->getSource()->setCreator($creator);
+            $task->getSource()->setLogger($logger);
         }
         $pid = $creator->getSourcepid();
-        $tsk->setSiteConfig($tsk->getSource()->getSiteConfig($pid));
-        return $tsk;
+        $task->setSiteConfig($task->getSource()->getSiteConfig($pid));
+        return $task;
     }
 }

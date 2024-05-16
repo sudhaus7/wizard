@@ -695,14 +695,14 @@ final class CreateProcess implements LoggerAwareInterface
                             $this->eventDispatcher->dispatch(new AfterContentCloneEvent($table, $olduid, $oldpid, $newuid, $row, $this));
                         } else {
                             $this->log('ERROR NO ROW ' . print_r([
-                                    $table,
-                                    [
-                                        'table' => $table,
-                                        'olduid' => $olduid,
-                                        'oldpid' => $oldpid,
-                                        'newpid' => $newpid,
-                                    ],
-                                ], true));
+                                $table,
+                                [
+                                    'table' => $table,
+                                    'olduid' => $olduid,
+                                    'oldpid' => $oldpid,
+                                    'newpid' => $newpid,
+                                ],
+                            ], true));
                             exit;
                         }
                     }
@@ -1274,7 +1274,7 @@ final class CreateProcess implements LoggerAwareInterface
 
             if (!isset($columnConfig['config']['foreign_field']) && !empty($csvInlineNewIds)) {
                 $translated = $this->translateIDlist($columnConfig['config']['foreign_table'], $row[$column]);
-                self::updateRecord($table, [ $column=>$translated ], ['uid'=>$newUid]);
+                self::updateRecord($table, [ $column => $translated ], ['uid' => $newUid]);
                 $row[$column] = $translated;
             }
         } else {
