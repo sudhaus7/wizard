@@ -13,16 +13,24 @@ use SUDHAUS7\Sudhaus7Wizard\Domain\Dto\PrepareProcess;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Repository\CreatorRepository;
 use SUDHAUS7\Sudhaus7Wizard\Enumeration\CreatorStatus;
+use SUDHAUS7\Sudhaus7Wizard\Events\AfterCreateFilemountEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\CreateFilemountEvent;
+use SUDHAUS7\Sudhaus7Wizard\Exception\DataHandlerExecutionFailedException;
 use SUDHAUS7\Sudhaus7Wizard\Services\CreateProcessFactory;
 use SUDHAUS7\Sudhaus7Wizard\Tools;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Output\OutputInterface;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
+use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Mail\MailMessage;
+use TYPO3\CMS\Core\Resource\Exception\ExistingTargetFolderException;
+use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderAccessPermissionsException;
+use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderWritePermissionsException;
+use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 final class ProcessService
@@ -31,6 +39,7 @@ final class ProcessService
         private CreatorRepository $creatorRepository,
         private EventDispatcherInterface $eventDispatcher,
         private \SUDHAUS7\Sudhaus7Wizard\CreateProcess\CreateProcessFactory $createProcessFactory,
+        private DataHandlingService $dataHandlingService,
         private LoggerInterface $logger
     ) {}
     public function create(PrepareProcess $prepareProcess, ?OutputInterface $output = null): int
@@ -128,9 +137,15 @@ final class ProcessService
 
     private function run(CreateProcessInterface $createProcess): int
     {
-
+        $this->createFileMount($createProcess);
     }
 
+    /**
+     * @throws InsufficientFolderAccessPermissionsException
+     * @throws DataHandlerExecutionFailedException
+     * @throws Exception
+     * @throws InsufficientFolderWritePermissionsException
+     */
     private function createFileMount(CreateProcessInterface $createProcess): void
     {
         $shortname = Tools::generateSlug($createProcess->getCreator()->getShortname());
@@ -142,13 +157,47 @@ final class ProcessService
             'path' => $dir,
             'base' => 1,
             'pid' => 0,
-        ], $createProcess);
+        ], $this);
         $this->eventDispatcher->dispatch($event);
-        $tmpl = $event->getRecord();
+        $fileMountRecord = $event->getRecord();
 
-        $dir = $tmpl['path'];
-        $name = $tmpl['title'];
+        $this->logger->debug(sprintf('Create Filemount 1 %s - %s', $fileMountRecord['title'], $fileMountRecord['path']));
 
-        $this->logger->debug(sprintf('Create Filemount 1 %s - %s', $name, $dir));
+        $result = GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getConnectionForTable('sys_filemounts')
+            ->select(
+                ['*'],
+                'sys_filemounts',
+                [
+                    'path' => $fileMountRecord['path'],
+                ]
+            );
+
+        $existingFileMount = $result->fetchAssociative();
+        if ($existingFileMount !== false) {
+            $createProcess->setFileMount($existingFileMount);
+            $event = new AfterCreateFilemountEvent($existingFileMount, $this);
+            $this->eventDispatcher->dispatch($event);
+            return;
+        }
+
+        $storage = GeneralUtility::makeInstance(ResourceFactory::class)
+            ->getDefaultStorage();
+        try {
+            $storage->createFolder($fileMountRecord['path']);
+        }
+            // If the folder exists, continue creating record.
+            // All other exceptions should be thrown
+        catch (ExistingTargetFolderException $_) {}
+
+        $newFileMountId = $this->dataHandlingService->immediatelyAddRecord('sys_filemounts', $fileMountRecord);
+
+        $fileMount = BackendUtility::getRecord(
+            'sys_filemounts',
+            $newFileMountId
+        );
+        $createProcess->setFileMount($fileMount);
+        $event = new AfterCreateFilemountEvent($fileMount, $this);
+        $this->eventDispatcher->dispatch($event);
     }
 }

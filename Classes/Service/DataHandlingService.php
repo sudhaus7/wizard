@@ -47,6 +47,38 @@ final class DataHandlingService implements SingletonInterface
     /**
      * @param non-empty-string $tableName
      * @param array<non-empty-string, mixed> $data
+     * @return positive-int The ID of the new created record
+     * @throws DataHandlerExecutionFailedException
+     */
+    public function immediatelyAddRecord(string $tableName, array $data): int
+    {
+        $newIdentifier = StringUtility::getUniqueId('NEW');
+
+        $originalUid = $data['uid'] ?? 0;
+
+        $data = [
+            $tableName => [
+                $newIdentifier => $this->cleanFieldsBeforeInsert($tableName, $data),
+            ],
+        ];
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start($data, []);
+        $dataHandler->process_datamap();
+
+        if (count($dataHandler->errorLog) > 0) {
+            throw new DataHandlerExecutionFailedException(
+                'DataHandler Failed to execute immediately record update',
+                1715899208011
+            );
+        }
+
+        return $dataHandler->substNEWwithIDs[$newIdentifier];
+    }
+
+    /**
+     * @param non-empty-string $tableName
+     * @param array<non-empty-string, mixed> $data
      * @param positive-int $recordUid
      */
     public function updateRecord(string $tableName, array $data, int $recordUid): void

@@ -12,4 +12,24 @@ interface CreateProcessInterface
     public function getWizardProcess(): WizardProcessInterface;
 
     public function getCreator(): Creator;
+
+    /**
+     * @return array{
+     *      uid: int,
+     *      title: string,
+     *      base: string,
+     *      path: string
+     *  }|array<string, int|string>
+     */
+    public function getFileMount(): array;
+
+    /**
+     * @param array{
+     *      uid: int,
+     *      title: string,
+     *      base: string,
+     *      path: string
+     *  }|array<string, int|string> $fileMount
+     */
+    public function setFileMount(array $fileMount): void;
 }
