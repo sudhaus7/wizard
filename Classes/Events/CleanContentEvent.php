@@ -14,8 +14,6 @@
 namespace SUDHAUS7\Sudhaus7Wizard\Events;
 
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
-use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventInterface;
-use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventWriteableRecordInterface;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventWriteableRecordTrait;
 

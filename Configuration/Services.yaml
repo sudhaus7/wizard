@@ -14,3 +14,15 @@ services:
       - name: 'console.command'
         command: 'wizard:info'
         schedulable: false
+
+  SUDHAUS7\Sudhaus7Wizard\Command\ListNextCommand:
+    arguments:
+      $name: 'wizard:list'
+    tags:
+      - name: 'console.command'
+        command: 'wizard:list'
+        schedulable: false
+
+  SUDHAUS7\Sudhaus7Wizard\Process\WizardProcessRegistry:
+    arguments:
+      - !tagged_iterator { tag: 'wizard.process' }

@@ -13,7 +13,7 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard\Backend\TCA;
 
-use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardProcessInterface;
+use SUDHAUS7\Sudhaus7Wizard\WizardProcess\WizardProcessInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Utility\GeneralUtility;

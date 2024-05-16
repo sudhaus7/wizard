@@ -11,9 +11,10 @@
  * The TYPO3 project - inspiring people to share!
  */
 
-namespace SUDHAUS7\Sudhaus7Wizard\Interfaces;
+namespace SUDHAUS7\Sudhaus7Wizard\Events;
 
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
+use SUDHAUS7\Sudhaus7Wizard\WizardProcess\WizardProcessInterface;
 
 interface WizardEventInterface
 {

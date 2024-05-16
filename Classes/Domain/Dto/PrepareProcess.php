@@ -7,7 +7,7 @@ namespace SUDHAUS7\Sudhaus7Wizard\Domain\Dto;
 use Psr\Log\LoggerInterface;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 
-final class Process
+final class PrepareProcess
 {
     public function __construct(
         private Creator $creator,

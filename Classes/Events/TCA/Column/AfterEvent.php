@@ -16,8 +16,8 @@ declare(strict_types=1);
 namespace SUDHAUS7\Sudhaus7Wizard\Events\TCA\Column;
 
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
-use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventInterface;
-use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventWriteableRecordInterface;
+use SUDHAUS7\Sudhaus7Wizard\Events\WizardEventInterface;
+use SUDHAUS7\Sudhaus7Wizard\Events\WizardEventWriteableRecordInterface;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventWriteableRecordTrait;
 

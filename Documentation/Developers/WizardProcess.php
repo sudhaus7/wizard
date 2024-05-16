@@ -12,8 +12,8 @@
  */
 
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
-use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardProcessInterface;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardTemplateConfigInterface;
+use SUDHAUS7\Sudhaus7Wizard\WizardProcess\WizardProcessInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 
 class WizardProcess implements WizardProcessInterface

@@ -14,7 +14,6 @@
 namespace SUDHAUS7\Sudhaus7Wizard\Events;
 
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
-use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventInterface;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
 
 final class BeforeSiteConfigWriteEvent implements WizardEventInterface

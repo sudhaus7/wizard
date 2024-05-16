@@ -45,7 +45,7 @@ use SUDHAUS7\Sudhaus7Wizard\Events\TCA\Column;
 use SUDHAUS7\Sudhaus7Wizard\Events\TCA\ColumnType;
 use SUDHAUS7\Sudhaus7Wizard\Events\TCA\Inlines;
 use SUDHAUS7\Sudhaus7Wizard\Events\TtContent\FinalContentByCtypeEvent;
-use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardProcessInterface;
+use SUDHAUS7\Sudhaus7Wizard\WizardProcess\WizardProcessInterface;
 use SUDHAUS7\Sudhaus7Wizard\Services\TyposcriptService;
 use SUDHAUS7\Sudhaus7Wizard\Sources\SourceInterface;
 use SUDHAUS7\Sudhaus7Wizard\Traits\DbTrait;

@@ -13,9 +13,10 @@ declare(strict_types=1);
  * The TYPO3 project - inspiring people to share!
  */
 
-namespace SUDHAUS7\Sudhaus7Wizard\Interfaces;
+namespace SUDHAUS7\Sudhaus7Wizard\WizardProcess;
 
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
+use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardTemplateConfigInterface;
 
 interface WizardProcessInterface
 {

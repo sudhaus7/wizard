@@ -14,7 +14,7 @@
 namespace SUDHAUS7\Sudhaus7Wizard\Traits;
 
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
-use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardProcessInterface;
+use SUDHAUS7\Sudhaus7Wizard\WizardProcess\WizardProcessInterface;
 
 trait EventTrait
 {

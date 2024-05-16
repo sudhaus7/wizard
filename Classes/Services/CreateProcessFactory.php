@@ -18,7 +18,7 @@ namespace SUDHAUS7\Sudhaus7Wizard\Services;
 use Psr\Log\LoggerInterface;
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
-use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardProcessInterface;
+use SUDHAUS7\Sudhaus7Wizard\WizardProcess\WizardProcessInterface;
 use SUDHAUS7\Sudhaus7Wizard\Sources\LocalDatabase;
 use SUDHAUS7\Sudhaus7Wizard\Sources\SourceInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -41,7 +41,7 @@ final class CreateProcessFactory
             $task->setLogger($logger);
         }
         $task->setTask($creator);
-        $task->setTemplateKey($creator->getBase());
+        $task->setTemplateKey($creator->getWizardProcessClass());
         /** @var class-string $processInterface */
         $processInterface = $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['Sudhaus7Wizard']['registeredTemplateExtentions'][ $task->getTemplateKey() ];
         /** @var WizardProcessInterface $wizardProcess */

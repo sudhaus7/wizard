@@ -16,7 +16,6 @@ declare(strict_types=1);
 namespace SUDHAUS7\Sudhaus7Wizard\Events;
 
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
-use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventInterface;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
 
 final class ModifyCloneInlinesSkipTablesEvent implements WizardEventInterface

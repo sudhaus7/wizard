@@ -6,11 +6,16 @@ namespace SUDHAUS7\Sudhaus7Wizard\Service;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
-use SUDHAUS7\Sudhaus7Wizard\Domain\Dto\Process;
+use Psr\EventDispatcher\EventDispatcherInterface;
+use Psr\Log\LoggerInterface;
+use SUDHAUS7\Sudhaus7Wizard\Domain\Dto\CreateProcessInterface;
+use SUDHAUS7\Sudhaus7Wizard\Domain\Dto\PrepareProcess;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Repository\CreatorRepository;
 use SUDHAUS7\Sudhaus7Wizard\Enumeration\CreatorStatus;
+use SUDHAUS7\Sudhaus7Wizard\Events\CreateFilemountEvent;
 use SUDHAUS7\Sudhaus7Wizard\Services\CreateProcessFactory;
+use SUDHAUS7\Sudhaus7Wizard\Tools;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -23,27 +28,32 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 final class ProcessService
 {
     public function __construct(
-        private CreatorRepository $creatorRepository
+        private CreatorRepository $creatorRepository,
+        private EventDispatcherInterface $eventDispatcher,
+        private \SUDHAUS7\Sudhaus7Wizard\CreateProcess\CreateProcessFactory $createProcessFactory,
+        private LoggerInterface $logger
     ) {}
-    public function create(Process $process, ?OutputInterface $output = null): int
+    public function create(PrepareProcess $prepareProcess, ?OutputInterface $output = null): int
     {
-        $process->getCreator()->setStatus(CreatorStatus::STATUS_PROCESSING);
-        $this->creatorRepository->updateStatus($process->getCreator());
-        $this->printInformation($process->getCreator(), $output);
+        $prepareProcess->getCreator()->setStatus(CreatorStatus::STATUS_PROCESSING);
+        $this->creatorRepository->updateStatus($prepareProcess->getCreator());
+        $this->printInformation($prepareProcess->getCreator(), $output);
+        $createProcess = $this->createProcessFactory;
         try {
-            if (CreateProcessFactory::get($process->getCreator(), $process->getLogger())->run($process->getMappingFolder())) {
+            if (CreateProcessFactory::get($prepareProcess->getCreator(), $prepareProcess->getLogger())
+                ->run($prepareProcess->getMappingFolder())) {
                 $output->write("Fertig\n", true);
-                $process->getCreator()->setStatus(20);
+                $prepareProcess->getCreator()->setStatus(20);
 
-                $this->creatorRepository->updateStatus($process->getCreator());
-                $this->creatorRepository->updatePid($process->getCreator());
+                $this->creatorRepository->updateStatus($prepareProcess->getCreator());
+                $this->creatorRepository->updatePid($prepareProcess->getCreator());
 
                 $user = GeneralUtility::makeInstance(ConnectionPool::class)
                     ->getConnectionForTable('be_users')
                     ->select(
                         ['*'],
                         'be_users',
-                        ['uid' => $process->getCreator()->getCruserId()],
+                        ['uid' => $prepareProcess->getCreator()->getCruserId()],
                         [],
                         [],
                         1
@@ -56,10 +66,10 @@ final class ProcessService
                     $mail = GeneralUtility::makeInstance(MailMessage::class);
 
                     // Prepare and send the message
-                    $mail->setSubject(sprintf('[Wizard] %s ist fertig', $process->getCreator()->getProjektname()))
+                    $mail->setSubject(sprintf('[Wizard] %s ist fertig', $prepareProcess->getCreator()->getProjektname()))
                         ->setFrom($user['email'])
                         ->setTo($user['email'])
-                        ->text(sprintf('Der neue Baukasten %s wurde angelegt', $process->getCreator()->getProjektname()));
+                        ->text(sprintf('Der neue Baukasten %s wurde angelegt', $prepareProcess->getCreator()->getProjektname()));
                     $mail->send();
                     $output->write("E-Mail versendet\n");
                 }
@@ -67,7 +77,7 @@ final class ProcessService
                 return Command::SUCCESS;
             }
         } catch (Exception|ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException|\Exception $e) {
-            $process->getLogger()->warning($e->getMessage(), $e->getTrace());
+            $prepareProcess->getLogger()->warning($e->getMessage(), $e->getTrace());
         }
 
         return Command::FAILURE;
@@ -82,7 +92,7 @@ final class ProcessService
         $outputTable->setHeaderTitle(sprintf('<info>Generate new TYPO3 page "%s"</info>', $creator->getLongname()));
 
         $informationArray = [
-            ['Template', $creator->getBase()],
+            ['Template', $creator->getWizardProcessClass()],
             ['Project name', $creator->getProjektname()],
             ['Short name', $creator->getShortname()],
             ['Domain', $creator->getDomainname()],
@@ -114,5 +124,31 @@ final class ProcessService
             $table->addRow([$creator->getUid(), $creator->getLongname(), $creator->getStatusLabel()]);
         }
         $table->render();
+    }
+
+    private function run(CreateProcessInterface $createProcess): int
+    {
+
+    }
+
+    private function createFileMount(CreateProcessInterface $createProcess): void
+    {
+        $shortname = Tools::generateSlug($createProcess->getCreator()->getShortname());
+        $dir = $createProcess->getWizardProcess()->getMediaBaseDir() . $shortname . '/';
+        $name = 'Medien ' . $createProcess->getCreator()->getProjektname();
+
+        $event = new CreateFilemountEvent([
+            'title' => $name,
+            'path' => $dir,
+            'base' => 1,
+            'pid' => 0,
+        ], $createProcess);
+        $this->eventDispatcher->dispatch($event);
+        $tmpl = $event->getRecord();
+
+        $dir = $tmpl['path'];
+        $name = $tmpl['title'];
+
+        $this->logger->debug(sprintf('Create Filemount 1 %s - %s', $name, $dir));
     }
 }

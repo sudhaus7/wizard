@@ -21,6 +21,7 @@ use SUDHAUS7\Sudhaus7Wizard\EventHandlers\FinalTTContentFormFrameworkListener;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\PreSysFileReferenceEventHandler;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\SysFileReferenceHandleLinkFieldListener;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\TypoLinkinRichTextFieldsEvent;
+use SUDHAUS7\Sudhaus7Wizard\WizardProcess\WizardProcessInterface;
 use SUDHAUS7\Sudhaus7Wizard\Sources\LocalDatabase;
 use SUDHAUS7\Sudhaus7Wizard\Sources\SourceInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -67,4 +68,6 @@ return static function (ContainerConfigurator $containerConfigurator, ContainerB
              ->tag('event.listener', ['identifier' => 's7wizardTxNewsFixRecordHandler']);
     $services->set(SysFileReferenceHandleLinkFieldListener::class)
              ->tag('event.listener', ['identifier' => 's7wizardSysFileReferenceHandleLinkFieldListener']);
+
+    $containerBuilder->registerForAutoconfiguration(WizardProcessInterface::class)->addTag('wizard.process');
 };

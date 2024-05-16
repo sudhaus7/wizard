@@ -6,7 +6,7 @@ namespace SUDHAUS7\Sudhaus7Wizard\Command;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
-use SUDHAUS7\Sudhaus7Wizard\Domain\Dto\Process;
+use SUDHAUS7\Sudhaus7Wizard\Domain\Dto\PrepareProcess;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Repository\CreatorRepository;
 use SUDHAUS7\Sudhaus7Wizard\Service\ProcessService;
@@ -93,7 +93,7 @@ final class RunWizardCommand extends Command
         }
 
         Bootstrap::initializeBackendAuthentication();
-        $process = new Process($creator, $this->logger, $cleanedUpMappingFolderPath);
+        $process = new PrepareProcess($creator, $this->logger, $cleanedUpMappingFolderPath);
 
         if ($this->processService->create($process, $ioHelper) === Command::SUCCESS) {
             return Command::SUCCESS;

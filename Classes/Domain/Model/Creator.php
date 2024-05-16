@@ -43,11 +43,11 @@ class Creator implements LoggerAwareInterface
     ];
 
     protected function __construct(
-        protected int $uid,
-        protected int $pid,
-        protected int $cruserId, // @todo cruser is removed by default in v12, if needed, handle in other ways
-        protected string $sourcepid,
-        protected string $base,
+        protected int     $uid,
+        protected int     $pid,
+        protected int     $cruserId, // @todo cruser is removed by default in v12, if needed, handle in other ways
+        protected string  $sourcepid,
+        protected string  $wizardProcessClass,
         protected ?string $projektname,
         protected ?string $longname,
         protected ?string $shortname,
@@ -56,7 +56,7 @@ class Creator implements LoggerAwareInterface
         protected ?string $reduser,
         protected ?string $redemail,
         protected ?string $redpass,
-        protected int $status,
+        protected int     $status,
         protected ?string $flexinfo,
         protected ?string $email,
         protected ?string $valuemapping,
@@ -128,9 +128,9 @@ class Creator implements LoggerAwareInterface
      *
      * @return string|null base
      */
-    public function getBase(): ?string
+    public function getWizardProcessClass(): ?string
     {
-        return $this->base;
+        return $this->wizardProcessClass;
     }
 
     /**
@@ -247,7 +247,7 @@ class Creator implements LoggerAwareInterface
      */
     public function getFlexinfo(bool $useTypo3Service = false)
     {
-        if ($this->flexinfo === null && isset($GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['types'][$this->base]) && strpos((string)$GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['types'][$this->base]['showitem'], 'flexinfo')) {
+        if ($this->flexinfo === null && isset($GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['types'][$this->wizardProcessClass]) && strpos((string)$GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['types'][$this->wizardProcessClass]['showitem'], 'flexinfo')) {
             $row = BackendUtility::getRecord('tx_sudhaus7wizard_domain_model_creator', $this->getUid());
             $this->flexinfo = $row['flexinfo'];
         }
