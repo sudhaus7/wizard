@@ -32,4 +32,8 @@ interface CreateProcessInterface
      *  }|array<string, int|string> $fileMount
      */
     public function setFileMount(array $fileMount): void;
+
+    public function setTemplateBackendGroupId(int $groupId): void;
+
+    public function setMainBackendGroup(array $group): void;
 }

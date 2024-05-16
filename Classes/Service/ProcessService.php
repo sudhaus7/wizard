@@ -8,6 +8,7 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
+use SUDHAUS7\Sudhaus7Wizard\Configuration\ExtensionConfiguration;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Dto\CreateProcessInterface;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Dto\PrepareProcess;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
@@ -24,7 +25,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
-use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Mail\MailMessage;
 use TYPO3\CMS\Core\Resource\Exception\ExistingTargetFolderException;
@@ -40,6 +40,7 @@ final class ProcessService
         private EventDispatcherInterface $eventDispatcher,
         private \SUDHAUS7\Sudhaus7Wizard\CreateProcess\CreateProcessFactory $createProcessFactory,
         private DataHandlingService $dataHandlingService,
+        private ExtensionConfiguration $extensionConfiguration,
         private LoggerInterface $logger
     ) {}
     public function create(PrepareProcess $prepareProcess, ?OutputInterface $output = null): int
@@ -199,5 +200,34 @@ final class ProcessService
         $createProcess->setFileMount($fileMount);
         $event = new AfterCreateFilemountEvent($fileMount, $this);
         $this->eventDispatcher->dispatch($event);
+    }
+
+    private function createBackendUserGroup(CreateProcessInterface $createProcess): void
+    {
+        $templateGroup = $createProcess->getWizardProcess()->getTemplateBackendUserGroup($createProcess);
+        $createProcess->setTemplateBackendGroupId($templateGroup['uid']);
+
+        $groupName = trim(sprintf(
+            '%s %s',
+            $this->extensionConfiguration->getGroupPrefix(),
+            $createProcess->getCreator()->getProjektname()
+        ));
+        $this->logger->debug('Create Group ' . $groupName);
+
+        $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('be_groups');
+        $result = $connection->select(
+            ['*'],
+            'be_groups',
+            ['title' => $groupName]
+        );
+
+        $existingGroup = $result->fetchAssociative();
+
+        if ($existingGroup !== false) {
+            $createProcess->setMainBackendGroup($existingGroup);
+            return;
+        }
+
+
     }
 }
