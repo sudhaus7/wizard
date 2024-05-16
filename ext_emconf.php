@@ -13,15 +13,14 @@
 
 $EM_CONF[$_EXTKEY] = [
     'title' => '(Sudhaus7) Wizard',
-    'description' => '',
-    'category' => 'fe',
+    'description' => '(Sudhaus7) Wizard to copy TYPO3 Website Trees',
+    'category' => 'be',
     'state' => 'beta',
-    'clearCacheOnLoad' => true,
+    'clearCacheOnLoad' => true, // @todo typo3/cms-core:>=12.1 remove as not needed
     'author' => 'Frank Berger',
     'author_email' => 'fberger@b-factor.de',
     'author_company' => 'Sudhaus 7',
     'version' => '0.2.36',
-    '_md5_values_when_last_written' => '',
     'constraints' => [
         'depends' => [
             'typo3' => '11.5.0-11.5.99',
