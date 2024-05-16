@@ -1,20 +1,121 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Parameter \\#2 \\$to of function copy expects string, string\\|null given\\.$#"
+			message: "#^Else branch is unreachable because ternary operator condition is always true\\.$#"
 			count: 1
-			path: ../../Classes/Converter/AbstractFileConverter.php
+			path: ../../Classes/Backend/TCA/UpdateStatus.php
 
 		-
-			message: "#^Parameter \\#1 \\$filename of function mime_content_type expects resource\\|string, string\\|null given\\.$#"
+			message: "#^PHPDoc tag @var has invalid value \\(\\$class WizardProcessInterface\\)\\: Unexpected token \"\\$class\", expected type at offset 36$#"
 			count: 1
-			path: ../../Tests/Functional/Event/ConvertFileToCorrectMimeTypeTest.php
-		-
-			message: "#^Parameter \\#2 \\$destination_file of function copy expects string, string\\|null given\\.$#"
-			count: 1
-			path: ../../Classes/Converter/AbstractFileConverter.php
+			path: ../../Classes/Backend/TCA/UpdateStatus.php
 
 		-
-			message: "#^Parameter \\#1 \\$filename_or_stream of function mime_content_type expects resource\\|string, string\\|null given\\.$#"
+			message: "#^Else branch is unreachable because ternary operator condition is always true\\.$#"
+			count: 4
+			path: ../../Classes/CreateProcess.php
+
+		-
+			message: "#^Method SUDHAUS7\\\\Sudhaus7Wizard\\\\CreateProcess\\:\\:addToFormConfig\\(\\) is unused\\.$#"
 			count: 1
-			path: ../../Tests/Functional/Event/ConvertFileToCorrectMimeTypeTest.php
+			path: ../../Classes/CreateProcess.php
+
+		-
+			message: "#^Result of && is always false\\.$#"
+			count: 2
+			path: ../../Classes/CreateProcess.php
+
+		-
+			message: "#^Undefined variable\\: \\$columnconfig$#"
+			count: 4
+			path: ../../Classes/CreateProcess.php
+
+		-
+			message: "#^Unreachable statement \\- code above always terminates\\.$#"
+			count: 2
+			path: ../../Classes/CreateProcess.php
+
+		-
+			message: "#^Variable \\$columnconfig in isset\\(\\) is never defined\\.$#"
+			count: 2
+			path: ../../Classes/CreateProcess.php
+
+		-
+			message: "#^Method SUDHAUS7\\\\Sudhaus7Wizard\\\\Domain\\\\Model\\\\Creator\\:\\:getCruserId\\(\\) should return string but returns int\\.$#"
+			count: 1
+			path: ../../Classes/Domain/Model/Creator.php
+
+		-
+			message: "#^Offset 'email' on array\\{uid\\: int, cruser_id\\: int, sourcepid\\: string, base\\: string, projektname\\: string, longname\\: string, shortname\\: string, domainname\\: string, \\.\\.\\.\\} on left side of \\?\\? always exists and is not nullable\\.$#"
+			count: 1
+			path: ../../Classes/Domain/Model/Creator.php
+
+		-
+			message: "#^Offset 'pid' does not exist on array\\{uid\\: int, cruser_id\\: int, sourcepid\\: string, base\\: string, projektname\\: string, longname\\: string, shortname\\: string, domainname\\: string, \\.\\.\\.\\}\\.$#"
+			count: 1
+			path: ../../Classes/Domain/Model/Creator.php
+
+		-
+			message: "#^Parameter \\#14 \\$status of class SUDHAUS7\\\\Sudhaus7Wizard\\\\Domain\\\\Model\\\\Creator constructor expects int, string given\\.$#"
+			count: 1
+			path: ../../Classes/Domain/Model/Creator.php
+
+		-
+			message: "#^Property SUDHAUS7\\\\Sudhaus7Wizard\\\\Service\\\\DataHandlingService\\:\\:\\$data is never read, only written\\.$#"
+			count: 1
+			path: ../../Classes/Service/DataHandlingService.php
+
+		-
+			message: "#^Property SUDHAUS7\\\\Sudhaus7Wizard\\\\Service\\\\DataHandlingService\\:\\:\\$oldIdToNewIdentifierMap is never read, only written\\.$#"
+			count: 1
+			path: ../../Classes/Service/DataHandlingService.php
+
+		-
+			message: "#^Method SUDHAUS7\\\\Sudhaus7Wizard\\\\Sources\\\\Couchdb\\:\\:filterorig\\(\\) is unused\\.$#"
+			count: 1
+			path: ../../Classes/Sources/Couchdb.php
+
+		-
+			message: "#^Offset 'views' does not exist on array\\{\\}\\.$#"
+			count: 1
+			path: ../../Classes/Sources/Couchdb.php
+
+		-
+			message: "#^Property SUDHAUS7\\\\Sudhaus7Wizard\\\\Sources\\\\Couchdb\\:\\:\\$views is never read, only written\\.$#"
+			count: 1
+			path: ../../Classes/Sources/Couchdb.php
+
+		-
+			message: "#^Unreachable statement \\- code above always terminates\\.$#"
+			count: 1
+			path: ../../Classes/Sources/Couchdb.php
+
+		-
+			message: "#^Variable \\$map might not be defined\\.$#"
+			count: 1
+			path: ../../Classes/Sources/Couchdb.php
+
+		-
+			message: "#^Variable \\$pidfilter in empty\\(\\) always exists and is not falsy\\.$#"
+			count: 1
+			path: ../../Classes/Sources/Couchdb.php
+
+		-
+			message: "#^Parameter \\#2 \\$replace of function str_replace expects array\\|string, int given\\.$#"
+			count: 2
+			path: ../../Classes/Sources/LocalDatabase.php
+
+		-
+			message: "#^Variable \\$ret on left side of \\?\\? always exists and is not nullable\\.$#"
+			count: 1
+			path: ../../Classes/Sources/LocalDatabase.php
+
+		-
+			message: "#^Property SUDHAUS7\\\\Sudhaus7Wizard\\\\Sources\\\\RestWizardServerSource\\:\\:\\$tree is never read, only written\\.$#"
+			count: 1
+			path: ../../Classes/Sources/RestWizardServerSource.php
+
+		-
+			message: "#^Unreachable statement \\- code above always terminates\\.$#"
+			count: 1
+			path: ../../Classes/Sources/RestWizardServerSource.php
