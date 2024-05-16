@@ -36,6 +36,7 @@ return static function (ContainerConfigurator $containerConfigurator, ContainerB
     $services->load('SUDHAUS7\\Sudhaus7Wizard\\', __DIR__ . '/../Classes/')
              ->exclude([
                  __DIR__ . '/../Classes/Domain/Model/',
+                 __DIR__ . '/../Classes/Domain/Dto/',
                  __DIR__ . '/../Classes/Events/',
                  __DIR__ . '/../Classes/Backend/',
              ]);
