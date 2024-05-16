@@ -43,7 +43,6 @@
    :glob:
 
    Introduction/Index
-   Configuration/Index
    Developers/Index
    Reference/Index
    Todo

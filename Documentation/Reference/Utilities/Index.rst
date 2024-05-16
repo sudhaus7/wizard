@@ -30,7 +30,7 @@ There are additional utility functions that can be used when writing events
       :returns: de-compiled typoscript-text representation of that array
       :returnValue: string
 
-.. php:class:: TyposcriptService
+.. php:class:: FlexformService
 
    .. php:method:: flatten($data)
 

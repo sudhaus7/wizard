@@ -1,6 +1,6 @@
 .. include:: /Includes.rst.txt
 
-.. _registering:
+.. _bestpracticesregistering:
 
 Registering a theme or template
 ===============================

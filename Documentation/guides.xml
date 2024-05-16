@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<guides xmlns="https://www.phpdoc.org/guides" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://www.phpdoc.org/guides ../vendor/phpdocumentor/guides-cli/resources/schema/guides.xsd" links-are-relative="true">
+  <extension class="\T3Docs\Typo3DocsTheme\DependencyInjection\Typo3DocsThemeExtension" project-home="https://sudhaus7_extensions.projects.sudhaus7.de/site-wizard/" project-repository="https://git.b-factor.de/sudhaus7_extensions/site-wizard/" project-issues="https://git.b-factor.de/sudhaus7_extensions/site-wizard/-/issues" typo3-core-preferred="stable"/>
+  <project title="(Sudhaus7) Site Wizard" release="0.0.2" version="0.0.2" copyright="2023 by Sudhaus7"/>
+  <inventory id="core" url="https://docs.typo3.org/m/typo3/reference-coreapi/main/en-us/"/>
+</guides>
