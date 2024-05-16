@@ -37,6 +37,7 @@ use SUDHAUS7\Sudhaus7Wizard\Events\CreateBackendUserGroupEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\CreateFilemountEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\FinalContentEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\GenerateSiteIdentifierEvent;
+use SUDHAUS7\Sudhaus7Wizard\Events\GetResourceStorageEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\ModifyCleanContentSkipListEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\ModifyCloneContentSkipTableEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\ModifyCloneInlinesSkipTablesEvent;
@@ -50,6 +51,7 @@ use SUDHAUS7\Sudhaus7Wizard\Events\TranslateUidReverseEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\TtContent\FinalContentByCtypeEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\UpdateBackendUserEvent;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardProcessInterface;
+use SUDHAUS7\Sudhaus7Wizard\Services\FolderService;
 use SUDHAUS7\Sudhaus7Wizard\Services\TyposcriptService;
 use SUDHAUS7\Sudhaus7Wizard\Sources\SourceInterface;
 use SUDHAUS7\Sudhaus7Wizard\Traits\DbTrait;
@@ -64,6 +66,8 @@ use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Crypto\PasswordHashing\InvalidPasswordHashException;
 use TYPO3\CMS\Core\Crypto\PasswordHashing\PasswordHashFactory;
 use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Resource\ResourceStorage;
+use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 final class CreateProcess implements LoggerAwareInterface
@@ -263,10 +267,17 @@ final class CreateProcess implements LoggerAwareInterface
 
         $name = 'Medien ' . $this->task->getProjektname();
 
+        /** @var ResourceStorage $storage */
+        $storage           = GeneralUtility::makeInstance(StorageRepository::class)->getDefaultStorage();
+
+        $defaultStorageEvent = new GetResourceStorageEvent($this, $storage);
+        $this->eventDispatcher->dispatch($defaultStorageEvent);
+        $storage = $defaultStorageEvent->getStorage();
+
         $event = new CreateFilemountEvent([
             'title' => $name,
             'path' => $dir,
-            'base' => 1,
+            'base' => $storage->getUid(),
             'pid' => 0,
         ], $this);
         $this->eventDispatcher->dispatch($event);
@@ -284,6 +295,7 @@ final class CreateProcess implements LoggerAwareInterface
                 'sys_filemounts',
                 [
                     'path' => $dir,
+                    'base' => $storage->getUid(),
                 ]
             );
 
@@ -295,8 +307,9 @@ final class CreateProcess implements LoggerAwareInterface
             return;
         }
 
-        $this->log('Create Filemount ' . 'mkdir -p ' . Environment::getPublicPath() . '/fileadmin/' . $tmpl['path']);
-        GeneralUtility::mkdir_deep(Environment::getPublicPath() . '/fileadmin/' . $tmpl['path']);
+        $folder = GeneralUtility::makeInstance(FolderService::class)->getOrCreateFromIdentifier($tmpl['path'], $storage);
+
+        $this->log('Create Filemount Directory ' . $folder->getReadablePath());
 
         $this->source->ping();
 
