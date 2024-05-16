@@ -51,6 +51,7 @@ use SUDHAUS7\Sudhaus7Wizard\Events\TranslateUidReverseEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\TtContent\FinalContentByCtypeEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\UpdateBackendUserEvent;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardProcessInterface;
+use SUDHAUS7\Sudhaus7Wizard\Services\Database;
 use SUDHAUS7\Sudhaus7Wizard\Services\FolderService;
 use SUDHAUS7\Sudhaus7Wizard\Services\TyposcriptService;
 use SUDHAUS7\Sudhaus7Wizard\Sources\SourceInterface;
@@ -69,6 +70,14 @@ use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use function array_keys;
+use function array_merge;
+use function array_search;
+use function array_values;
+use function file_put_contents;
+use function is_null;
+use function str_contains;
+use function str_starts_with;
 
 final class CreateProcess implements LoggerAwareInterface
 {
@@ -213,11 +222,11 @@ final class CreateProcess implements LoggerAwareInterface
         $this->source->ping();
 
         $this->template->finalize($this);
-
+		GeneralUtility::makeInstance( Database::class)->finish();
         $this->source->ping();
 
         $this->task->setPid($this->pageMap[$sourcePid]);
-        if (!\is_null($mapFolder)) {
+        if (! is_null($mapFolder)) {
             if ($fp = fopen($mapFolder . '/page.csv', 'w')) {
                 foreach ($this->pageMap as $k => $v) {
                     fwrite($fp, sprintf("%s;%s\n", $k, $v));
@@ -239,7 +248,7 @@ final class CreateProcess implements LoggerAwareInterface
 
     public function log($c, $info = 'DEBUG', string $section = null, array $context = []): void
     {
-        if (!\is_null($section)) {
+        if (! is_null($section)) {
             $this->debugSection = $section;
         }
 
@@ -864,25 +873,25 @@ final class CreateProcess implements LoggerAwareInterface
 
         $fields = GeneralUtility::trimExplode(',', $showitem, true);
         foreach ($fields as $field) {
-            if (\str_starts_with($field, '--div--')) {
+            if ( str_starts_with($field, '--div--')) {
                 continue;
             }
-            if (\str_starts_with($field, '--linebreak--')) {
+            if ( str_starts_with($field, '--linebreak--')) {
                 continue;
             }
-            if (\str_starts_with($field, '--palette--')) {
+            if ( str_starts_with($field, '--palette--')) {
                 $tmp = GeneralUtility::trimExplode(';', $field, true);
                 $palette = array_pop($tmp);
                 if (isset($tca['palettes'][$palette]['showitem'])) {
                     $paletteShowitem = GeneralUtility::trimExplode(',', $tca['palettes'][$palette]['showitem']);
                     foreach ($paletteShowitem as $paletteItem) {
-                        if (\str_starts_with($paletteItem, $column)) {
+                        if ( str_starts_with($paletteItem, $column)) {
                             return true;
                         }
                     }
                 }
             } else {
-                if (\str_starts_with($field, $column)) {
+                if ( str_starts_with($field, $column)) {
                     return true;
                 }
             }
@@ -904,7 +913,7 @@ final class CreateProcess implements LoggerAwareInterface
         $TCAType = $tca['ctrl']['type'] ?? 'type';
         $tcaTypeValue = $record[$TCAType] ?? 0;
         if (isset($tca['types'][$tcaTypeValue]) && isset($tca['types'][$tcaTypeValue]['columnsOverrides']) && isset($tca['types'][$tcaTypeValue]['columnsOverrides'][$column]) && isset($tca['types'][$tcaTypeValue]['columnsOverrides'][$column]['config'])) {
-            $columnConfig['config'] = \array_merge($columnConfig['config'], $tca['types'][$tcaTypeValue]['columnsOverrides'][$column]['config']);
+            $columnConfig['config'] = array_merge($columnConfig['config'], $tca['types'][$tcaTypeValue]['columnsOverrides'][$column]['config']);
         }
         return $columnConfig;
     }
@@ -1001,7 +1010,7 @@ final class CreateProcess implements LoggerAwareInterface
     public function getTranslateUid(string $table, string|int $uid): int|string
     {
         $tablePrefix = false;
-        if (\str_contains((string)$uid, '_')) {
+        if ( str_contains((string)$uid, '_')) {
             $tablePrefix = true;
             $x = explode('_', (string)$uid);
             $uid = array_pop($x);
@@ -1151,7 +1160,7 @@ final class CreateProcess implements LoggerAwareInterface
                 };
             }
             foreach ($queryParts as $k => $v) {
-                if (\str_starts_with($k, 'amp;')) {
+                if ( str_starts_with($k, 'amp;')) {
                     $k2 = substr($k, 4);
                     unset($queryParts[$k]);
                     $queryParts[$k2] = $v;
@@ -1511,7 +1520,7 @@ final class CreateProcess implements LoggerAwareInterface
         $this->eventDispatcher->dispatch($event);
 
         $aSkip = array_merge($event->getSkipList(), $this->alwaysIgnoreTables);
-        $newPids = \array_values($this->pageMap);
+        $newPids = array_values($this->pageMap);
         foreach ($GLOBALS['TCA'] as $table => $config) {
             if (!in_array($table, $aSkip)) {
                 $this->source->ping();
@@ -1649,7 +1658,7 @@ final class CreateProcess implements LoggerAwareInterface
 
         if (isset($this->siteConfig['errorHandling'])) {
             foreach ($this->siteConfig['errorHandling'] as $idx => $config) {
-                if (isset($config['errorContentSource']) && \str_starts_with($config['errorContentSource'], 't3://')) {
+                if (isset($config['errorContentSource']) && str_starts_with($config['errorContentSource'], 't3://')) {
                     $this->siteConfig['errorHandling'][$idx]['errorContentSource'] = $this->translateT3LinkString($config['errorContentSource']);
                 }
             }
@@ -1890,12 +1899,12 @@ final class CreateProcess implements LoggerAwareInterface
     {
         $config = Yaml::parseFile(Environment::getPublicPath() . '/fileadmin/bk_form_config.yaml');
 
-        if (!\array_search('1:' . $path, $config['TYPO3']['CMS']['Form']['persistenceManager']['allowedFileMounts'], true)) {
-            $keys = \array_keys($config['TYPO3']['CMS']['Form']['persistenceManager']['allowedFileMounts']);
+        if (! array_search( '1:' . $path, $config['TYPO3']['CMS']['Form']['persistenceManager']['allowedFileMounts'], true)) {
+            $keys = array_keys($config['TYPO3']['CMS']['Form']['persistenceManager']['allowedFileMounts']);
             $lastkey = array_pop($keys);
             $config['TYPO3']['CMS']['Form']['persistenceManager']['allowedFileMounts'][$lastkey + 10] = '1:' . $path;
         }
-        \file_put_contents(Environment::getPublicPath() . '/fileadmin/bk_form_config.yaml', Yaml::dump($config, 99, 2));
+        file_put_contents(Environment::getPublicPath() . '/fileadmin/bk_form_config.yaml', Yaml::dump($config, 99, 2));
     }
 
     public function getCalculatedSiteconfigIdentifier(): string
