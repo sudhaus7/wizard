@@ -15,6 +15,7 @@ namespace SUDHAUS7\Sudhaus7Wizard\Sources;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
+use function in_array;
 use InvalidArgumentException;
 use Psr\Log\LoggerAwareTrait;
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
@@ -37,12 +38,10 @@ use TYPO3\CMS\Core\Resource\Exception\ExistingTargetFolderException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderAccessPermissionsException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderReadPermissionsException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderWritePermissionsException;
-use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use function in_array;
 
 class LocalDatabase implements SourceInterface
 {
@@ -235,12 +234,12 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     {
         $this->logger->debug('handleFile ' . $newIdentifier . ' START');
 
-	    /** @var ResourceStorage $storage */
-	    $storage           = GeneralUtility::makeInstance(StorageRepository::class)->getDefaultStorage();
+        /** @var ResourceStorage $storage */
+        $storage           = GeneralUtility::makeInstance(StorageRepository::class)->getDefaultStorage();
 
-	    $defaultStorageEvent = new GetResourceStorageEvent($storage, $this);
-	    GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($defaultStorageEvent);
-	    $storage = $defaultStorageEvent->getStorage();
+        $defaultStorageEvent = new GetResourceStorageEvent($storage, $this->getCreateProcess());
+        GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($defaultStorageEvent);
+        $storage = $defaultStorageEvent->getStorage();
 
         $folder = GeneralUtility::makeInstance(FolderService::class)
             ->getOrCreateFromIdentifier(dirname($newIdentifier), $storage);

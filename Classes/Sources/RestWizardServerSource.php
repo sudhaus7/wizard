@@ -13,8 +13,14 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard\Sources;
 
+use function array_intersect;
 use Doctrine\DBAL\Driver\Exception;
+use function file_get_contents;
+use function file_put_contents;
+use function in_array;
 use InvalidArgumentException;
+use function is_array;
+use function json_encode;
 use Psr\Log\LoggerAwareTrait;
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
@@ -23,6 +29,8 @@ use SUDHAUS7\Sudhaus7Wizard\Events\GetResourceStorageEvent;
 use SUDHAUS7\Sudhaus7Wizard\Services\FolderService;
 use SUDHAUS7\Sudhaus7Wizard\Services\RestWizardRequest;
 use SUDHAUS7\Sudhaus7Wizard\Traits\DbTrait;
+use function sys_get_temp_dir;
+use function tempnam;
 use Throwable;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Core\Environment;
@@ -32,18 +40,9 @@ use TYPO3\CMS\Core\Resource\Exception\ExistingTargetFolderException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderAccessPermissionsException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderReadPermissionsException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderWritePermissionsException;
-use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use function array_intersect;
-use function file_get_contents;
-use function file_put_contents;
-use function in_array;
-use function is_array;
-use function json_encode;
-use function sys_get_temp_dir;
-use function tempnam;
 
 abstract class RestWizardServerSource implements SourceInterface
 {
@@ -128,7 +127,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     public function getSiteConfig(mixed $id): array
     {
         $result = $this->getAPI()->request('/siteconfig/' . $id);
-        if ( is_array($result) && isset($result['rootPageId'])) {
+        if (is_array($result) && isset($result['rootPageId'])) {
             return $result;
         }
         return $this->siteconfig;
@@ -156,7 +155,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         if (!isset($this->rowCache[$endpoint])) {
             try {
                 $content = $this->getAPI()->request($endpoint);
-            } catch ( Throwable $e) {
+            } catch (Throwable $e) {
                 $this->logger->warning('getRow ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
                 sleep(5);
                 $content = $this->getAPI()->request($endpoint);
@@ -192,7 +191,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 
         try {
             $content = $this->getAPI()->request($endpoint);
-        } catch ( Throwable $e) {
+        } catch (Throwable $e) {
             $this->logger->warning('getRows ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
             sleep(5);
             $content = $this->getAPI()->request($endpoint);
@@ -216,7 +215,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $this->logger->debug('getTree ' . $endpoint);
         try {
             $content = $this->getAPI()->request($endpoint);
-        } catch ( Throwable $e) {
+        } catch (Throwable $e) {
             $this->logger->warning('getTree ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
             sleep(5);
             $content = $this->getAPI()->request($endpoint);
@@ -268,7 +267,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $this->logger->debug('getIRRE ' . $endpoint . ' ' . json_encode($where));
         try {
             $content = $this->getAPI()->post($endpoint, $where);
-        } catch ( Throwable $e) {
+        } catch (Throwable $e) {
             $this->logger->warning('getIrre ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
             sleep(5);
             $content = $this->getAPI()->post($endpoint, $where);
@@ -289,12 +288,12 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     {
         $this->logger->debug('handleFile ' . $newIdentifier . ' START');
 
-	    /** @var ResourceStorage $storage */
-	    $storage           = GeneralUtility::makeInstance(StorageRepository::class)->getDefaultStorage();
+        /** @var ResourceStorage $storage */
+        $storage           = GeneralUtility::makeInstance(StorageRepository::class)->getDefaultStorage();
 
-	    $defaultStorageEvent = new GetResourceStorageEvent($storage, $this);
-	    GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($defaultStorageEvent);
-	    $storage = $defaultStorageEvent->getStorage();
+        $defaultStorageEvent = new GetResourceStorageEvent($storage, $this->getCreateProcess());
+        GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($defaultStorageEvent);
+        $storage = $defaultStorageEvent->getStorage();
 
         $folder = GeneralUtility::makeInstance(FolderService::class)->getOrCreateFromIdentifier(dirname($newIdentifier), $storage);
 
@@ -317,13 +316,13 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 
         $this->logger->debug('fetching ' . $this->getAPI()->getAPIFILEHOST() . 'fileadmin/' . trim($sysFile['identifier'], '/'));
 
-        $buf = @file_get_contents( $this->getAPI()->getAPIFILEHOST() . 'fileadmin' . $sysFile['identifier']);
+        $buf = @file_get_contents($this->getAPI()->getAPIFILEHOST() . 'fileadmin' . $sysFile['identifier']);
         if (!$buf) {
             $this->logger->error('fetch failed' . $this->getAPI()->getAPIFILEHOST() . 'fileadmin/' . trim($sysFile['identifier'], '/'));
             return ['uid' => 0];
         }
 
-        $tempFile = tempnam( sys_get_temp_dir(), 'wizarddl');
+        $tempFile = tempnam(sys_get_temp_dir(), 'wizarddl');
         file_put_contents($tempFile, $buf);
 
         $file = $folder->addFile($tempFile, basename($newIdentifier));
@@ -343,7 +342,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 
             try {
                 $content  = $this->getAPI()->request($endpoint);
-            } catch ( Throwable $e) {
+            } catch (Throwable $e) {
                 $this->logger->warning('handleFile ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
                 sleep(5);
                 $content  = $this->getAPI()->request($endpoint);
@@ -411,12 +410,12 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $this->logger->debug('getMM ' . $endpoint);
         try {
             $content  = $this->getAPI()->request($endpoint);
-        } catch ( Throwable $e) {
+        } catch (Throwable $e) {
             $this->logger->warning('getMM ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
             sleep(5);
             $content  = $this->getAPI()->request($endpoint);
         }
-        if ( is_array($content)) {
+        if (is_array($content)) {
             return $content;
         }
         return [];
@@ -440,7 +439,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         if (empty($this->remoteTables)) {
             try {
                 $this->remoteTables = $this->getAPI()->request('tables');
-            } catch ( Throwable $e) {
+            } catch (Throwable $e) {
                 $this->logger->warning('tables failed retrying in 5 seconds once ' . $e->getMessage());
                 sleep(5);
                 $this->remoteTables = $this->getAPI()->request('tables');
@@ -459,7 +458,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $this->logger->debug('getSites ' . $endpoint);
         try {
             $content = $this->getAPI()->request($endpoint);
-        } catch ( Throwable $e) {
+        } catch (Throwable $e) {
             $this->logger->warning('getSites ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
             sleep(5);
             $content = $this->getAPI()->request($endpoint);
@@ -489,7 +488,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
             $this->logger->debug('filterByPid ' . $endpoint);
             try {
                 $filteredList = $this->getAPI()->post($endpoint, [ 'values' => implode(',', $preList) ]);
-            } catch ( Throwable $e) {
+            } catch (Throwable $e) {
                 $this->logger->warning('filterByPid ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
                 sleep(5);
                 $filteredList = $this->getAPI()->post($endpoint, [ 'values' => implode(',', $preList) ]);
