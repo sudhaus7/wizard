@@ -1,0 +1,28 @@
+<html
+    data-namespace-typo3-fluid="true"
+    lang="en"
+    xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+    xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+    xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+>
+<form id="editorWizardForm">
+    <div class="form-group">
+        <label for="username">
+            Editor username
+        </label>
+        <input type="text" name="wizard[reduser]" id="username" required>
+    </div>
+    <div class="form-group">
+        <label for="password">
+            Editor Password (Min. 8 Zeichen)
+        </label>
+        <input type="text" name="wizard[password]" minlength="8" id="password" required>
+    </div>
+    <div class="form-group">
+        <label for="email">
+            Editor E-Mail
+        </label>
+        <input type="email" name="wizard[redemail]" id="email" required>
+    </div>
+</form>
+</html>

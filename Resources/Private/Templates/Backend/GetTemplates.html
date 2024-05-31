@@ -1,0 +1,28 @@
+<html
+    data-namespace-typo3-fluid="true"
+    lang="en"
+    xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+    xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+    xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+>
+<div class="form-group">
+    <label for="selectTemplate">
+        Select Template
+    </label>
+    <select class="form-select" id="selectTemplate" name="base">
+        <option value="">
+            Please choose
+        </option>
+        <f:for each="{templates}" as="template">
+            <f:if condition="{selectedTemplate} == {template.value}">
+                <f:then>
+                    <option selected value="{template.value}">{template.title}</option>
+                </f:then>
+                <f:else>
+                    <option value="{template.value}">{template.title}</option>
+                </f:else>
+            </f:if>
+        </f:for>
+    </select>
+</div>
+</html>

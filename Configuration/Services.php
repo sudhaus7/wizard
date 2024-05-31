@@ -14,6 +14,7 @@ declare(strict_types=1);
  */
 
 use SUDHAUS7\Sudhaus7Wizard\Cli\RunCommand;
+use SUDHAUS7\Sudhaus7Wizard\Controller\Backend\CreateNewTaskAjaxController;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\DefaultSiteSorterListener;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\Extensions\TxNewsFixRecordHandler;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\Extensions\TxNewsPluginHandlerEvent;
@@ -52,6 +53,9 @@ return static function (ContainerConfigurator $containerConfigurator, ContainerB
             'description' => 'run wizard tasks',
             'schedulable' => true,
         ]);
+
+    $services->set(CreateNewTaskAjaxController::class)
+        ->public();
 
     $services->set(PreSysFileReferenceEventHandler::class)
              ->tag('event.listener', ['identifier' => 's7wizardBaseHandleSysFileReferences']);
