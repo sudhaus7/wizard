@@ -1,0 +1,40 @@
+<html
+    data-namespace-typo3-fluid="true"
+    lang="en"
+    xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+    xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+    xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+>
+<form id="generalWizardForm">
+    <div class="form-group">
+        <label for="projectname">
+            Projektname / Kunde (wird intern im System verwendet)
+        </label>
+        <input type="text" name="wizard[projektname]" id="projectname" required>
+    </div>
+    <div class="form-group">
+        <label for="longname">
+            Name des Auftritts (Website Titel)
+        </label>
+        <input type="text" name="wizard[longname]" id="longname" required>
+    </div>
+    <div class="form-group">
+        <label for="shortname">
+            Kurzname (für fileadmin, erlaubte Zeichen: A-Z, a-z, 0-9, _
+        </label>
+        <input type="text" name="wizard[shortname]" id="shortname" required>
+    </div>
+    <div class="form-group">
+        <label for="url">
+            URL des Auftritts (ohne http:// oder https://)
+        </label>
+        <input type="text" pattern="^[\w.-]*\.(\w{2,3})$" name="wizard[url]" id="url" required>
+    </div>
+    <div class="form-group">
+        <label for="contact">
+            Kontakt E-Mail
+        </label>
+        <input type="email" name="wizard[contact]" id="contact" required>
+    </div>
+</form>
+</html>
