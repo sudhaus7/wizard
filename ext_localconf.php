@@ -10,3 +10,7 @@
  *
  * The TYPO3 project - inspiring people to share!
  */
+(static function (): void {
+    $GLOBALS['TYPO3_CONF_VARS']['BE']['ContextMenu']['ItemProviders'][1717198724657] =
+        \SUDHAUS7\Sudhaus7Wizard\ContextMenu\ItemProvider::class;
+})();
