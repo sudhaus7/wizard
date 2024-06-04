@@ -1,5 +1,6 @@
 #!/usr/bin/env php
 <?php
+
 declare(strict_types=1);
 
 /*
@@ -56,7 +57,7 @@ class validateRstFiles
         }
     }
 
-    public function validate()
+    public function validate(): void
     {
         printf('Searching for rst snippets in ' . $this->baseDir . chr(10));
 
@@ -169,14 +170,14 @@ class validateRstFiles
         $this->validateLinkTarget($fileContent);
     }
 
-    private function setError(array $config)
+    private function setError(array $config): void
     {
         $this->messages[$config['type']]['title'] = $config['title'];
         $this->messages[$config['type']]['message'] = $config['message'];
         $this->isError = true;
     }
 
-    private function validateLinkTarget(string $fileContent)
+    private function validateLinkTarget(string $fileContent): void
     {
         $linkTargetConfig = [
             'type' => 'linktarget',

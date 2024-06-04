@@ -23,7 +23,6 @@ return [
         'rootLevel' => -1,
         'tstamp'            => 'tstamp',
         'crdate'            => 'crdate',
-        'cruser_id'         => 'cruser_id',
         'delete'            => 'deleted',
         'enablecolumns'     => [
             'disabled' => 'hidden',
@@ -47,7 +46,7 @@ return [
             'label' => 'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.versionLabel',
             'config' => [
                 'type' => 'none',
-                'cols' => 27,
+                'size' => 27,
             ],
         ],
         'hidden' => [
@@ -62,13 +61,12 @@ return [
             'displayCond' => 'FIELD:status:<:10',
             'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.source',
             'config' => [
-                'eval' => 'trim,required',
-                'type' => 'input',
+                'type' => 'link',
                 'softref' => 'typo3link',
                 'default' => '',
                 'size' => 50,
-                'renderType' => 'inputLink',
-                'fieldControl' => ['linkPopup' => ['options' => ['title' => 'LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:header_link_formlabel']]],
+                'required' => true,
+                'appearance' => ['browserTitle' => 'LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:header_link_formlabel'],
 
             ],
         ],
@@ -82,7 +80,7 @@ return [
                 'renderType' => 'selectSingle',
                 'default' => '1',
                 'items' => [
-                    ['Bitte wählen', 1],
+                    ['label' => 'Bitte wählen', 'value' => 1],
                 ],
             ],
             'onChange' => 'reload',
@@ -98,7 +96,7 @@ return [
                 'renderType' => 'selectSingle',
                 'default' => '\\' . \SUDHAUS7\Sudhaus7Wizard\Sources\LocalDatabase::class,
                 'items' => [
-                    ['LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.sourcetype.localdb', '\\' . \SUDHAUS7\Sudhaus7Wizard\Sources\LocalDatabase::class],
+                    ['label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.sourcetype.localdb', 'value' => '\\' . \SUDHAUS7\Sudhaus7Wizard\Sources\LocalDatabase::class],
 
                     //['Remote Server with WizardServer component', '\\' . \SUDHAUS7\Sudhaus7Wizard\Sources\RestWizardServer::class],
                     //['Umzugs-service', '\\' . \SUDHAUS7\Sudhaus7Wizard\Sources\Couchdb::class],
@@ -113,7 +111,8 @@ return [
             'config' => [
                 'type' => 'input',
                 'size' => 30,
-                'eval' => 'trim,required',
+                'eval' => 'trim',
+                'required' => true,
             ],
         ],
         'longname' => [
@@ -124,7 +123,8 @@ return [
             'config' => [
                 'type' => 'input',
                 'size' => 30,
-                'eval' => 'trim,required',
+                'eval' => 'trim',
+                'required' => true,
             ],
         ],
         'shortname' => [
@@ -135,7 +135,8 @@ return [
             'config' => [
                 'type' => 'input',
                 'size' => 30,
-                'eval' => 'trim,required',
+                'eval' => 'trim',
+                'required' => true,
             ],
         ],
         'valuemapping' => [
@@ -147,7 +148,7 @@ return [
                 'type' => 'select',
                 'renderType' => 'selectSingle',
                 'items' => [
-                    ['Bitte wählen', ''],
+                    ['label' => 'Bitte wählen', 'value' => ''],
                 ],
             ],
         ],
@@ -159,7 +160,8 @@ return [
             'config' => [
                 'type' => 'input',
                 'size' => 30,
-                'eval' => 'trim,required',
+                'eval' => 'trim',
+                'required' => true,
             ],
         ],
         'contact' => [
@@ -168,9 +170,9 @@ return [
             'displayCond' => 'FIELD:status:<:10',
             'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.contact',
             'config' => [
-                'type' => 'input',
+                'type' => 'email',
                 'size' => 30,
-                'eval' => 'trim,email,required',
+                'required' => true,
             ],
         ],
 
@@ -182,7 +184,8 @@ return [
             'config' => [
                 'type' => 'input',
                 'size' => 30,
-                'eval' => 'trim,required',
+                'eval' => 'trim',
+                'required' => true,
             ],
         ],
         'redemail' => [
@@ -191,9 +194,9 @@ return [
             'displayCond' => 'FIELD:status:<:10',
             'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.redemail',
             'config' => [
-                'type' => 'input',
+                'type' => 'email',
                 'size' => 30,
-                'eval' => 'trim,email,required',
+                'required' => true,
             ],
         ],
         'redpass' => [
@@ -204,7 +207,8 @@ return [
             'config' => [
                 'type' => 'input',
                 'size' => 30,
-                'eval' => 'trim,required',
+                'eval' => 'trim',
+                'required' => true,
             ],
         ],
         'status' => [

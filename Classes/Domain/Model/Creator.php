@@ -17,7 +17,6 @@ namespace SUDHAUS7\Sudhaus7Wizard\Domain\Model;
 
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
-use function str_starts_with;
 use SUDHAUS7\Sudhaus7Wizard\Tools;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Loader\YamlFileLoader;
@@ -61,8 +60,7 @@ class Creator implements LoggerAwareInterface
         protected int $sourcefilemount,
         protected string $sourceclass,
         private array $valuemappingcache = []
-    ) {
-    }
+    ) {}
 
     /**
      * @param array{
@@ -115,7 +113,7 @@ class Creator implements LoggerAwareInterface
 
     public function getSourcepid(): int
     {
-        if (str_starts_with((string)$this->sourcepid, 't3://')) {
+        if (\str_starts_with((string)$this->sourcepid, 't3://')) {
             return (int)GeneralUtility::trimExplode('=', $this->sourcepid)[1];
         }
         return (int)$this->sourcepid;
@@ -243,7 +241,7 @@ class Creator implements LoggerAwareInterface
         }
 
         if ($useTypo3Service) {
-            return  GeneralUtility::makeInstance(FlexFormService::class)
+            return GeneralUtility::makeInstance(FlexFormService::class)
                 ->convertFlexFormContentToArray($this->flexinfo);
         }
 

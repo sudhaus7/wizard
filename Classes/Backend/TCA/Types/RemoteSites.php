@@ -18,7 +18,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 final class RemoteSites
 {
-    public function itemsProcFunc(&$params)
+    public function itemsProcFunc(&$params): void
     {
         if (!empty($params['row']['sourceclass'])) {
             $class = $params['row']['sourceclass'];

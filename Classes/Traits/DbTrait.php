@@ -20,7 +20,6 @@ use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use function in_array;
 
 trait DbTrait
 {
@@ -41,8 +40,8 @@ trait DbTrait
     {
         $data = self::cleanFieldsBeforeInsert($tableName, $data);
 
-	    $db = GeneralUtility::makeInstance( Database::class);
-		return $db->update($tableName, $data, $where);
+        $db = GeneralUtility::makeInstance(Database::class);
+        return $db->update($tableName, $data, $where);
 
         //return GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($tableName)->update($tableName, $data, $where);
     }
@@ -55,9 +54,9 @@ trait DbTrait
     public static function insertRecord(string $tableName, array $data): array
     {
         $data = self::cleanFieldsBeforeInsert($tableName, $data);
-	    $db = GeneralUtility::makeInstance( Database::class);
+        $db = GeneralUtility::makeInstance(Database::class);
 
-	    [$rows, $newid] = $db->insert( $tableName, $data);
+        [$rows, $newid] = $db->insert($tableName, $data);
 
         return [$rows, $newid];
     }
@@ -95,7 +94,7 @@ trait DbTrait
         }
 
         foreach ($row as $field => $value) {
-            if (! in_array($field, $GLOBALS['localtables'][$tableName])) {
+            if (! \in_array($field, $GLOBALS['localtables'][$tableName])) {
                 unset($row[$field]);
             }
         }

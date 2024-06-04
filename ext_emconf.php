@@ -16,15 +16,13 @@ $EM_CONF[$_EXTKEY] = [
     'description' => '',
     'category' => 'fe',
     'state' => 'beta',
-    'clearCacheOnLoad' => true,
     'author' => 'Frank Berger',
     'author_email' => 'fberger@b-factor.de',
     'author_company' => 'Sudhaus 7',
     'version' => '0.4.4',
-    '_md5_values_when_last_written' => '',
     'constraints' => [
         'depends' => [
-            'typo3' => '11.5.0-11.5.99',
+            'typo3' => '12.4.0-12.4.99',
         ],
         'conflicts' => [
         ],

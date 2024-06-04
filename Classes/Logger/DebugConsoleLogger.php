@@ -56,7 +56,7 @@ class DebugConsoleLogger extends ConsoleLogger
         $output = $this->output;
         if ($output->getVerbosity() >= $this->verbosityLevelMap[$level]) {
             $time = \microtime(true);
-            $output->writeln(sprintf('Time Elapsed: %fs', $time-$this->timer));
+            $output->writeln(sprintf('Time Elapsed: %fs', $time - $this->timer));
             $output->writeln(sprintf('Memory Used: %d, peak %d', \memory_get_usage(true), \memory_get_peak_usage(true)));
         }
         parent::log($level, $message, $context);
