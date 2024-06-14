@@ -13,13 +13,21 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard;
 
+use function array_keys;
+use function array_merge;
+use function array_search;
+use function array_values;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
+use function file_put_contents;
+use function is_null;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use function str_contains;
+use function str_starts_with;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use SUDHAUS7\Sudhaus7Wizard\Events\AfterAllContentCloneEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\AfterClonedTreeInsertEvent;
@@ -36,6 +44,8 @@ use SUDHAUS7\Sudhaus7Wizard\Events\CreateBackendUserEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\CreateBackendUserGroupEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\CreateFilemountEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\FinalContentEvent;
+use SUDHAUS7\Sudhaus7Wizard\Events\FinalGroupEvent;
+use SUDHAUS7\Sudhaus7Wizard\Events\FinalUserEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\GenerateSiteIdentifierEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\GetResourceStorageEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\ModifyCleanContentSkipListEvent;
@@ -70,14 +80,6 @@ use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use function array_keys;
-use function array_merge;
-use function array_search;
-use function array_values;
-use function file_put_contents;
-use function is_null;
-use function str_contains;
-use function str_starts_with;
 
 final class CreateProcess implements LoggerAwareInterface
 {
@@ -222,7 +224,7 @@ final class CreateProcess implements LoggerAwareInterface
         $this->source->ping();
 
         $this->template->finalize($this);
-		GeneralUtility::makeInstance( Database::class)->finish();
+        GeneralUtility::makeInstance(Database::class)->finish();
         $this->source->ping();
 
         $this->task->setPid($this->pageMap[$sourcePid]);
@@ -873,25 +875,25 @@ final class CreateProcess implements LoggerAwareInterface
 
         $fields = GeneralUtility::trimExplode(',', $showitem, true);
         foreach ($fields as $field) {
-            if ( str_starts_with($field, '--div--')) {
+            if (str_starts_with($field, '--div--')) {
                 continue;
             }
-            if ( str_starts_with($field, '--linebreak--')) {
+            if (str_starts_with($field, '--linebreak--')) {
                 continue;
             }
-            if ( str_starts_with($field, '--palette--')) {
+            if (str_starts_with($field, '--palette--')) {
                 $tmp = GeneralUtility::trimExplode(';', $field, true);
                 $palette = array_pop($tmp);
                 if (isset($tca['palettes'][$palette]['showitem'])) {
                     $paletteShowitem = GeneralUtility::trimExplode(',', $tca['palettes'][$palette]['showitem']);
                     foreach ($paletteShowitem as $paletteItem) {
-                        if ( str_starts_with($paletteItem, $column)) {
+                        if (str_starts_with($paletteItem, $column)) {
                             return true;
                         }
                     }
                 }
             } else {
-                if ( str_starts_with($field, $column)) {
+                if (str_starts_with($field, $column)) {
                     return true;
                 }
             }
@@ -1010,7 +1012,7 @@ final class CreateProcess implements LoggerAwareInterface
     public function getTranslateUid(string $table, string|int $uid): int|string
     {
         $tablePrefix = false;
-        if ( str_contains((string)$uid, '_')) {
+        if (str_contains((string)$uid, '_')) {
             $tablePrefix = true;
             $x = explode('_', (string)$uid);
             $uid = array_pop($x);
@@ -1160,7 +1162,7 @@ final class CreateProcess implements LoggerAwareInterface
                 };
             }
             foreach ($queryParts as $k => $v) {
-                if ( str_starts_with($k, 'amp;')) {
+                if (str_starts_with($k, 'amp;')) {
                     $k2 = substr($k, 4);
                     unset($queryParts[$k]);
                     $queryParts[$k2] = $v;
@@ -1595,10 +1597,29 @@ final class CreateProcess implements LoggerAwareInterface
     private function finalGroup(): void
     {
         $list = $this->translateIDlist('pages', $this->group['db_mountpoints']);
-        if ($list != 0) {
+        if (!empty($list) && $list != 0) {
             $this->group['db_mountpoints'] = $list;
+        }
+
+        $event = new FinalGroupEvent($this->group, $this);
+        $this->eventDispatcher->dispatch($event);
+        $group = $event->getRecord();
+
+        $payload = [];
+        foreach ($group as $k=>$v) {
+            if ($v !== $this->group[$k]) {
+                $payload[$k] = $v;
+            }
+        }
+        if (!isset($payload['db_mountpoints']) && !empty($list) && $list != 0) {
+            $payload['db_mountpoints'] = $list;
+        }
+        if (isset($payload['uid'])) {
+            unset($payload['uid']);
+        }
+        if (!empty($payload)) {
             $this->source->ping();
-            self::updateRecord('be_groups', ['db_mountpoints' => $list], ['uid' => $this->group['uid']]);
+            self::updateRecord('be_groups', $payload, [ 'uid' => $this->group['uid'] ]);
         }
     }
 
@@ -1627,8 +1648,26 @@ final class CreateProcess implements LoggerAwareInterface
             $list = implode(',', $aList);
         }
         $this->user['db_mountpoints'] = $list;
-        $this->source->ping();
-        self::updateRecord('be_users', ['db_mountpoints' => $list], ['uid' => $this->user['uid']]);
+
+        $event = new FinalUserEvent($this->user, $this);
+        $this->eventDispatcher->dispatch($event);
+        $user = $event->getRecord();
+
+        $payload = [];
+        foreach ($user as $k=>$v) {
+            if ($v !== $this->user[$k]) {
+                $payload[$k] = $v;
+            }
+        }
+        if (!isset($payload['db_mountpoints'])) {
+            $payload['db_mountpoints'] = $list;
+        }
+        if (isset($payload['uid'])) {
+            unset($payload['uid']);
+        }
+        if (!empty($payload)) {
+            self::updateRecord('be_users', $payload, [ 'uid' => $this->user['uid'] ]);
+        }
     }
 
     /**
@@ -1899,7 +1938,7 @@ final class CreateProcess implements LoggerAwareInterface
     {
         $config = Yaml::parseFile(Environment::getPublicPath() . '/fileadmin/bk_form_config.yaml');
 
-        if (! array_search( '1:' . $path, $config['TYPO3']['CMS']['Form']['persistenceManager']['allowedFileMounts'], true)) {
+        if (! array_search('1:' . $path, $config['TYPO3']['CMS']['Form']['persistenceManager']['allowedFileMounts'], true)) {
             $keys = array_keys($config['TYPO3']['CMS']['Form']['persistenceManager']['allowedFileMounts']);
             $lastkey = array_pop($keys);
             $config['TYPO3']['CMS']['Form']['persistenceManager']['allowedFileMounts'][$lastkey + 10] = '1:' . $path;
