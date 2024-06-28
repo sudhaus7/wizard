@@ -19,21 +19,26 @@ use function array_search;
 use function array_values;
 
 use Doctrine\DBAL\DBALException;
+
 use Doctrine\DBAL\Driver\Exception;
 
 use function file_put_contents;
+
 use function is_null;
 
 use Psr\EventDispatcher\EventDispatcherInterface;
+
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
 use function str_contains;
+
 use function str_starts_with;
 
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
+
 use SUDHAUS7\Sudhaus7Wizard\Events\AfterAllContentCloneEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\AfterClonedTreeInsertEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\AfterContentCloneEvent;
@@ -44,8 +49,9 @@ use SUDHAUS7\Sudhaus7Wizard\Events\BeforeClonedTreeInsertEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\BeforeContentCloneEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\BeforeSiteConfigWriteEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\BeforeUserCreationUCDefaultsEvent;
-use SUDHAUS7\Sudhaus7Wizard\Events\CalcualteMountpointNameEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\CalculateBackendUserGroupNameEvent;
+use SUDHAUS7\Sudhaus7Wizard\Events\CalculateMountpointDirectoryNameEvent;
+use SUDHAUS7\Sudhaus7Wizard\Events\CalculateMountpointNameEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\CleanContentEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\CreateBackendUserEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\CreateBackendUserGroupEvent;
@@ -281,10 +287,13 @@ final class CreateProcess implements LoggerAwareInterface
         $shortname = $this->task->getShortname();
         $shortname = Tools::generateSlug($shortname);
 
+        $event = new CalculateMountpointDirectoryNameEvent($shortname, $this);
+        $this->eventDispatcher->dispatch($event);
+        $shortname = $event->getMountpointDirectoryName();
         $dir = $this->template->getMediaBaseDir() . $shortname . '/';
 
         $name = 'Medien ' . $this->task->getProjektname();
-        $event = new CalcualteMountpointNameEvent($name, $this);
+        $event = new CalculateMountpointNameEvent($name, $this);
         $this->eventDispatcher->dispatch($event);
         $name = $event->getMountpointName();
 

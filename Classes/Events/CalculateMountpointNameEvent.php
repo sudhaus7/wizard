@@ -20,7 +20,7 @@ use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardEventInterface;
 use SUDHAUS7\Sudhaus7Wizard\Traits\EventTrait;
 
-class CalcualteMountpointNameEvent implements WizardEventInterface, LoggerAwareInterface
+class CalculateMountpointNameEvent implements WizardEventInterface, LoggerAwareInterface
 {
     use LoggerAwareTrait;
     use EventTrait;
