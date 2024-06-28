@@ -39,6 +39,8 @@ use SUDHAUS7\Sudhaus7Wizard\Events\BeforeClonedTreeInsertEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\BeforeContentCloneEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\BeforeSiteConfigWriteEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\BeforeUserCreationUCDefaultsEvent;
+use SUDHAUS7\Sudhaus7Wizard\Events\CalcualteMountpointNameEvent;
+use SUDHAUS7\Sudhaus7Wizard\Events\CalculateBackendUserGroupNameEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\CleanContentEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\CreateBackendUserEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\CreateBackendUserGroupEvent;
@@ -277,6 +279,9 @@ final class CreateProcess implements LoggerAwareInterface
         $dir = $this->template->getMediaBaseDir() . $shortname . '/';
 
         $name = 'Medien ' . $this->task->getProjektname();
+        $event = new CalcualteMountpointNameEvent($name, $this);
+        $this->eventDispatcher->dispatch($event);
+        $name = $event->getMountpointName();
 
         /** @var ResourceStorage $storage */
         $storage           = GeneralUtility::makeInstance(StorageRepository::class)->getDefaultStorage();
@@ -344,6 +349,11 @@ final class CreateProcess implements LoggerAwareInterface
         $this->tmplGroup = $tmpl['uid'];
 
         $groupName = $this->confArr['groupprefix'] . ' ' . $this->task->getProjektname();
+
+        $event = new CalculateBackendUserGroupNameEvent($groupName, $this);
+        $this->eventDispatcher->dispatch($event);
+        $groupName = $event->getGroupname();
+
         $this->log('Create Group ' . $groupName);
         $this->source->ping();
 
