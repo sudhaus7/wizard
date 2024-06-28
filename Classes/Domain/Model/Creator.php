@@ -17,7 +17,9 @@ namespace SUDHAUS7\Sudhaus7Wizard\Domain\Model;
 
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
+
 use function str_starts_with;
+
 use SUDHAUS7\Sudhaus7Wizard\Tools;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Loader\YamlFileLoader;
@@ -61,8 +63,7 @@ class Creator implements LoggerAwareInterface
         protected int $sourcefilemount,
         protected string $sourceclass,
         private array $valuemappingcache = []
-    ) {
-    }
+    ) {}
 
     /**
      * @param array{

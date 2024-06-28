@@ -17,17 +17,22 @@ use function array_keys;
 use function array_merge;
 use function array_search;
 use function array_values;
+
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
+
 use function file_put_contents;
 use function is_null;
+
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+
 use function str_contains;
 use function str_starts_with;
+
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use SUDHAUS7\Sudhaus7Wizard\Events\AfterAllContentCloneEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\AfterClonedTreeInsertEvent;
@@ -730,14 +735,14 @@ final class CreateProcess implements LoggerAwareInterface
                             $this->eventDispatcher->dispatch(new AfterContentCloneEvent($table, $olduid, $oldpid, $newuid, $row, $this));
                         } else {
                             $this->log('ERROR NO ROW ' . print_r([
-                                    $table,
-                                    [
-                                        'table' => $table,
-                                        'olduid' => $olduid,
-                                        'oldpid' => $oldpid,
-                                        'newpid' => $newpid,
-                                    ],
-                                ], true));
+                                $table,
+                                [
+                                    'table' => $table,
+                                    'olduid' => $olduid,
+                                    'oldpid' => $oldpid,
+                                    'newpid' => $newpid,
+                                ],
+                            ], true));
                             exit;
                         }
                     }
@@ -1344,7 +1349,7 @@ final class CreateProcess implements LoggerAwareInterface
 
             if (!isset($columnConfig['config']['foreign_field']) && !empty($csvInlineNewIds)) {
                 $translated = $this->translateIDlist($columnConfig['config']['foreign_table'], $row[$column]);
-                self::updateRecord($table, [ $column=>$translated ], ['uid'=>$newUid]);
+                self::updateRecord($table, [ $column => $translated ], ['uid' => $newUid]);
                 $row[$column] = $translated;
             }
         } else {
@@ -1616,7 +1621,7 @@ final class CreateProcess implements LoggerAwareInterface
         $group = $event->getRecord();
 
         $payload = [];
-        foreach ($group as $k=>$v) {
+        foreach ($group as $k => $v) {
             if ($v !== $this->group[$k]) {
                 $payload[$k] = $v;
             }
@@ -1664,7 +1669,7 @@ final class CreateProcess implements LoggerAwareInterface
         $user = $event->getRecord();
 
         $payload = [];
-        foreach ($user as $k=>$v) {
+        foreach ($user as $k => $v) {
             if ($v !== $this->user[$k]) {
                 $payload[$k] = $v;
             }

@@ -21,6 +21,4 @@ namespace SUDHAUS7\Sudhaus7Wizard\Services;
  *
  * @internal not part of public API.
  */
-final class CreateProcessFactory extends AbstractCreateProcessFactory
-{
-}
+final class CreateProcessFactory extends AbstractCreateProcessFactory {}

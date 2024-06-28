@@ -14,13 +14,18 @@
 namespace SUDHAUS7\Sudhaus7Wizard\Sources;
 
 use function array_intersect;
+
 use Doctrine\DBAL\Driver\Exception;
+
 use function file_get_contents;
 use function file_put_contents;
 use function in_array;
+
 use InvalidArgumentException;
+
 use function is_array;
 use function json_encode;
+
 use Psr\Log\LoggerAwareTrait;
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
@@ -29,8 +34,10 @@ use SUDHAUS7\Sudhaus7Wizard\Events\GetResourceStorageEvent;
 use SUDHAUS7\Sudhaus7Wizard\Services\FolderService;
 use SUDHAUS7\Sudhaus7Wizard\Services\RestWizardRequest;
 use SUDHAUS7\Sudhaus7Wizard\Traits\DbTrait;
+
 use function sys_get_temp_dir;
 use function tempnam;
+
 use Throwable;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Core\Environment;
@@ -360,7 +367,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                                      ->select(
                                          [ '*' ],
                                          'sys_file_metadata',
-                                         ['file'=>$uid]
+                                         ['file' => $uid]
                                      );
                 $newSysFileMetadata = $res->fetchAssociative();
                 if (!empty($newSysFileMetadata)) {
@@ -373,7 +380,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                         'cruser_id',
                     ];
                     $update = [];
-                    foreach ($sys_file_metadata as $k=>$v) {
+                    foreach ($sys_file_metadata as $k => $v) {
                         if (! in_array($k, $skipFields)) {
                             if (! empty($v) || (int)$v > 0) {
                                 $update[ $k ] = $v;

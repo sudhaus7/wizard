@@ -15,7 +15,9 @@ namespace SUDHAUS7\Sudhaus7Wizard\Sources;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
+
 use function in_array;
+
 use InvalidArgumentException;
 use Psr\Log\LoggerAwareTrait;
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
@@ -286,7 +288,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                                  ->select(
                                      [ '*' ],
                                      'sys_file_metadata',
-                                     ['file'=>$uid]
+                                     ['file' => $uid]
                                  );
             $newSysFileMetadata = $res->fetchAssociative();
             if (!empty($newSysFileMetadata)) {
@@ -299,7 +301,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                     'cruser_id',
                 ];
                 $update = [];
-                foreach ($sys_file_metadata as $k=>$v) {
+                foreach ($sys_file_metadata as $k => $v) {
                     if (! in_array($k, $skipFields)) {
                         if (! empty($v) || (int)$v > 0) {
                             $update[ $k ] = $v;
