@@ -323,7 +323,10 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 
         $this->logger->debug('fetching ' . $this->getAPI()->getAPIFILEHOST() . 'fileadmin/' . trim($sysFile['identifier'], '/'));
 
-        $buf = @file_get_contents($this->getAPI()->getAPIFILEHOST() . 'fileadmin' . $sysFile['identifier']);
+        $remoteFilename = $sysFile['identifier'];
+        $remoteFilename = str_replace(' ', '%20', $remoteFilename);
+
+        $buf = @file_get_contents($this->getAPI()->getAPIFILEHOST() . 'fileadmin' . $remoteFilename);
         if (!$buf) {
             $this->logger->error('fetch failed' . $this->getAPI()->getAPIFILEHOST() . 'fileadmin/' . trim($sysFile['identifier'], '/'));
             return ['uid' => 0];
