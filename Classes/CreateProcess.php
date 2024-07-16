@@ -477,6 +477,8 @@ final class CreateProcess implements LoggerAwareInterface
         $uc['titleLen'] = 50;
         $uc['edit_RTE'] = 1;
         $uc['resizeTextareas_MaxHeight'] = 500;
+        $uc['edit_docModuleUpload'] = 1;
+        $uc['showHiddenFilesAndFolders'] = 0;
         $uc['lang'] = 'default';
 
         $event = new BeforeUserCreationUCDefaultsEvent($uc, $this);
