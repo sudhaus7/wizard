@@ -41,14 +41,14 @@ final class TypoLinkinRichTextFieldsEvent
                 \preg_match_all('/<a.+href="(t3:\/\/\S+)"/mU', (string)$record[$fieldName], $matches);
                 foreach ($matches[1] as $match) {
                     $replace = $proc->translateT3LinkString($match);
-                    $record[$fieldName] = str_replace($match, $replace, (string)$record[$fieldName]);
+                    $record[$fieldName] = str_replace($match, (string)$replace, (string)$record[$fieldName]);
                 }
 
                 // Legacy? Will man das?
                 \preg_match_all('/<a.+href="(\d+)"/mU', (string)$record[$fieldName], $matches);
                 foreach ($matches[1] as $match) {
                     $replace = $proc->getTranslateUid('pages', $match);
-                    $record[$fieldName] = str_replace($match, $replace, (string)$record[$fieldName]);
+                    $record[$fieldName] = str_replace($match, (string)$replace, (string)$record[$fieldName]);
                 }
 
                 $event->setRecord($record);
