@@ -14,6 +14,8 @@
 namespace SUDHAUS7\Sudhaus7Wizard\Services;
 
 use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Database\Query\QueryBuilder;
+use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\DataHandling\ReferenceIndexUpdater;
 use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -45,12 +47,15 @@ class Database implements SingletonInterface
     public function update(string $table, array $data, array $where): int
     {
         if (!isset($where['uid'])) {
-            $res = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($table)
-                                 ->select(
-                                     [ '*' ],
-                                     $table,
-                                     $where
-                                 );
+            $query = self::getQueryBuilderWithoutRestriction($table);
+            $query->select('*')
+                  ->from($table);
+            foreach ($where as $key => $value) {
+                $query->andWhere($query->expr()->eq($key, $query->createNamedParameter($value)));
+            }
+
+            $res = $query->execute();
+
             $affected = 0;
             while ($row = $res->fetchAssociative()) {
                 $this->update($table, $data, ['uid' => $row['uid']]);
@@ -67,5 +72,14 @@ class Database implements SingletonInterface
             $this->referenceIndexUpdater->registerForUpdate($table, $where['uid'], 0);
         }
         return $affected;
+    }
+
+    public static function getQueryBuilderWithoutRestriction(string $tableName): QueryBuilder
+    {
+        $query = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($tableName);
+
+        $query->getRestrictions()->removeAll();
+        $query->getRestrictions()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
+        return $query;
     }
 }

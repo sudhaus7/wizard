@@ -20,18 +20,13 @@ use function in_array;
 use SUDHAUS7\Sudhaus7Wizard\Services\Database;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
-use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 trait DbTrait
 {
     public static function getQueryBuilderWithoutRestriction(string $tableName): QueryBuilder
     {
-        $query = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($tableName);
-
-        $query->getRestrictions()->removeAll();
-        $query->getRestrictions()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
-        return $query;
+        return Database::getQueryBuilderWithoutRestriction($tableName);
     }
 
     /**
