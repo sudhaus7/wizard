@@ -26,8 +26,8 @@
 	],
 	"require": {
 		"ext-curl": "*",
-		"php": "^8.1 || ^8.2",
-		"typo3/cms-core": "12.4.*",
+		"php": "8.*",
+		"typo3/cms-core": "12.4.*||13.4.*",
 		"psr/log": "^3.0"
 	},
 	"require-dev": {
@@ -38,14 +38,12 @@
 		"typo3/cms-info": "^12.4",
 		"typo3/cms-beuser": "^12.4",
 		"typo3/cms-lowlevel": "^12.4",
-		"helhum/typo3-console": "*",
-		"typo3/coding-standards": "^0.5",
-		"ssch/typo3-rector": "^1.1",
-		"georgringer/news": "^11.4",
-		"typo3/cms-introduction": "^4.6",
+		"typo3/coding-standards": "^0.8",
+		"ssch/typo3-rector": "^2.13",
 		"sudhaus7/template": "@dev",
 		"typo3/testing-framework": "^8.0",
-		"typo3/cms-composer-installers": "^5.0"
+		"typo3/cms-composer-installers": "^5.0",
+		"helhum/typo3-console": "^8.1"
 	},
 	"autoload": {
 		"psr-4": {

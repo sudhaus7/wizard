@@ -20,4 +20,3 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['proc
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processCmdmapClass'][]  = UpdateStatus::class;
 
 ExtensionManagementUtility::addToInsertRecords('tx_sudhaus7wizard_domain_model_creator');
-ExtensionManagementUtility::allowTableOnStandardPages('tx_sudhaus7wizard_domain_model_creator');
