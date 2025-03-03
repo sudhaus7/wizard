@@ -16,6 +16,9 @@ namespace SUDHAUS7\Sudhaus7Wizard\Logger;
 use Psr\Log\LogLevel;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
+use function memory_get_peak_usage;
+use function memory_get_usage;
+use function microtime;
 
 class DebugConsoleLogger extends ConsoleLogger
 {
@@ -48,16 +51,16 @@ class DebugConsoleLogger extends ConsoleLogger
         $this->output = $output;
         $this->verbosityLevelMap = $verbosityLevelMap + $this->verbosityLevelMap;
         $this->formatLevelMap = $formatLevelMap + $this->formatLevelMap;
-        $this->timer = \microtime(true);
+        $this->timer = microtime(true);
     }
 
-    public function log($level, $message, array $context = [])
+    public function log($level, $message, array $context = []): void
     {
         $output = $this->output;
         if ($output->getVerbosity() >= $this->verbosityLevelMap[$level]) {
-            $time = \microtime(true);
+            $time = microtime(true);
             $output->writeln(sprintf('Time Elapsed: %fs', $time - $this->timer));
-            $output->writeln(sprintf('Memory Used: %d, peak %d', \memory_get_usage(true), \memory_get_peak_usage(true)));
+            $output->writeln(sprintf('Memory Used: %d, peak %d', memory_get_usage(true), memory_get_peak_usage(true)));
         }
         parent::log($level, $message, $context);
     }

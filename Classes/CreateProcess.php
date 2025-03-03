@@ -1379,7 +1379,6 @@ final class CreateProcess implements LoggerAwareInterface
         $this->log('Start Inlines Clone , TODO ' . count($this->cleanUpTodo));
         $event = new ModifyCloneInlinesSkipTablesEvent([
             'sys_domain',
-            //'sys_file_reference',
             'be_users',
             'be_groups',
             'tx_sudhaus7wizard_domain_model_creator',

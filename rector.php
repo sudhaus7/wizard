@@ -24,12 +24,13 @@ return RectorConfig::configure()
         __DIR__ . '/ext_tables.php',
     ])
     // uncomment to reach your current PHP version
-    // ->withPhpSets()
-    ->withPhpVersion(PhpVersion::PHP_81)
+    //->withPhpSets()
+    ->withPhpVersion(PhpVersion::PHP_83)
     ->withSets([
         Typo3SetList::CODE_QUALITY,
         Typo3SetList::GENERAL,
-        Typo3LevelSetList::UP_TO_TYPO3_12,
+	    Typo3LevelSetList::UP_TO_TYPO3_12,
+
         // To migrate to Doctrine Dbal 4, uncomment the following line
         //\Rector\Doctrine\Set\DoctrineSetList::DOCTRINE_DBAL_40,
     ])

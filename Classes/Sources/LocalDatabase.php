@@ -13,6 +13,9 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard\Sources;
 
+use ErrorReporting\Warning;
+use InvalidArgumentException;
+use Throwable;
 use function in_array;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
@@ -129,7 +132,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
             ->from('pages')->where($query->expr()->eq('pid', $start))->executeQuery();
 
         while ($p = $stmt->fetchNumeric()) {
-            if (! \in_array($p[0], $this->tree)) {
+            if (! in_array($p[0], $this->tree)) {
                 $this->tree[] = $p[0];
                 $this->getTree($p[0]);
             }
@@ -256,7 +259,12 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $this->logger->notice('cp ' . Environment::getPublicPath() . '/fileadmin' . $sysFile['identifier'] . ' ' . Environment::getPublicPath() . '/fileadmin' . $newIdentifier);
 
         $oldfile = $folder->getStorage()->getFileByIdentifier($sysFile['identifier']);
-        $file = $oldfile->copyTo($folder);
+        try {
+            $file = $oldfile->copyTo( $folder );
+        } catch ( Throwable $t) {
+            $this->logger->error($t->getMessage());
+            return BackendUtility::getRecord('sys_file', $oldfile->getUid());
+        }
 
         $newIdentifier = $file->getIdentifier();
 
@@ -295,7 +303,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                 ];
                 $update = [];
                 foreach ($sys_file_metadata as $k => $v) {
-                    if (! \in_array($k, $skipFields)) {
+                    if (! in_array($k, $skipFields)) {
                         if (! empty($v) || (int)$v > 0) {
                             $update[ $k ] = $v;
                         }
@@ -418,7 +426,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     public function getCreateProcess(): CreateProcess
     {
         if ($this->createProcess === null) {
-            throw new \InvalidArgumentException('Create Process must be defined', 1715795482);
+            throw new InvalidArgumentException('Create Process must be defined', 1715795482);
         }
         return $this->createProcess;
     }
