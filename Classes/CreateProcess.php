@@ -13,6 +13,8 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard;
 
+use TYPO3\CMS\Core\Configuration\SiteWriter;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use function array_keys;
 use function array_merge;
 use function array_search;
@@ -1712,7 +1714,12 @@ final class CreateProcess implements LoggerAwareInterface
         $this->siteConfig = $event->getSiteconfig();
 
         $this->calculatedSiteconfigIdentifier = $identifier;
-        GeneralUtility::makeInstance(SiteConfiguration::class)->write($identifier, $this->siteConfig);
+
+        if (GeneralUtility::makeInstance(Typo3Version::class)->getMajorVersion() < 13) {
+            GeneralUtility::makeInstance( SiteConfiguration::class )->write( $identifier, $this->siteConfig );
+        } else {
+            GeneralUtility::makeInstance( SiteWriter::class )->write( $identifier, $this->siteConfig );
+        }
     }
 
     /**
