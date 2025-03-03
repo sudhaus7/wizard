@@ -13,6 +13,7 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard\Sources;
 
+use function in_array;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use Psr\Log\LoggerAwareTrait;
@@ -231,7 +232,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         /** @var ResourceStorage $storage */
         $storage           = GeneralUtility::makeInstance(StorageRepository::class)->getDefaultStorage();
 
-        $defaultStorageEvent = new GetResourceStorageEvent($storage, $this);
+        $defaultStorageEvent = new GetResourceStorageEvent($storage, $this->getCreateProcess());
         GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($defaultStorageEvent);
         $storage = $defaultStorageEvent->getStorage();
 

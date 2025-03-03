@@ -15,6 +15,8 @@ declare(strict_types=1);
 
 namespace SUDHAUS7\Sudhaus7Wizard\Traits;
 
+use function in_array;
+
 use SUDHAUS7\Sudhaus7Wizard\Services\Database;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
