@@ -8,6 +8,9 @@
 			<trans-unit id="tx_sudhaus7wizard_domain_model_creator" xml:space="preserve">
 				<source>Site Wizard Task</source>
 			</trans-unit>
+			<trans-unit id="tx_sudhaus7wizard_domain_model_log">
+				<source>Site Wizard Log</source>
+			</trans-unit>
 			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.projektname" xml:space="preserve">
 				<source>Project name/Customer (System Internal Description)</source>
 			</trans-unit>

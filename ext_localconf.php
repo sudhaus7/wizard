@@ -10,3 +10,11 @@
  *
  * The TYPO3 project - inspiring people to share!
  */
+
+use SUDHAUS7\Sudhaus7Wizard\Backend\TCA\Types\CreatorLogRenderType;
+
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1742575212] = [
+    'nodeName' => 'creatorLog',
+    'priority' => 10,
+    'class' => CreatorLogRenderType::class,
+];

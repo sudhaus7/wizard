@@ -19,10 +19,10 @@ $EM_CONF[$_EXTKEY] = [
     'author' => 'Frank Berger',
     'author_email' => 'fberger@b-factor.de',
     'author_company' => 'Sudhaus 7',
-    'version' => '0.4.4',
+    'version' => '0.5.0',
     'constraints' => [
         'depends' => [
-            'typo3' => '12.4.0-12.4.99',
+            'typo3' => '12.4.0-13.4.99',
         ],
         'conflicts' => [
         ],

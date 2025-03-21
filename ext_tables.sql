@@ -37,8 +37,17 @@ CREATE TABLE tx_sudhaus7wizard_domain_model_creator (
 	sourcefilemount varchar(255) NOT NULL DEFAULT '0',
 
   status int(11) unsigned NOT NULL DEFAULT '0',
+	stacktrace TEXT,
 
   PRIMARY KEY (uid),
   KEY parent (pid),
   KEY language (l10n_parent,sys_language_uid)
+);
+
+CREATE TABLE tx_sudhaus7wizard_domain_model_log (
+	creator int(11) NOT NULL DEFAULT '0',
+	level varchar(16) NOT NULL DEFAULT '',
+	message TEXT,
+	context TEXT,
+	KEY creator_idx (creator)
 );
