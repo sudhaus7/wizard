@@ -13,12 +13,12 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard\Sources;
 
+use ErrorReporting\Warning;
+use InvalidArgumentException;
+use Throwable;
+use function in_array;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
-
-use function in_array;
-
-use InvalidArgumentException;
 use Psr\Log\LoggerAwareTrait;
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
@@ -129,11 +129,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $query->getRestrictions()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
 
         $stmt = $query->select('uid')
-            ->from('pages')
-            ->where(
-                $query->expr()->eq('pid', $start)
-            )
-            ->execute();
+            ->from('pages')->where($query->expr()->eq('pid', $start))->executeQuery();
 
         while ($p = $stmt->fetchNumeric()) {
             if (! in_array($p[0], $this->tree)) {
@@ -263,7 +259,12 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $this->logger->notice('cp ' . Environment::getPublicPath() . '/fileadmin' . $sysFile['identifier'] . ' ' . Environment::getPublicPath() . '/fileadmin' . $newIdentifier);
 
         $oldfile = $folder->getStorage()->getFileByIdentifier($sysFile['identifier']);
-        $file = $oldfile->copyTo($folder);
+        try {
+            $file = $oldfile->copyTo( $folder );
+        } catch ( Throwable $t) {
+            $this->logger->error($t->getMessage());
+            return BackendUtility::getRecord('sys_file', $oldfile->getUid());
+        }
 
         $newIdentifier = $file->getIdentifier();
 
@@ -318,7 +319,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
             }
         }
 
-        return   BackendUtility::getRecord('sys_file', $uid);
+        return BackendUtility::getRecord('sys_file', $uid);
     }
 
     /**

@@ -20,6 +20,8 @@ use SUDHAUS7\Sudhaus7Wizard\EventHandlers\Extensions\TxNewsPluginHandlerEvent;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\FinalTTContentFormFrameworkListener;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\PreSysFileReferenceEventHandler;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\SysFileReferenceHandleLinkFieldListener;
+use SUDHAUS7\Sudhaus7Wizard\EventHandlers\TypeFileListener;
+use SUDHAUS7\Sudhaus7Wizard\EventHandlers\TypeLinkListener;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\TypoLinkinRichTextFieldsEvent;
 use SUDHAUS7\Sudhaus7Wizard\Services\CreateProcessFactory;
 use SUDHAUS7\Sudhaus7Wizard\Services\CreateProcessFactoryInterface;
@@ -71,4 +73,8 @@ return static function (ContainerConfigurator $containerConfigurator, ContainerB
              ->tag('event.listener', ['identifier' => 's7wizardTxNewsFixRecordHandler']);
     $services->set(SysFileReferenceHandleLinkFieldListener::class)
              ->tag('event.listener', ['identifier' => 's7wizardSysFileReferenceHandleLinkFieldListener']);
+    $services->set( TypeLinkListener::class)
+             ->tag('event.listener', ['identifier' => 's7wizardTypeLinkListener']);
+    $services->set( TypeFileListener::class)
+             ->tag('event.listener', ['identifier' => 's7wizardTypeFileListener']);
 };

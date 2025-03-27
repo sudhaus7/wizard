@@ -141,10 +141,10 @@ class CreatorRepository
             self::$table => [
                 $creator->getUid() => [
                     'status' => $creator->getStatus(),
+                    'stacktrace' => $creator->getStacktrace(),
                 ],
             ],
         ];
-
         $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
         $dataHandler->start($data, []);
         $dataHandler->process_datamap();

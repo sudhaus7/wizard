@@ -61,7 +61,7 @@ final class Tools
             $GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['columns']['flexinfo']['config']['ds'][$config->getExtension()] = $config->getFlexinfoFile();
             $GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['types'][$config->getExtension()] = [
                 'showitem' => '
-                status,base,sourceclass,sourcepid,projektname,longname,shortname,domainname,contact,email,--div--;Benutzer,reduser,redpass,redemail,--div--;Template Konfigurationen,flexinfo
+                status,base,sourceclass,sourcepid,projektname,longname,shortname,domainname,contact,email,--div--;Benutzer,reduser,redpass,redemail,--div--;Template Konfigurationen,flexinfo,--div--;Log,log,stacktrace
             ' . $config->getAddFields(),
             ];
             $GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['columns']['sourcepid']['config']['default'] = $config->getSourcePid();

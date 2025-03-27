@@ -21,53 +21,53 @@ class TCAFieldActiveForThisRecordTest extends UnitTestCase
 {
     protected CreateProcess $create_process;
     protected $record = [
-        'uid'=>1,
-        'pid'=>1,
-        'CType'=>'text',
-        'header'=>'header',
-        'header_link'=>'header_link',
-        'header_layout'=>1,
-        'bodytext'=>'<p>bodytext</p>',
+        'uid' => 1,
+        'pid' => 1,
+        'CType' => 'text',
+        'header' => 'header',
+        'header_link' => 'header_link',
+        'header_layout' => 1,
+        'bodytext' => '<p>bodytext</p>',
 
     ];
     protected $tca = [
-        'tt_content'=>[
-            'ctrl'=>[
+        'tt_content' => [
+            'ctrl' => [
                 'type' => 'CType',
             ],
-            'columns'=>[
-                'header'=>[
-                    'config'=>[
+            'columns' => [
+                'header' => [
+                    'config' => [
                         'max' => 255,
                         'size' => 50,
                         'type' => 'input',
                     ],
                 ],
-                'header_link'=>[
-                    'config'=>[
+                'header_link' => [
+                    'config' => [
                         'max' => 255,
                         'size' => 50,
                         'type' => 'input',
                     ],
                 ],
-                'bodytext'=>[
-                    'config'=>[
+                'bodytext' => [
+                    'config' => [
                         'type' => 'text',
                     ],
                 ],
-                'image'=>[
-                    'config'=>[
+                'image' => [
+                    'config' => [
                         'max' => 255,
                         'size' => 50,
                         'type' => 'input',
                     ],
                 ],
-                'header_layout'=>[
-                    'config'=>[
-                        'default'=>0,
-                        'items'=>[
-                            ['title 1', 0],
-                            ['title 2', 1],
+                'header_layout' => [
+                    'config' => [
+                        'default' => 0,
+                        'items' => [
+                            ['label' => 'title 1', 'value' => 0],
+                            ['label' => 'title 2', 'value' => 1],
                         ],
 
                         'renderType' => 'selectSingle',
@@ -75,15 +75,15 @@ class TCAFieldActiveForThisRecordTest extends UnitTestCase
                     ],
                 ],
             ],
-            'palettes'=>[
-                'header'=>[
-                    'showitem'=> 'header,header_layout,--linebreak--,header_link',
+            'palettes' => [
+                'header' => [
+                    'showitem' => 'header,header_layout,--linebreak--,header_link',
                 ],
             ],
-            'types'=>[
-                'text'=>[
-                    'columnsOverrides'=>['bodytext'=>['config'=>['enableRichtext'=>1]]],
-                    'showitem'=>'--div--;Allgemein,--palette--;;header,bodytext',
+            'types' => [
+                'text' => [
+                    'columnsOverrides' => ['bodytext' => ['config' => ['enableRichtext' => 1]]],
+                    'showitem' => '--div--;Allgemein,--palette--;;header,bodytext',
                 ],
             ],
         ],
@@ -99,28 +99,28 @@ class TCAFieldActiveForThisRecordTest extends UnitTestCase
     /**
      * @test
      */
-    public function isBodytextEnabledInThisRecord()
+    public function isBodytextEnabledInThisRecord(): void
     {
         self::assertTrue($this->create_process->isTCAFieldActiveForThisRecord('tt_content', 'bodytext', $this->record));
     }
     /**
      * @test
      */
-    public function isHeaderEnabledInThisRecord()
+    public function isHeaderEnabledInThisRecord(): void
     {
         self::assertTrue($this->create_process->isTCAFieldActiveForThisRecord('tt_content', 'header', $this->record));
     }
     /**
      * @test
      */
-    public function isHeaderLinkEnabledInThisRecord()
+    public function isHeaderLinkEnabledInThisRecord(): void
     {
         self::assertTrue($this->create_process->isTCAFieldActiveForThisRecord('tt_content', 'header_link', $this->record));
     }
     /**
      * @test
      */
-    public function isImageNotEnabledInThisRecord()
+    public function isImageNotEnabledInThisRecord(): void
     {
         self::assertFalse($this->create_process->isTCAFieldActiveForThisRecord('tt_content', 'image', $this->record));
     }

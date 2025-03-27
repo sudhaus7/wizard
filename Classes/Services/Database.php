@@ -37,13 +37,14 @@ class Database implements SingletonInterface
         return [$rows, $newid];
     }
 
-    public function finish()
+    public function finish(): void
     {
         $this->referenceIndexUpdater->update();
     }
 
     public function update(string $table, array $data, array $where): int
     {
+
         if (!isset($where['uid'])) {
             $res = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($table)
                                  ->select(

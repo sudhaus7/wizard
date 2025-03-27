@@ -39,7 +39,7 @@ class WizardProcessRemote implements WizardProcessInterface
     public function getTemplateBackendUser(CreateProcess $pObj): array
     {
         if ($pObj->getTask()->getSourceuser() > 0) {
-            $user = $pObj->getSource()->getRow('be_users', ['uid'=>$pObj->getTask()->getSourceuser()]);
+            $user = $pObj->getSource()->getRow('be_users', ['uid' => $pObj->getTask()->getSourceuser()]);
             $pObj->getTask()->setReduser($user['username']);
             if (!empty($user['email'])) {
                 $pObj->getTask()->setRedemail($user['email']);
@@ -64,7 +64,5 @@ class WizardProcessRemote implements WizardProcessInterface
         return 'sites/';
     }
 
-    public function finalize(CreateProcess &$pObj): void
-    {
-    }
+    public function finalize(CreateProcess &$pObj): void {}
 }

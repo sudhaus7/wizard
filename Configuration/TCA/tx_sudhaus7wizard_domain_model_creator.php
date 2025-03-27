@@ -11,6 +11,10 @@
  * The TYPO3 project - inspiring people to share!
  */
 
+use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
+use SUDHAUS7\Sudhaus7Wizard\Sources\LocalDatabase;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+
 if (!defined('TYPO3')) {
     die('Access denied.');
 }
@@ -23,14 +27,13 @@ return [
         'rootLevel' => -1,
         'tstamp'            => 'tstamp',
         'crdate'            => 'crdate',
-        'cruser_id'         => 'cruser_id',
         'delete'            => 'deleted',
         'enablecolumns'     => [
             'disabled' => 'hidden',
         ],
         'type' => 'base',
         'searchFields' => 'projektname,longname,domainname,',
-        'dynamicConfigFile' => \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('sudhaus7_wizard') . 'Configuration/TCA/tx_sudhaus7wizard_domain_model_creator.php',
+        'dynamicConfigFile' => ExtensionManagementUtility::extPath('sudhaus7_wizard') . 'Configuration/TCA/tx_sudhaus7wizard_domain_model_creator.php',
         'iconfile' => 'EXT:sudhaus7_wizard/Resources/Public/Icons/icon.svg',
         'subtype_value_field' => 'sourceclass',
     ],
@@ -47,7 +50,7 @@ return [
             'label' => 'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.versionLabel',
             'config' => [
                 'type' => 'none',
-                'cols' => 27,
+                'size' => 27,
             ],
         ],
         'hidden' => [
@@ -59,16 +62,15 @@ return [
         ],
 
         'sourcepid' => [
-            'displayCond' => 'FIELD:status:<:10',
+            'displayCond' => 'FIELD:status:<:' . Creator::STATUS_READY,
             'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.source',
             'config' => [
-                'eval' => 'trim,required',
-                'type' => 'input',
+                'type' => 'link',
                 'softref' => 'typo3link',
                 'default' => '',
                 'size' => 50,
-                'renderType' => 'inputLink',
-                'fieldControl' => ['linkPopup' => ['options' => ['title' => 'LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:header_link_formlabel']]],
+                'required' => true,
+                'appearance' => ['browserTitle' => 'LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:header_link_formlabel'],
 
             ],
         ],
@@ -76,13 +78,13 @@ return [
         'base' => [
             'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.base',
 
-            'displayCond' => 'FIELD:status:<:10',
+            'displayCond' => 'FIELD:status:<:' . Creator::STATUS_READY,
             'config' => [
                 'type' => 'select',
                 'renderType' => 'selectSingle',
                 'default' => '1',
                 'items' => [
-                    ['Bitte wählen', 1],
+                    ['label' => 'Bitte wählen', 'value' => 1],
                 ],
             ],
             'onChange' => 'reload',
@@ -91,14 +93,14 @@ return [
         'sourceclass' => [
             'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.sourcetype',
             'exclude' => 1,
-            'displayCond' => 'FIELD:status:<:10',
+            'displayCond' => 'FIELD:status:<:' . Creator::STATUS_READY,
             'onChange' => 'reload',
             'config' => [
                 'type' => 'select',
                 'renderType' => 'selectSingle',
-                'default' => '\\' . \SUDHAUS7\Sudhaus7Wizard\Sources\LocalDatabase::class,
+                'default' => '\\' . LocalDatabase::class,
                 'items' => [
-                    ['LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.sourcetype.localdb', '\\' . \SUDHAUS7\Sudhaus7Wizard\Sources\LocalDatabase::class],
+                    ['label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.sourcetype.localdb', 'value' => '\\' . LocalDatabase::class],
 
                     //['Remote Server with WizardServer component', '\\' . \SUDHAUS7\Sudhaus7Wizard\Sources\RestWizardServer::class],
                     //['Umzugs-service', '\\' . \SUDHAUS7\Sudhaus7Wizard\Sources\Couchdb::class],
@@ -108,103 +110,109 @@ return [
 
         'projektname' => [
             'exclude' => 0,
-            'displayCond' => 'FIELD:status:<:10',
+            'displayCond' => 'FIELD:status:<:' . Creator::STATUS_READY,
             'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.projektname',
             'config' => [
                 'type' => 'input',
                 'size' => 30,
-                'eval' => 'trim,required',
+                'eval' => 'trim',
+                'required' => true,
             ],
         ],
         'longname' => [
             'exclude' => 0,
 
-            'displayCond' => 'FIELD:status:<:10',
+            'displayCond' => 'FIELD:status:<:' . Creator::STATUS_READY,
             'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.longname',
             'config' => [
                 'type' => 'input',
                 'size' => 30,
-                'eval' => 'trim,required',
+                'eval' => 'trim',
+                'required' => true,
             ],
         ],
         'shortname' => [
             'exclude' => 0,
 
-            'displayCond' => 'FIELD:status:<:10',
+            'displayCond' => 'FIELD:status:<:' . Creator::STATUS_READY,
             'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.shortname',
             'config' => [
                 'type' => 'input',
                 'size' => 30,
-                'eval' => 'trim,required',
+                'eval' => 'trim',
+                'required' => true,
             ],
         ],
         'valuemapping' => [
             'exclude' => 0,
 
-            'displayCond' => 'FIELD:status:<:10',
+            'displayCond' => 'FIELD:status:<:' . Creator::STATUS_READY,
             'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.valuemapping',
             'config' => [
                 'type' => 'select',
                 'renderType' => 'selectSingle',
                 'items' => [
-                    ['Bitte wählen', ''],
+                    ['label' => 'Bitte wählen', 'value' => ''],
                 ],
             ],
         ],
         'domainname' => [
             'exclude' => 0,
 
-            'displayCond' => 'FIELD:status:<:10',
+            'displayCond' => 'FIELD:status:<:' . Creator::STATUS_READY,
             'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.domainname',
             'config' => [
                 'type' => 'input',
                 'size' => 30,
-                'eval' => 'trim,required',
+                'eval' => 'trim',
+                'required' => true,
             ],
         ],
         'contact' => [
             'exclude' => 0,
 
-            'displayCond' => 'FIELD:status:<:10',
+            'displayCond' => 'FIELD:status:<:' . Creator::STATUS_READY,
             'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.contact',
             'config' => [
-                'type' => 'input',
+                'type' => 'email',
                 'size' => 30,
-                'eval' => 'trim,email,required',
+                'required' => true,
             ],
         ],
 
         'reduser' => [
             'exclude' => 0,
 
-            'displayCond' => 'FIELD:status:<:10',
+            'displayCond' => 'FIELD:status:<:' . Creator::STATUS_READY,
             'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.reduser',
             'config' => [
                 'type' => 'input',
                 'size' => 30,
-                'eval' => 'trim,required',
+                'eval' => 'trim',
+                'required' => true,
             ],
         ],
         'redemail' => [
             'exclude' => 0,
 
-            'displayCond' => 'FIELD:status:<:10',
+            'displayCond' => 'FIELD:status:<:' . Creator::STATUS_READY,
             'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.redemail',
             'config' => [
-                'type' => 'input',
+                'type' => 'email',
                 'size' => 30,
-                'eval' => 'trim,email,required',
+                'required' => true,
             ],
         ],
         'redpass' => [
             'exclude' => 0,
 
-            'displayCond' => 'FIELD:status:<:10',
+            'displayCond' => 'FIELD:status:<:' . Creator::STATUS_READY,
             'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.redpass',
             'config' => [
                 'type' => 'input',
                 'size' => 30,
-                'eval' => 'trim,required',
+                'eval' => 'trim',
+                'required' => true,
             ],
         ],
         'status' => [
@@ -214,12 +222,12 @@ return [
                 'default' => '0',
                 'type' => 'select',
                 'renderType' => 'selectSingle',
-                'items' => \SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator::getStatusTca(),
+                'items' => Creator::getStatusTca(),
             ],
         ],
 
         'flexinfo' => [
-            'displayCond' => 'FIELD:status:<:10',
+            'displayCond' => 'FIELD:status:<:' . Creator::STATUS_READY,
             'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.flexinfo',
             'config' => [
                 'ds' => [
@@ -231,7 +239,7 @@ return [
         ],
 
         'email' => [
-            'displayCond' => 'FIELD:status:=:20',
+            'displayCond' => 'FIELD:status:=:'.Creator::STATUS_DONE,
             'label' => 'Email-Vorlage',
             'config' => [
                 'type' => 'text',
@@ -266,5 +274,20 @@ return [
             ],
         ],
 
+        'stacktrace' => [
+            //'displayCond' => 'FIELD:status:=:'.Creator::STATUS_FAILED,
+            'label' => 'Stacktrace',
+            'config' => [
+                'type' => 'text',
+            ],
+        ],
+
+        'log'=>[
+            'label'=>'Log',
+            'config' => [
+                'type' => 'user',
+                'renderType'=>'creatorLog'
+            ]
+        ]
     ],
 ];

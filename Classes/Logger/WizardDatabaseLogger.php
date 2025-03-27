@@ -13,17 +13,29 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard\Logger;
 
+use Psr\Log\AbstractLogger;
+use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
+use Stringable;
+use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
+use TYPO3\CMS\Core\Database\Connection;
+use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use function memory_get_peak_usage;
 use function memory_get_usage;
 use function microtime;
 
-class DebugConsoleLogger extends ConsoleLogger
+class WizardDatabaseLogger extends AbstractLogger
 {
+    public const INFO = 'info';
+    public const ERROR = 'error';
+    public const TABLE = 'tx_sudhaus7wizard_domain_model_log';
     protected float $timer = 0.0;
-    private $output;
+    protected Connection $connection;
+    protected Creator $creator;
+    protected ?LoggerInterface $console = null;
     private $verbosityLevelMap = [
         LogLevel::EMERGENCY => OutputInterface::VERBOSITY_NORMAL,
         LogLevel::ALERT => OutputInterface::VERBOSITY_NORMAL,
@@ -44,24 +56,31 @@ class DebugConsoleLogger extends ConsoleLogger
         LogLevel::INFO => self::INFO,
         LogLevel::DEBUG => self::INFO,
     ];
-    private $errored = false;
-    public function __construct(OutputInterface $output, array $verbosityLevelMap = [], array $formatLevelMap = [])
+
+    public function __construct(Creator $creator, ?LoggerInterface $console, array $verbosityLevelMap = [], array $formatLevelMap = [])
     {
-        parent::__construct($output, $verbosityLevelMap, $formatLevelMap);
-        $this->output = $output;
+        $this->console = $console;
         $this->verbosityLevelMap = $verbosityLevelMap + $this->verbosityLevelMap;
         $this->formatLevelMap = $formatLevelMap + $this->formatLevelMap;
-        $this->timer = microtime(true);
+
+        $this->connection = GeneralUtility::makeInstance( ConnectionPool::class)->getConnectionForTable( self::TABLE );
+        $this->creator = $creator;
     }
 
-    public function log($level, $message, array $context = []): void
+    public function log($level, string|Stringable $message, array $context = []): void
     {
-        $output = $this->output;
-        if ($output->getVerbosity() >= $this->verbosityLevelMap[$level]) {
-            $time = microtime(true);
-            $output->writeln(sprintf('Time Elapsed: %fs', $time - $this->timer));
-            $output->writeln(sprintf('Memory Used: %d, peak %d', memory_get_usage(true), memory_get_peak_usage(true)));
+        if ($this->console instanceof LoggerInterface) {
+            $this->console->log($level, $message, $context);
         }
-        parent::log($level, $message, $context);
+
+        $this->connection->insert(self::TABLE, [
+            'tstamp' => time(),
+            'crdate' => time(),
+            'creator'=>$this->creator->getUid(),
+            'pid'=>$this->creator->getPid(),
+            'level'=>(string)$level,
+            'message'=>(string)$message,
+            'context'=>json_encode($context),
+        ]);
     }
 }

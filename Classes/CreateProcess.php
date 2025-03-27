@@ -13,6 +13,8 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard;
 
+use TYPO3\CMS\Core\Configuration\SiteWriter;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use function array_keys;
 use function array_merge;
 use function array_search;
@@ -520,7 +522,7 @@ final class CreateProcess implements LoggerAwareInterface
     {
         $this->log('Clone Tree Start');
         $sourcePid = (int)$this->source->sourcePid();
-        foreach (array_keys($this->pageMap) as $old) {
+        foreach ( array_keys($this->pageMap) as $old) {
             $page = $this->source->getRow('pages', ['uid' => $old]);
 
             $this->log('Cloning Page ' . $page['title']);
@@ -830,14 +832,14 @@ final class CreateProcess implements LoggerAwareInterface
                     $row = $event->getRecord();
 
                     if (isset($columnconfig['config']['renderType']) && $columnconfig['config']['renderType'] === 'inputLink') {
-                        $row = $this->cloneContent_final_wizards_link($column, $columnconfig, $row, $parameters);
+                        $row[$column] = $this->translateTypolinkString($row[$column]);
                     } elseif (isset($columnconfig['config']['softref']) && $columnconfig['config']['softref'] === 'typolink') {
-                        $row = $this->cloneContent_final_wizards_link($column, $columnconfig, $row, $parameters);
+                        $row[$column] = $this->translateTypolinkString($row[$column]);
                     }
 
                     if (isset($columnConfig['config']['wizards'])) {
                         foreach ($columnConfig['config']['wizards'] as $wizard => $wizardConfig) {
-                            $row = $this->cloneContent_final_wizards_link($wizard, $wizardConfig, $row, $parameters);
+                            $row[$wizard] = $this->translateTypolinkString($row[$wizard]);
                         }
                     }
 
@@ -1102,6 +1104,7 @@ final class CreateProcess implements LoggerAwareInterface
      * @param array<array-key, mixed> $row
      * @param array<array-key, mixed> $parameters
      * @return array<array-key, mixed>
+     * @deprecated
      */
     private function cloneContent_final_wizards_link(
         string $column,
@@ -1140,7 +1143,7 @@ final class CreateProcess implements LoggerAwareInterface
             }
         } elseif (in_array('mail', $a) && $a[1] == '-' && $a[2] == 'mail') {
             return implode(' ', $a);
-        } elseif (str_starts_with($s, 'http') || str_starts_with($s, 'fileadmin') || str_starts_with($s, '/fileadmin')) {
+        } elseif ( str_starts_with($s, 'http') || str_starts_with($s, 'fileadmin') || str_starts_with($s, '/fileadmin')) {
             return implode(' ', $a);
         } else {
             $aID = explode('#', $id);
@@ -1378,7 +1381,6 @@ final class CreateProcess implements LoggerAwareInterface
         $this->log('Start Inlines Clone , TODO ' . count($this->cleanUpTodo));
         $event = new ModifyCloneInlinesSkipTablesEvent([
             'sys_domain',
-            //'sys_file_reference',
             'be_users',
             'be_groups',
             'tx_sudhaus7wizard_domain_model_creator',
@@ -1398,11 +1400,7 @@ final class CreateProcess implements LoggerAwareInterface
 
                 $query = self::getQueryBuilderWithoutRestriction($table);
                 $stmt = $query->select('*')
-                    ->from($table)
-                    ->where(
-                        $query->expr()->in('uid', $newUid)
-                    )
-                    ->execute();
+                    ->from($table)->where($query->expr()->in('uid', $newUid))->executeQuery();
 
                 while ($originalRow = $stmt->fetchAssociative()) {
                     // fetch a clean version, might have changed in between
@@ -1454,10 +1452,7 @@ final class CreateProcess implements LoggerAwareInterface
 
             $query = self::getQueryBuilderWithoutRestriction($table);
             $res = $query->select('*')
-                ->from($table)
-                ->where(
-                    $query->expr()->eq('uid', $newPid)
-                )->execute();
+                ->from($table)->where($query->expr()->eq('uid', $newPid))->executeQuery();
 
             while ($originalRow = $res->fetchAssociative()) {
                 // fetch a clean version, might have changed in between
@@ -1546,11 +1541,7 @@ final class CreateProcess implements LoggerAwareInterface
                 $query = self::getQueryBuilderWithoutRestriction($table);
 
                 $stmt = $query->select('*')
-                    ->from($table)
-                    ->where(
-                        $query->expr()->in('pid', $newPids)
-                    )
-                    ->execute();
+                    ->from($table)->where($query->expr()->in('pid', $newPids))->executeQuery();
 
                 while ($originalRow = $stmt->fetchAssociative()) {
                     // fetch a clean version, might have changed in between
@@ -1723,7 +1714,12 @@ final class CreateProcess implements LoggerAwareInterface
         $this->siteConfig = $event->getSiteconfig();
 
         $this->calculatedSiteconfigIdentifier = $identifier;
-        GeneralUtility::makeInstance(SiteConfiguration::class)->write($identifier, $this->siteConfig);
+
+        if (GeneralUtility::makeInstance(Typo3Version::class)->getMajorVersion() < 13) {
+            GeneralUtility::makeInstance( SiteConfiguration::class )->write( $identifier, $this->siteConfig );
+        } else {
+            GeneralUtility::makeInstance( SiteWriter::class )->write( $identifier, $this->siteConfig );
+        }
     }
 
     /**

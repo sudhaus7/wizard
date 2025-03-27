@@ -22,6 +22,7 @@ final class SysFileReferenceHandleLinkFieldListener
     public function __invoke(CleanEvent $event): void
     {
         if ($event->getTable() === 'sys_file_reference') {
+
             $record = $event->getRecord();
             if (!empty($record['link'])) {
                 $record['link'] = $event->getCreateProcess()->translateTypolinkString($record['link']);

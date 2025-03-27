@@ -15,7 +15,9 @@ namespace SUDHAUS7\Sudhaus7Wizard\Services;
 
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
+use TYPO3\CMS\Core\TypoScript\AST\AstBuilderInterface;
 use TYPO3\CMS\Core\TypoScript\Parser\TypoScriptParser;
+use TYPO3\CMS\Core\TypoScript\TypoScriptStringFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 final class TyposcriptService implements LoggerAwareInterface
@@ -24,15 +26,26 @@ final class TyposcriptService implements LoggerAwareInterface
 
     public const INDENT = '  ';
 
+    public TypoScriptStringFactory $factory;
+    public AstBuilderInterface $astBuilder;
+    public function __construct(TypoScriptStringFactory $factory, AstBuilderInterface $astBuilder) {
+        $this->factory = $factory;
+        $this->astBuilder = $astBuilder;
+    }
+
     /**
      * @return array<array-key, mixed>
      */
     public static function parse(string $s): array
     {
+        $service = GeneralUtility::makeInstance(TyposcriptService::class);
+
+        $result = $service->factory->parseFromString( $s, $service->astBuilder )->toArray();
+        return $result;
         /** @var  TypoScriptParser $oTSparser */
-        $oTSparser = GeneralUtility::makeInstance(TypoScriptParser::class);
-        $oTSparser->parse($s);
-        return $oTSparser->setup;
+        //$oTSparser = GeneralUtility::makeInstance(TypoScriptParser::class);
+        //$oTSparser->parse($s);
+        //return $oTSparser->setup;
     }
 
     /**

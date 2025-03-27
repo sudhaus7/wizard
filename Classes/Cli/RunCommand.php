@@ -15,9 +15,12 @@ namespace SUDHAUS7\Sudhaus7Wizard\Cli;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
+use Psr\Log\AbstractLogger;
+use Psr\Log\LoggerInterface;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Repository\CreatorRepository;
 use SUDHAUS7\Sudhaus7Wizard\Logger\DebugConsoleLogger;
+use SUDHAUS7\Sudhaus7Wizard\Logger\WizardDatabaseLogger;
 use SUDHAUS7\Sudhaus7Wizard\Services\CreateProcessFactoryInterface;
 use SUDHAUS7\Sudhaus7Wizard\Tools;
 use Symfony\Component\Console\Command\Command;
@@ -27,6 +30,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
+use Throwable;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Core\Bootstrap;
@@ -36,7 +40,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 final class RunCommand extends Command
 {
-    public ?ConsoleLogger $logger = null;
+    public ?LoggerInterface $logger = null;
     private ?CreatorRepository $repository = null;
     private CreateProcessFactoryInterface $createProcessFactory;
 
@@ -54,21 +58,21 @@ final class RunCommand extends Command
         $this->addOption('id', 'i', InputOption::VALUE_REQUIRED, 'in mode single, the uid of a specific task');
         $this->addOption('force', 'f', InputOption::VALUE_NONE, 'force running the task');
         $this->addOption('mapto', 'm', InputOption::VALUE_REQUIRED, 'write the map to this folder');
+        $this->addOption('logtodatabase', null, InputOption::VALUE_NONE, 'Write log to database');
         $this->addOption('debug', null, InputOption::VALUE_NONE, 'print debug information like runtime and memory usage');
     }
 
-    protected function initialize(InputInterface $input, OutputInterface $output): void
-    {
-        if ($input->getOption('debug')) {
-            $this->logger = new DebugConsoleLogger($output);
-        } else {
+    protected function initialize(InputInterface $input, OutputInterface $output): void {
+        if ( $input->getOption( 'debug' ) ) {
+            $this->logger = new DebugConsoleLogger( $output );
+        }  else {
             $this->logger = new ConsoleLogger($output);
         }
         $this->repository = GeneralUtility::makeInstance(CreatorRepository::class);
     }
 
     /**
-     * @throws \Doctrine\DBAL\Driver\Exception
+     * @throws Exception
      * @throws DBALException
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -166,8 +170,15 @@ final class RunCommand extends Command
 
     public function create(Creator $creator, InputInterface $input, OutputInterface $output, $mapfolder = null): int
     {
+        if ($input->getOption('logtodatabase')) {
+            // Start a new log
+            GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable( WizardDatabaseLogger::TABLE)->delete( WizardDatabaseLogger::TABLE,
+                ['creator'=>$creator->getUid()]);
+            $this->logger = new WizardDatabaseLogger( $creator , $this->logger );
+        }
+
         Bootstrap::initializeBackendAuthentication();
-        $creator->setStatus(15);
+        $creator->setStatus(Creator::STATUS_PROCESSING);
         $this->repository->updateStatus($creator);
 
         $this->getInfo($creator, $input, $output);
@@ -176,7 +187,7 @@ final class RunCommand extends Command
         try {
             if ($this->createProcessFactory->get($creator, $this->logger)->run($mapfolder)) {
                 $output->write("Fertig\n", true);
-                $creator->setStatus(20);
+                $creator->setStatus(Creator::STATUS_DONE);
 
                 $this->repository->updateStatus($creator);
                 $this->repository->updatePid($creator);
@@ -209,11 +220,12 @@ final class RunCommand extends Command
 
                 return Command::SUCCESS;
             }
-        } catch (Exception|ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException $e) {
-            $this->logger->warning($e->getMessage(), $e->getTrace());
+        } catch ( Throwable $e) {
+            $this->logger->warning($e->getMessage()." (".$e->getCode().")\n". $e->getTraceAsString(), []);
+            $creator->setStacktrace($e->getMessage()." (".$e->getCode().")\n". $e->getTraceAsString());
+            $creator->setStatus(Creator::STATUS_FAILED);
         }
 
-        $creator->setStatus(17);
         $this->repository->updateStatus($creator);
 
         return Command::FAILURE;

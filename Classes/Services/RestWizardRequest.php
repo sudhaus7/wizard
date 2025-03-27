@@ -15,7 +15,12 @@ declare(strict_types=1);
 
 namespace SUDHAUS7\Sudhaus7Wizard\Services;
 
+use RuntimeException;
 use TYPO3\CMS\Core\Http\RequestFactory;
+use function base64_encode;
+use function is_array;
+use function password_hash;
+use const PASSWORD_DEFAULT;
 
 final class RestWizardRequest
 {
@@ -47,8 +52,8 @@ final class RestWizardRequest
         ];
 
         if (!empty($this->getAPISHAREDSECRET())) {
-            $password = \password_hash($this->getAPISHAREDSECRET(), \PASSWORD_DEFAULT);
-            $additionalOptions['headers']['X-Authorization'] = \base64_encode($password);
+            $password = password_hash($this->getAPISHAREDSECRET(), PASSWORD_DEFAULT);
+            $additionalOptions['headers']['X-Authorization'] = base64_encode($password);
         }
 
         // $additionalOptions['headers']['X-Authorization']=\base64_encode( 'bla');
@@ -60,22 +65,22 @@ final class RestWizardRequest
         );
 
         if ($response->getStatusCode() !== 200) {
-            throw new \RuntimeException(
-                'Returned status code is ' . $response->getStatusCode()
+            throw new RuntimeException(
+                'Returned status code is ' . $response->getStatusCode(), 3947156395
             );
         }
 
         if ($response->getHeaderLine('Content-Type') !== 'application/json') {
-            throw new \RuntimeException(
-                'The request did not return JSON data'
+            throw new RuntimeException(
+                'The request did not return JSON data', 1335319967
             );
         }
         $body = $response->getBody()->getContents();
         $decoded = json_decode($body, true);
-        if (\is_array($decoded)) {
+        if ( is_array($decoded)) {
             return $decoded;
         }
-        throw new \RuntimeException('No information available');
+        throw new RuntimeException('No information available', 1048881159);
         // Get the content as a string on a successful request
     }
 
@@ -92,8 +97,8 @@ final class RestWizardRequest
         ];
 
         if (!empty($this->getAPISHAREDSECRET())) {
-            $password = \password_hash($this->getAPISHAREDSECRET(), \PASSWORD_DEFAULT);
-            $additionalOptions['headers']['X-Authorization'] = \base64_encode($password);
+            $password = password_hash($this->getAPISHAREDSECRET(), PASSWORD_DEFAULT);
+            $additionalOptions['headers']['X-Authorization'] = base64_encode($password);
         }
 
         // Get a PSR-7-compliant response object
@@ -104,23 +109,23 @@ final class RestWizardRequest
         );
 
         if ($response->getStatusCode() !== 200) {
-            throw new \RuntimeException(
-                'Returned status code is ' . $response->getStatusCode()
+            throw new RuntimeException(
+                'Returned status code is ' . $response->getStatusCode(), 9125293608
             );
         }
 
         if ($response->getHeaderLine('Content-Type') !== 'application/json') {
-            throw new \RuntimeException(
-                'The request did not return JSON data'
+            throw new RuntimeException(
+                'The request did not return JSON data', 7823592929
             );
         }
 
         $body = $response->getBody()->getContents();
         $decoded = json_decode($body, true);
-        if (\is_array($decoded)) {
+        if ( is_array($decoded)) {
             return $decoded;
         }
-        throw new \RuntimeException('No information available');
+        throw new RuntimeException('No information available', 2510733962);
     }
 
     public function getAPIHOST(): string

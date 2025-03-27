@@ -47,7 +47,8 @@ final class TxNewsPluginHandlerEvent
                 }
 
                 if (isset($flex['data']['sDEF']['lDEF']['settings.categories']['vDEF'])) {
-                    $flex['data']['sDEF']['lDEF']['settings.categories']['vDEF'] = $process->translateIDlist('sys_category', $flex['data']['sDEF']['lDEF']['settings.categories']['vDEF']);
+                    $translated = $process->translateIDlist('sys_category', $flex['data']['sDEF']['lDEF']['settings.categories']['vDEF']);
+                    $flex['data']['sDEF']['lDEF']['settings.categories']['vDEF'] = $translated == 0 ? '' : $translated;
                 }
 
                 $record['pi_flexform'] = Tools::array2xml($flex);
