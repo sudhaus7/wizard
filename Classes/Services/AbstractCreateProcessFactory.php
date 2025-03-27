@@ -18,10 +18,13 @@ namespace SUDHAUS7\Sudhaus7Wizard\Services;
 use Psr\Log\LoggerInterface;
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
+use SUDHAUS7\Sudhaus7Wizard\Events\LoadInitialSiteConfigEvent;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardProcessInterface;
 use SUDHAUS7\Sudhaus7Wizard\Sources\LocalDatabase;
 use SUDHAUS7\Sudhaus7Wizard\Sources\SourceInterface;
+use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use function class_exists;
 
 /**
  * Abstract factory implementation used in the default CreateProcessFactory,
@@ -31,6 +34,7 @@ abstract class AbstractCreateProcessFactory implements CreateProcessFactoryInter
 {
     public function get(Creator $creator, ?LoggerInterface $logger = null): CreateProcess
     {
+        /** @var CreateProcess $tsk */
         $tsk = GeneralUtility::makeInstance(CreateProcess::class);
         if ($logger instanceof LoggerInterface) {
             $tsk->setLogger($logger);
@@ -43,7 +47,7 @@ abstract class AbstractCreateProcessFactory implements CreateProcessFactoryInter
         $wizardProcess = GeneralUtility::makeInstance($processInterface);
         $tsk->setTemplate($wizardProcess);
         $sourceClassName = $creator->getSourceclass();
-        if (\class_exists($sourceClassName)) {
+        if ( class_exists($sourceClassName)) {
             $sourceClass = GeneralUtility::makeInstance(ltrim($sourceClassName, '\\'));
             $tsk->setSource($sourceClass instanceof SourceInterface ? $sourceClass : GeneralUtility::makeInstance(LocalDatabase::class));
             $tsk->getSource()->setCreateProcess($tsk);
@@ -51,7 +55,12 @@ abstract class AbstractCreateProcessFactory implements CreateProcessFactoryInter
             $tsk->getSource()->setLogger($logger);
         }
         $pid = $creator->getSourcepid();
-        $tsk->setSiteConfig($tsk->getSource()->getSiteConfig($pid));
+        $siteconfig = $tsk->getSource()->getSiteConfig($pid);
+
+        // wanted to do this early to have more control over where the source is loaded
+        $event = new LoadInitialSiteConfigEvent( $pid, $siteconfig, $tsk );
+        GeneralUtility::makeInstance(EventDispatcher::class)->dispatch( $event);
+        $tsk->setSiteConfig($event->getSiteconfig());
         return $tsk;
     }
 }
