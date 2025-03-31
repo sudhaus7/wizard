@@ -270,7 +270,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
             // problem at the moment (FB 31.03.2025)
 
             $this->logger->error($t->getMessage());
-            return BackendUtility::getRecord('sys_file', $oldfile->getUid());
+            return $sysFile;
         }
 
         $newIdentifier = $file->getIdentifier();
