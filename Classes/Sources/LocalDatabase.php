@@ -258,10 +258,17 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 
         $this->logger->notice('cp ' . Environment::getPublicPath() . '/fileadmin' . $sysFile['identifier'] . ' ' . Environment::getPublicPath() . '/fileadmin' . $newIdentifier);
 
-        $oldfile = $folder->getStorage()->getFileByIdentifier($sysFile['identifier']);
         try {
+            $oldfile = $folder->getStorage()->getFileByIdentifier($sysFile['identifier']);
+
             $file = $oldfile->copyTo( $folder );
         } catch ( Throwable $t) {
+
+            // We're on the local system, and the original file is missing. shouldn't happen
+            // as we can not get back a new file, we return the old record. this way the process
+            // continues and at least there is a broken image. I don't see a better solution for this
+            // problem at the moment (FB 31.03.2025)
+
             $this->logger->error($t->getMessage());
             return BackendUtility::getRecord('sys_file', $oldfile->getUid());
         }
