@@ -296,13 +296,22 @@ final class CreateProcess implements LoggerAwareInterface
         $defaultStorageEvent = new GetResourceStorageEvent($storage, $this);
         $this->eventDispatcher->dispatch($defaultStorageEvent);
         $storage = $defaultStorageEvent->getStorage();
-
-        $event = new CreateFilemountEvent([
-            'title' => $name,
-            'path' => $dir,
-            'base' => $storage->getUid(),
-            'pid' => 0,
-        ], $this);
+        if (GeneralUtility::makeInstance(Typo3Version::class)->getMajorVersion() > 11) {
+            $event = new CreateFilemountEvent( [
+                'title' => $name,
+                'path'  => trim($dir,'/'),
+                'base'  => $storage->getUid(),
+                'pid'   => 0,
+                'identifier'=>sprintf('%d:/%s',$storage->getUid(),trim($dir,'/'))
+            ], $this );
+        } else {
+            $event = new CreateFilemountEvent( [
+                'title' => $name,
+                'path'  => $dir,
+                'base'  => $storage->getUid(),
+                'pid'   => 0,
+            ], $this );
+        }
         $this->eventDispatcher->dispatch($event);
         $tmpl = $event->getRecord();
 
