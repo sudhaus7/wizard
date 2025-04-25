@@ -11,6 +11,8 @@
  * The TYPO3 project - inspiring people to share!
  */
 
+use SUDHAUS7\Sudhaus7Wizard\Backend\TCA\Evaluation\DomainnameEvaluation;
+use SUDHAUS7\Sudhaus7Wizard\Backend\TCA\Evaluation\NotifyEmailEvaluation;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use SUDHAUS7\Sudhaus7Wizard\Sources\LocalDatabase;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
@@ -164,7 +166,7 @@ return [
             'config' => [
                 'type' => 'input',
                 'size' => 30,
-                'eval' => 'domainname,trim',
+                'eval' => 'domainname,trim,'. DomainnameEvaluation::class,
                 'required' => true,
             ],
         ],
@@ -177,8 +179,7 @@ return [
             'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.notify_email',
             'config' => [
                 'type' => 'input',
-                'size' => 30,
-                'eval' => 'trim,email',
+                'eval'=> 'trim,'. NotifyEmailEvaluation::class,
             ],
         ],
 
@@ -189,8 +190,6 @@ return [
             'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.contact',
             'config' => [
                 'type' => 'email',
-                'size' => 30,
-                'required' => true,
             ],
         ],
 
@@ -256,7 +255,7 @@ return [
             'displayCond' => 'FIELD:status:=:'.Creator::STATUS_DONE,
             'label' => 'Email-Vorlage',
             'config' => [
-                'type' => 'text',
+                'type' => 'email',
             ],
         ],
         'pid' => [
