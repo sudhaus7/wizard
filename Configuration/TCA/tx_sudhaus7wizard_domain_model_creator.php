@@ -252,13 +252,7 @@ return [
                 'type' => 'none',
             ],
         ],
-        'cruser_id' => [
-            'exclude' => 1,
-            'label' => 'cruser_id',
-            'config' => [
-                'type' => 'none',
-            ],
-        ],
+
 
         'sourceuser' => [
             'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.sourceuser',

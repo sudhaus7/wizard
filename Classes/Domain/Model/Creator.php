@@ -52,7 +52,6 @@ class Creator implements LoggerAwareInterface
     protected function __construct(
         protected int $uid,
         protected int $pid,
-        protected int $cruserId, // @todo cruser is removed by default in v12, if needed, handle in other ways
         protected string $sourcepid,
         protected string $base,
         protected ?string $projektname,
@@ -76,7 +75,6 @@ class Creator implements LoggerAwareInterface
     /**
      * @param array{
      *     uid: int,
-     *     cruser_id: int,
      *     sourcepid: string,
      * base: string,
      * projektname: string,
@@ -101,7 +99,6 @@ class Creator implements LoggerAwareInterface
         return new self(
             $row['uid'],
             $row['pid'],
-            $row['cruser_id'],
             $row['sourcepid'],
             $row['base'],
             $row['projektname'],
