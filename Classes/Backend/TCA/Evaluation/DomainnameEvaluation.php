@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the TYPO3 project.
  *
@@ -11,9 +13,14 @@
  * The TYPO3 project - inspiring people to share!
  */
 
-use SUDHAUS7\Sudhaus7Wizard\Backend\TCA\Evaluation\DomainnameEvaluation;
+namespace SUDHAUS7\Sudhaus7Wizard\Backend\TCA\Evaluation;
 
+class DomainnameEvaluation
+{
+    public function evaluateFieldValue($value, $is_in, &$set)
+    {
+        $value = preg_replace('/\s*/', '', $value);
+        return $value;
+    }
 
-$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['tce']['formevals'][ DomainnameEvaluation::class] = '';
-
-
+}

@@ -11,6 +11,11 @@
  * The TYPO3 project - inspiring people to share!
  */
 
+use SUDHAUS7\Sudhaus7Wizard\Backend\TCA\Evaluation\DomainnameEvaluation;
+use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
+use SUDHAUS7\Sudhaus7Wizard\Sources\LocalDatabase;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+
 if (!defined('TYPO3')) {
     die('Access denied.');
 }
@@ -30,7 +35,7 @@ return [
         ],
         'type' => 'base',
         'searchFields' => 'projektname,longname,domainname,',
-        'dynamicConfigFile' => \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('sudhaus7_wizard') . 'Configuration/TCA/tx_sudhaus7wizard_domain_model_creator.php',
+        'dynamicConfigFile' => ExtensionManagementUtility::extPath('sudhaus7_wizard') . 'Configuration/TCA/tx_sudhaus7wizard_domain_model_creator.php',
         'iconfile' => 'EXT:sudhaus7_wizard/Resources/Public/Icons/icon.svg',
         'subtype_value_field' => 'sourceclass',
     ],
@@ -96,9 +101,9 @@ return [
             'config' => [
                 'type' => 'select',
                 'renderType' => 'selectSingle',
-                'default' => '\\' . \SUDHAUS7\Sudhaus7Wizard\Sources\LocalDatabase::class,
+                'default' => '\\' . LocalDatabase::class,
                 'items' => [
-                    ['LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.sourcetype.localdb', '\\' . \SUDHAUS7\Sudhaus7Wizard\Sources\LocalDatabase::class],
+                    ['LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.sourcetype.localdb', '\\' . LocalDatabase::class],
 
                     //['Remote Server with WizardServer component', '\\' . \SUDHAUS7\Sudhaus7Wizard\Sources\RestWizardServer::class],
                     //['Umzugs-service', '\\' . \SUDHAUS7\Sudhaus7Wizard\Sources\Couchdb::class],
@@ -159,7 +164,7 @@ return [
             'config' => [
                 'type' => 'input',
                 'size' => 30,
-                'eval' => 'trim,required',
+                'eval' => 'trim,domainname,required,' . DomainnameEvaluation::class,
             ],
         ],
         'contact' => [
@@ -214,7 +219,7 @@ return [
                 'default' => '0',
                 'type' => 'select',
                 'renderType' => 'selectSingle',
-                'items' => \SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator::getStatusTca(),
+                'items' => Creator::getStatusTca(),
             ],
         ],
 
