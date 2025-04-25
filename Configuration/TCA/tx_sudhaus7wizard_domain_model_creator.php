@@ -11,6 +11,7 @@
  * The TYPO3 project - inspiring people to share!
  */
 
+use SUDHAUS7\Sudhaus7Wizard\Backend\TCA\Evaluation\DomainnameEvaluation;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use SUDHAUS7\Sudhaus7Wizard\Sources\LocalDatabase;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
