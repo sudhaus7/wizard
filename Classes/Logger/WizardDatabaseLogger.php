@@ -18,14 +18,10 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Stringable;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
-use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use function memory_get_peak_usage;
-use function memory_get_usage;
-use function microtime;
 
 class WizardDatabaseLogger extends AbstractLogger
 {
@@ -63,7 +59,7 @@ class WizardDatabaseLogger extends AbstractLogger
         $this->verbosityLevelMap = $verbosityLevelMap + $this->verbosityLevelMap;
         $this->formatLevelMap = $formatLevelMap + $this->formatLevelMap;
 
-        $this->connection = GeneralUtility::makeInstance( ConnectionPool::class)->getConnectionForTable( self::TABLE );
+        $this->connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable(self::TABLE);
         $this->creator = $creator;
     }
 
@@ -76,11 +72,11 @@ class WizardDatabaseLogger extends AbstractLogger
         $this->connection->insert(self::TABLE, [
             'tstamp' => time(),
             'crdate' => time(),
-            'creator'=>$this->creator->getUid(),
-            'pid'=>$this->creator->getPid(),
-            'level'=>(string)$level,
-            'message'=>(string)$message,
-            'context'=>json_encode($context),
+            'creator' => $this->creator->getUid(),
+            'pid' => $this->creator->getPid(),
+            'level' => (string)$level,
+            'message' => (string)$message,
+            'context' => json_encode($context),
         ]);
     }
 }

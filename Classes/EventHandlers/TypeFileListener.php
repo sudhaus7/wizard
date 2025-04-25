@@ -1,6 +1,17 @@
 <?php
-declare( strict_types=1 );
 
+declare(strict_types=1);
+
+/*
+ * This file is part of the TYPO3 project.
+ *
+ * @author Frank Berger <fberger@sudhaus7.de>
+ *
+ * For the full copyright and license information, please view
+ * the LICENSE file that was distributed with this source code.
+ *
+ * The TYPO3 project - inspiring people to share!
+ */
 
 namespace SUDHAUS7\Sudhaus7Wizard\EventHandlers;
 
@@ -10,22 +21,21 @@ use SUDHAUS7\Sudhaus7Wizard\Events\TCA\ColumnType\CleanEvent;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-final class TypeFileListener {
-
+final class TypeFileListener
+{
     public function __invoke(CleanEvent $event): void
     {
         if ($event->getColumntype() === 'file') {
             $fieldName = $event->getColumn();
             $record = $event->getRecord();
             $table = $event->getTable();
-            $origuid = $event->getCreateProcess()->getTranslateUidReverse( $table, $record['uid']);
-            $origSysFileReferences = $event->getCreateProcess()->getSource()->getRows( 'sys_file_reference', ['uid_foreign'=>$origuid,'tablenames'=>$table,'fieldname'=>$fieldName] );
-            foreach($origSysFileReferences as $origSysFileReference) {
+            $origuid = $event->getCreateProcess()->getTranslateUidReverse($table, $record['uid']);
+            $origSysFileReferences = $event->getCreateProcess()->getSource()->getRows('sys_file_reference', ['uid_foreign' => $origuid, 'tablenames' => $table, 'fieldname' => $fieldName]);
+            foreach ($origSysFileReferences as $origSysFileReference) {
 
+                $event->getCreateProcess()->getSource()->getRows('sys_file', ['uid' => $origSysFileReference['uid_local']]);
 
-                $event->getCreateProcess()->getSource()->getRows( 'sys_file', ['uid'=>$origSysFileReference['uid_local']] );
-
-                $subEvent = new BeforeContentCloneEvent('sys_file_reference', $origSysFileReference['uid'],$origSysFileReference['pid'],$origSysFileReference,$event->getCreateProcess());
+                $subEvent = new BeforeContentCloneEvent('sys_file_reference', $origSysFileReference['uid'], $origSysFileReference['pid'], $origSysFileReference, $event->getCreateProcess());
                 $subEvent = GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($subEvent);
 
                 // this has now the new sys_file
@@ -34,9 +44,9 @@ final class TypeFileListener {
                 $newSysFileReference['pid'] = $record['pid'];
                 $newSysFileReference['uid_foreign'] = $record['uid'];
 
-                [$rowsaffected, $newUid] = CreateProcess::insertRecord( 'sys_file_reference', $newSysFileReference);
+                [$rowsaffected, $newUid] = CreateProcess::insertRecord('sys_file_reference', $newSysFileReference);
 
-                $event->getCreateProcess()->addContentMap( 'sys_file_reference', (int)$origSysFileReference['uid'], (int)$newUid , );
+                $event->getCreateProcess()->addContentMap('sys_file_reference', (int)$origSysFileReference['uid'], (int)$newUid);
                 $event->getCreateProcess()->addCleanupInline('sys_file_reference', (int)$newUid);
 
             }

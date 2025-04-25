@@ -66,13 +66,15 @@ final class RestWizardRequest
 
         if ($response->getStatusCode() !== 200) {
             throw new RuntimeException(
-                'Returned status code is ' . $response->getStatusCode(), 3947156395
+                'Returned status code is ' . $response->getStatusCode(),
+                3947156395
             );
         }
 
         if ($response->getHeaderLine('Content-Type') !== 'application/json') {
             throw new RuntimeException(
-                'The request did not return JSON data', 1335319967
+                'The request did not return JSON data',
+                1335319967
             );
         }
         $body = $response->getBody()->getContents();
@@ -110,13 +112,15 @@ final class RestWizardRequest
 
         if ($response->getStatusCode() !== 200) {
             throw new RuntimeException(
-                'Returned status code is ' . $response->getStatusCode(), 9125293608
+                'Returned status code is ' . $response->getStatusCode(),
+                9125293608
             );
         }
 
         if ($response->getHeaderLine('Content-Type') !== 'application/json') {
             throw new RuntimeException(
-                'The request did not return JSON data', 7823592929
+                'The request did not return JSON data',
+                7823592929
             );
         }
 

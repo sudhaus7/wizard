@@ -16,7 +16,6 @@ declare(strict_types=1);
 namespace SUDHAUS7\Sudhaus7Wizard\EventHandlers;
 
 use SUDHAUS7\Sudhaus7Wizard\Events\TCA\ColumnType\FinalEvent;
-use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 /**
  * handles the new TCA Type 'link'
@@ -28,7 +27,7 @@ final class TypeLinkListener
         if ($event->getColumntype() === 'link') {
             $fieldName = $event->getColumn();
             $record = $event->getRecord();
-            $record[$fieldName] = $event->getCreateProcess()->translateTypolinkString( $record[$fieldName] );
+            $record[$fieldName] = $event->getCreateProcess()->translateTypolinkString($record[$fieldName]);
             $event->setRecord($record);
         }
     }

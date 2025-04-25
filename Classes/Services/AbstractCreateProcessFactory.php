@@ -58,8 +58,8 @@ abstract class AbstractCreateProcessFactory implements CreateProcessFactoryInter
         $siteconfig = $tsk->getSource()->getSiteConfig($pid);
 
         // wanted to do this early to have more control over where the source is loaded
-        $event = new LoadInitialSiteConfigEvent( $pid, $siteconfig, $tsk );
-        GeneralUtility::makeInstance(EventDispatcher::class)->dispatch( $event);
+        $event = new LoadInitialSiteConfigEvent($pid, $siteconfig, $tsk);
+        GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
         $tsk->setSiteConfig($event->getSiteconfig());
         return $tsk;
     }

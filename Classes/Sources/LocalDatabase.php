@@ -13,12 +13,9 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard\Sources;
 
-use ErrorReporting\Warning;
-use InvalidArgumentException;
-use Throwable;
-use function in_array;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
+use InvalidArgumentException;
 use Psr\Log\LoggerAwareTrait;
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
@@ -26,6 +23,7 @@ use SUDHAUS7\Sudhaus7Wizard\Events\FinalContentEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\GetResourceStorageEvent;
 use SUDHAUS7\Sudhaus7Wizard\Services\FolderService;
 use SUDHAUS7\Sudhaus7Wizard\Traits\DbTrait;
+use Throwable;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -44,6 +42,7 @@ use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use function in_array;
 
 class LocalDatabase implements SourceInterface
 {
@@ -261,7 +260,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         try {
             $oldfile = $folder->getStorage()->getFileByIdentifier($sysFile['identifier']);
 
-            $file = $oldfile->copyTo( $folder );
+            $file = $oldfile->copyTo($folder);
         } catch ( Throwable $t) {
 
             // We're on the local system, and the original file is missing. shouldn't happen

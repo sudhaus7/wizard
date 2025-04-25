@@ -375,11 +375,13 @@ class Creator implements LoggerAwareInterface
         return $this;
     }
 
-    public function getStacktrace(): string {
+    public function getStacktrace(): string
+    {
         return $this->stacktrace;
     }
 
-    public function setStacktrace( string $stacktrace ): void {
+    public function setStacktrace(string $stacktrace): void
+    {
         $this->stacktrace = $stacktrace;
     }
 
@@ -387,6 +389,5 @@ class Creator implements LoggerAwareInterface
     {
         return $this->notifyEmail;
     }
-
 
 }

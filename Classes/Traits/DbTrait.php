@@ -15,15 +15,14 @@ declare(strict_types=1);
 
 namespace SUDHAUS7\Sudhaus7Wizard\Traits;
 
-use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
-use TYPO3\CMS\Core\Cache\Frontend\NullFrontend;
-use function in_array;
-use TYPO3\CMS\Core\Database\Schema\SchemaInformation;
 use SUDHAUS7\Sudhaus7Wizard\Services\Database;
+use TYPO3\CMS\Core\Cache\Frontend\NullFrontend;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
+use TYPO3\CMS\Core\Database\Schema\SchemaInformation;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use function in_array;
 
 trait DbTrait
 {
@@ -69,10 +68,8 @@ trait DbTrait
     {
         $conn = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($tableName);
 
-
-
         /** @var SchemaInformation $schemaInformation */
-        $columns = GeneralUtility::makeInstance( SchemaInformation::class, $conn,  new NullFrontend( 'wizard-dummy-cache'))->introspectTable( $tableName);
+        $columns = GeneralUtility::makeInstance(SchemaInformation::class, $conn, new NullFrontend('wizard-dummy-cache'))->introspectTable($tableName);
         foreach ($columns as $column) {
             if ($column->getName() === $field) {
                 return true;

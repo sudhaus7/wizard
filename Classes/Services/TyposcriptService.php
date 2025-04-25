@@ -28,7 +28,8 @@ final class TyposcriptService implements LoggerAwareInterface
 
     public TypoScriptStringFactory $factory;
     public AstBuilderInterface $astBuilder;
-    public function __construct(TypoScriptStringFactory $factory, AstBuilderInterface $astBuilder) {
+    public function __construct(TypoScriptStringFactory $factory, AstBuilderInterface $astBuilder)
+    {
         $this->factory = $factory;
         $this->astBuilder = $astBuilder;
     }
@@ -40,7 +41,7 @@ final class TyposcriptService implements LoggerAwareInterface
     {
         $service = GeneralUtility::makeInstance(TyposcriptService::class);
 
-        $result = $service->factory->parseFromString( $s, $service->astBuilder )->toArray();
+        $result = $service->factory->parseFromString($s, $service->astBuilder)->toArray();
         return $result;
         /** @var  TypoScriptParser $oTSparser */
         //$oTSparser = GeneralUtility::makeInstance(TypoScriptParser::class);
