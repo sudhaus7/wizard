@@ -24,7 +24,10 @@
 				<source>Value Mapping Configuration File. - must be a path to a YAML file containing the table und field translation mapping. (Normaly only used in remote source with different content types)</source>
 			</trans-unit>
 			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.domainname" xml:space="preserve">
-				<source>Domain/Address (e.q. www.our-little-farm.com - withouht http:// or https://)</source>
+				<source>Domain/Address (e.q. www.our-little-farm.com - without http:// or https://)</source>
+			</trans-unit>
+			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.notify_email" xml:space="preserve">
+				<source>E-Mail to notify once the task is finished</source>
 			</trans-unit>
 			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.contact" xml:space="preserve">
 				<source>Contact E-Mail (e.q. info@our-little-farm.com)</source>

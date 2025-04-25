@@ -38,6 +38,7 @@ CREATE TABLE tx_sudhaus7wizard_domain_model_creator (
 
   status int(11) unsigned NOT NULL DEFAULT '0',
 	stacktrace TEXT,
+	notify_email varchar(255) NOT NULL DEFAULT '',
 
   PRIMARY KEY (uid),
   KEY parent (pid),

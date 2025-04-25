@@ -164,10 +164,24 @@ return [
             'config' => [
                 'type' => 'input',
                 'size' => 30,
-                'eval' => 'trim',
+                'eval' => 'domainname,trim',
                 'required' => true,
             ],
         ],
+
+
+        'notify_email' => [
+            'exclude' => 0,
+
+            'displayCond' => 'FIELD:status:<:' . Creator::STATUS_READY,
+            'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.notify_email',
+            'config' => [
+                'type' => 'input',
+                'size' => 30,
+                'eval' => 'trim,email',
+            ],
+        ],
+
         'contact' => [
             'exclude' => 0,
 

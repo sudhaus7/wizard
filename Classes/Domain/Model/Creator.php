@@ -69,13 +69,14 @@ class Creator implements LoggerAwareInterface
         protected int $sourceuser,
         protected int $sourcefilemount,
         protected string $sourceclass,
+        protected string $notifyEmail = '',
         private array $valuemappingcache = []
     ) {}
 
     /**
      * @param array{
-     *     uid: int,
-     *     sourcepid: string,
+     * uid: int,
+     * sourcepid: string,
      * base: string,
      * projektname: string,
      * longname: string,
@@ -92,6 +93,7 @@ class Creator implements LoggerAwareInterface
      * sourceuser: int,
      * sourcefilemount: int,
      * sourceclass: string
+     * notify_email: string
      * } $row
      */
     public static function createFromDatabaseRow(array $row): Creator
@@ -115,7 +117,8 @@ class Creator implements LoggerAwareInterface
             $row['valuemapping'],
             (int)$row['sourceuser'],
             (int)$row['sourcefilemount'],
-            $row['sourceclass']
+            $row['sourceclass'],
+            $row['notify_email']
         );
     }
 
@@ -378,6 +381,11 @@ class Creator implements LoggerAwareInterface
 
     public function setStacktrace( string $stacktrace ): void {
         $this->stacktrace = $stacktrace;
+    }
+
+    public function getNotifyEmail(): string
+    {
+        return $this->notifyEmail;
     }
 
 

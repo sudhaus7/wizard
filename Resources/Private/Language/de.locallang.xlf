@@ -27,8 +27,13 @@
 				<target>Value Mapping Konfigurationsdatei. - Eine YAML Datei welche die value replacements von Feldern in Tabellen definiert. (Nur relevant bei Quellen ausserhalb der lokalen Datenbank)</target>
 			</trans-unit>
 			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.domainname" xml:space="preserve">
-				<source>Domain/Address (e.q. www.our-little-farm.com - withouht http:// or https://)</source>
+				<source>Domain/Address (e.q. www.our-little-farm.com - without http:// or https://)</source>
 				<target>Domain/Adresse (z.B. www.unsere-kleine-farm.de - ohne http:// oder https://)</target>
+			</trans-unit>
+
+			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.notify_email" xml:space="preserve">
+				<source>E-Mail to notify once the task is finished</source>
+				<target>E-Mail-Adresse zur Benachrichtigung wenn der Auftrag ausgeführt wurde</target>
 			</trans-unit>
 			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.contact" xml:space="preserve">
 				<target>Contact E-Mail (e.q. info@our-little-farm.com)</target>

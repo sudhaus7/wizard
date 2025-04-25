@@ -45,7 +45,7 @@ class WizardConfigRemote implements WizardTemplateConfigInterface
 
     public function modifyRecordTCA(array $TCA): array
     {
-        $TCA['types']['template_remote']['showitem']         = 'status,base,sourceclass,sourcepid,valuemapping,projektname,longname,shortname,domainname,contact,email,--div--;Benutzer,reduser,redpass,redemail,--div--;Template Konfigurationen,flexinfo';
+        $TCA['types']['template_remote']['showitem']         = 'status,base,sourceclass,sourcepid,valuemapping,projektname,longname,shortname,domainname,contact,email,notify_email,--div--;Benutzer,reduser,redpass,redemail,--div--;Template Konfigurationen,flexinfo';
         $TCA['types']['template_remote']['columnsOverrides'] = [
             'valuemapping' => [
                 'config' => [
@@ -69,7 +69,7 @@ class WizardConfigRemote implements WizardTemplateConfigInterface
                     'items' => [
                         0 => [
                             'EKBO Server',
-                            '\\' . \SUDHAUS7\Sudhaus7Template\Wizard\WizardSource::class,
+                            '\\' . WizardSource::class,
                         ],
                     ],
                 ],
