@@ -281,15 +281,6 @@ class Creator implements LoggerAwareInterface
         return $this->email;
     }
 
-    /**
-     * Returns the CruserId
-     *
-     * @return string $cruserId
-     */
-    public function getCruserId()
-    {
-        return $this->cruserId;
-    }
 
     /**
      * Sourceclass

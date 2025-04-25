@@ -192,27 +192,15 @@ final class RunCommand extends Command
                 $this->repository->updateStatus($creator);
                 $this->repository->updatePid($creator);
 
-                $user = GeneralUtility::makeInstance(ConnectionPool::class)
-                    ->getConnectionForTable('be_users')
-                    ->select(
-                        ['*'],
-                        'be_users',
-                        ['uid' => $creator->getCruserId()],
-                        [],
-                        [],
-                        1
-                    )
-                    ->fetchAssociative();
-
-                if (!empty($user['email'])) {
+                if (!empty($creator->getNotifyEmail())) {
                     // Create the message
                     /** @var MailMessage $mail */
                     $mail = GeneralUtility::makeInstance(MailMessage::class);
 
                     // Prepare and send the message
                     $mail->setSubject(sprintf('[Wizard] %s ist fertig', $creator->getProjektname()))
-                        ->setFrom($user['email'])
-                        ->setTo($user['email'])
+                        //->setFrom($creator->getNotifyEmail())
+                        ->setTo($creator->getNotifyEmail())
                         ->text(sprintf('Der neue Baukasten %s wurde angelegt', $creator->getProjektname()));
                     $mail->send();
                     $output->write("E-Mail versendet\n");
