@@ -27,6 +27,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
+use TYPO3\CMS\Core\Authentication\CommandLineUserAuthentication;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Core\Bootstrap;
@@ -65,14 +66,22 @@ final class RunCommand extends Command
             $this->logger = new ConsoleLogger($output);
         }
         $this->repository = GeneralUtility::makeInstance(CreatorRepository::class);
+        Bootstrap::initializeBackendUser(CommandLineUserAuthentication::class);
+        Bootstrap::initializeBackendAuthentication();
+    }
+
+    protected function getBeUser(): CommandLineUserAuthentication
+    {
+        return $GLOBALS['BE_USER'];
     }
 
     /**
-     * @throws \Doctrine\DBAL\Driver\Exception
+     * @throws Exception
      * @throws DBALException
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $this->getBeUser()->initializeUserSessionManager();
         $mapFolder = null;
         if ($input->getOption('mapto')) {
             $mapFolder = $input->getOption('mapto');
