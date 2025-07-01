@@ -15,6 +15,9 @@ namespace SUDHAUS7\Sudhaus7Wizard\Sources;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
+
+use function in_array;
+
 use InvalidArgumentException;
 use Psr\Log\LoggerAwareTrait;
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
@@ -42,7 +45,6 @@ use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use function in_array;
 
 class LocalDatabase implements SourceInterface
 {
@@ -261,8 +263,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
             $oldfile = $folder->getStorage()->getFileByIdentifier($sysFile['identifier']);
 
             $file = $oldfile->copyTo($folder);
-        } catch ( Throwable $t) {
-
+        } catch (Throwable $t) {
             // We're on the local system, and the original file is missing. shouldn't happen
             // as we can not get back a new file, we return the old record. this way the process
             // continues and at least there is a broken image. I don't see a better solution for this

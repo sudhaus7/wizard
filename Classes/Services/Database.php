@@ -44,7 +44,6 @@ class Database implements SingletonInterface
 
     public function update(string $table, array $data, array $where): int
     {
-
         if (!isset($where['uid'])) {
             $res = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($table)
                                  ->select(

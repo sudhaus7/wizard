@@ -2,6 +2,17 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the TYPO3 project.
+ *
+ * @author Frank Berger <fberger@sudhaus7.de>
+ *
+ * For the full copyright and license information, please view
+ * the LICENSE file that was distributed with this source code.
+ *
+ * The TYPO3 project - inspiring people to share!
+ */
+
 use Rector\Config\RectorConfig;
 use Rector\PostRector\Rector\NameImportingPostRector;
 use Rector\TypeDeclaration\Rector\ClassMethod\AddVoidReturnTypeWhereNoReturnRector;
@@ -29,7 +40,7 @@ return RectorConfig::configure()
     ->withSets([
         Typo3SetList::CODE_QUALITY,
         Typo3SetList::GENERAL,
-	    Typo3LevelSetList::UP_TO_TYPO3_12,
+        Typo3LevelSetList::UP_TO_TYPO3_12,
 
         // To migrate to Doctrine Dbal 4, uncomment the following line
         //\Rector\Doctrine\Set\DoctrineSetList::DOCTRINE_DBAL_40,
@@ -53,6 +64,6 @@ return RectorConfig::configure()
             'ext_localconf.php', // This line can be removed since TYPO3 11.4, see https://docs.typo3.org/c/typo3/cms-core/main/en-us/Changelog/11.4/Important-94280-MoveContentsOfExtPhpIntoLocalScopes.html
             'ext_tables.php', // This line can be removed since TYPO3 11.4, see https://docs.typo3.org/c/typo3/cms-core/main/en-us/Changelog/11.4/Important-94280-MoveContentsOfExtPhpIntoLocalScopes.html
             'ClassAliasMap.php',
-        ]
+        ],
     ])
 ;

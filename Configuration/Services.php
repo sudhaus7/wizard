@@ -73,8 +73,8 @@ return static function (ContainerConfigurator $containerConfigurator, ContainerB
              ->tag('event.listener', ['identifier' => 's7wizardTxNewsFixRecordHandler']);
     $services->set(SysFileReferenceHandleLinkFieldListener::class)
              ->tag('event.listener', ['identifier' => 's7wizardSysFileReferenceHandleLinkFieldListener']);
-    $services->set( TypeLinkListener::class)
+    $services->set(TypeLinkListener::class)
              ->tag('event.listener', ['identifier' => 's7wizardTypeLinkListener']);
-    $services->set( TypeFileListener::class)
+    $services->set(TypeFileListener::class)
              ->tag('event.listener', ['identifier' => 's7wizardTypeFileListener']);
 };

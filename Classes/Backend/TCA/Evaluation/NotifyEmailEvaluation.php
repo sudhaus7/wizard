@@ -28,7 +28,6 @@ class NotifyEmailEvaluation
 
     public function deevaluateFieldValue(array $parameters)
     {
-
         if (empty($parameters['value']) && isset($GLOBALS['BE_USER']) && !empty($GLOBALS['BE_USER']->user['email'])) {
             return $GLOBALS['BE_USER']->user['email'];
         }

@@ -15,12 +15,15 @@ declare(strict_types=1);
 
 namespace SUDHAUS7\Sudhaus7Wizard\Services;
 
-use RuntimeException;
-use TYPO3\CMS\Core\Http\RequestFactory;
 use function base64_encode;
 use function is_array;
-use function password_hash;
+
 use const PASSWORD_DEFAULT;
+
+use function password_hash;
+
+use RuntimeException;
+use TYPO3\CMS\Core\Http\RequestFactory;
 
 final class RestWizardRequest
 {
@@ -79,7 +82,7 @@ final class RestWizardRequest
         }
         $body = $response->getBody()->getContents();
         $decoded = json_decode($body, true);
-        if ( is_array($decoded)) {
+        if (is_array($decoded)) {
             return $decoded;
         }
         throw new RuntimeException('No information available', 1048881159);
@@ -126,7 +129,7 @@ final class RestWizardRequest
 
         $body = $response->getBody()->getContents();
         $decoded = json_decode($body, true);
-        if ( is_array($decoded)) {
+        if (is_array($decoded)) {
             return $decoded;
         }
         throw new RuntimeException('No information available', 2510733962);

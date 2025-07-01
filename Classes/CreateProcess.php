@@ -13,18 +13,30 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard;
 
+use function array_keys;
+use function array_merge;
+
+use function array_search;
+use function array_values;
+
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 
-use Psr\EventDispatcher\EventDispatcherInterface;
-use Psr\Log\LoggerAwareInterface;
+use function file_put_contents;
+use function is_null;
 
+use Psr\EventDispatcher\EventDispatcherInterface;
+
+use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+
+use function str_contains;
+use function str_starts_with;
+
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use SUDHAUS7\Sudhaus7Wizard\Events\AfterAllContentCloneEvent;
-
 use SUDHAUS7\Sudhaus7Wizard\Events\AfterClonedTreeInsertEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\AfterContentCloneEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\AfterCreateFilemountEvent;
@@ -79,14 +91,6 @@ use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use function array_keys;
-use function array_merge;
-use function array_search;
-use function array_values;
-use function file_put_contents;
-use function is_null;
-use function str_contains;
-use function str_starts_with;
 
 final class CreateProcess implements LoggerAwareInterface
 {
@@ -529,7 +533,7 @@ final class CreateProcess implements LoggerAwareInterface
     {
         $this->log('Clone Tree Start');
         $sourcePid = (int)$this->source->sourcePid();
-        foreach ( array_keys($this->pageMap) as $old) {
+        foreach (array_keys($this->pageMap) as $old) {
             $page = $this->source->getRow('pages', ['uid' => $old]);
 
             $this->log('Cloning Page ' . $page['title']);
@@ -846,7 +850,9 @@ final class CreateProcess implements LoggerAwareInterface
 
                     if (isset($columnConfig['config']['wizards'])) {
                         foreach ($columnConfig['config']['wizards'] as $wizard => $wizardConfig) {
-                            $row[$wizard] = $this->translateTypolinkString($row[$wizard]);
+                            if (isset($row[$wizard]) && !empty($row['wizard'])) {
+                                $row[ $wizard ] = $this->translateTypolinkString($row[ $wizard ]);
+                            }
                         }
                     }
 
@@ -899,25 +905,25 @@ final class CreateProcess implements LoggerAwareInterface
 
         $fields = GeneralUtility::trimExplode(',', $showitem, true);
         foreach ($fields as $field) {
-            if ( str_starts_with($field, '--div--')) {
+            if (str_starts_with($field, '--div--')) {
                 continue;
             }
-            if ( str_starts_with($field, '--linebreak--')) {
+            if (str_starts_with($field, '--linebreak--')) {
                 continue;
             }
-            if ( str_starts_with($field, '--palette--')) {
+            if (str_starts_with($field, '--palette--')) {
                 $tmp = GeneralUtility::trimExplode(';', $field, true);
                 $palette = array_pop($tmp);
                 if (isset($tca['palettes'][$palette]['showitem'])) {
                     $paletteShowitem = GeneralUtility::trimExplode(',', $tca['palettes'][$palette]['showitem']);
                     foreach ($paletteShowitem as $paletteItem) {
-                        if ( str_starts_with($paletteItem, $column)) {
+                        if (str_starts_with($paletteItem, $column)) {
                             return true;
                         }
                     }
                 }
             } else {
-                if ( str_starts_with($field, $column)) {
+                if (str_starts_with($field, $column)) {
                     return true;
                 }
             }
@@ -1036,7 +1042,7 @@ final class CreateProcess implements LoggerAwareInterface
     public function getTranslateUid(string $table, string|int $uid): int|string
     {
         $tablePrefix = false;
-        if ( str_contains((string)$uid, '_')) {
+        if (str_contains((string)$uid, '_')) {
             $tablePrefix = true;
             $x = explode('_', (string)$uid);
             $uid = array_pop($x);
@@ -1150,7 +1156,7 @@ final class CreateProcess implements LoggerAwareInterface
             }
         } elseif (in_array('mail', $a) && $a[1] == '-' && $a[2] == 'mail') {
             return implode(' ', $a);
-        } elseif ( str_starts_with($s, 'http') || str_starts_with($s, 'fileadmin') || str_starts_with($s, '/fileadmin')) {
+        } elseif (str_starts_with($s, 'http') || str_starts_with($s, 'fileadmin') || str_starts_with($s, '/fileadmin')) {
             return implode(' ', $a);
         } else {
             $aID = explode('#', $id);
@@ -1187,7 +1193,7 @@ final class CreateProcess implements LoggerAwareInterface
                 };
             }
             foreach ($queryParts as $k => $v) {
-                if ( str_starts_with($k, 'amp;')) {
+                if (str_starts_with($k, 'amp;')) {
                     $k2 = substr($k, 4);
                     unset($queryParts[$k]);
                     $queryParts[$k2] = $v;

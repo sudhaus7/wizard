@@ -22,5 +22,4 @@ class DomainnameEvaluation
         $value = preg_replace('/\s*/', '', $value);
         return $value;
     }
-
 }

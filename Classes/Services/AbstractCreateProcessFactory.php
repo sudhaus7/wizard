@@ -15,6 +15,8 @@ declare(strict_types=1);
 
 namespace SUDHAUS7\Sudhaus7Wizard\Services;
 
+use function class_exists;
+
 use Psr\Log\LoggerInterface;
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
@@ -24,7 +26,6 @@ use SUDHAUS7\Sudhaus7Wizard\Sources\LocalDatabase;
 use SUDHAUS7\Sudhaus7Wizard\Sources\SourceInterface;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use function class_exists;
 
 /**
  * Abstract factory implementation used in the default CreateProcessFactory,
@@ -47,7 +48,7 @@ abstract class AbstractCreateProcessFactory implements CreateProcessFactoryInter
         $wizardProcess = GeneralUtility::makeInstance($processInterface);
         $tsk->setTemplate($wizardProcess);
         $sourceClassName = $creator->getSourceclass();
-        if ( class_exists($sourceClassName)) {
+        if (class_exists($sourceClassName)) {
             $sourceClass = GeneralUtility::makeInstance(ltrim($sourceClassName, '\\'));
             $tsk->setSource($sourceClass instanceof SourceInterface ? $sourceClass : GeneralUtility::makeInstance(LocalDatabase::class));
             $tsk->getSource()->setCreateProcess($tsk);

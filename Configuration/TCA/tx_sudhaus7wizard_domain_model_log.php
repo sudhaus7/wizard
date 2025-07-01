@@ -21,12 +21,12 @@ return [
     'ctrl' => [
         'title'             => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_log',
         'label' => 'message',
-        'label_alt'=>'tstamp,level',
-        'label_alt_force'=>1,
+        'label_alt' => 'tstamp,level',
+        'label_alt_force' => 1,
         'rootLevel' => -1,
-        'adminOnly'=> true,
-        'default_sortby'=>'tstamp',
-        'hideTable'=>true,
+        'adminOnly' => true,
+        'default_sortby' => 'tstamp',
+        'hideTable' => true,
         'security' => [
             'ignorePageTypeRestriction' => true,
             'ignoreRootLevelRestriction' => true,

@@ -208,7 +208,7 @@ final class RunCommand extends Command
 
                 return Command::SUCCESS;
             }
-        } catch ( Throwable $e) {
+        } catch (Throwable $e) {
             $this->logger->warning($e->getMessage() . ' (' . $e->getCode() . ")\n" . $e->getTraceAsString(), []);
             $creator->setStacktrace($e->getMessage() . ' (' . $e->getCode() . ")\n" . $e->getTraceAsString());
             $creator->setStatus(Creator::STATUS_FAILED);

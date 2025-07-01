@@ -166,11 +166,10 @@ return [
             'config' => [
                 'type' => 'input',
                 'size' => 30,
-                'eval' => 'domainname,trim,'. DomainnameEvaluation::class,
+                'eval' => 'domainname,trim,' . DomainnameEvaluation::class,
                 'required' => true,
             ],
         ],
-
 
         'notify_email' => [
             'exclude' => 0,
@@ -179,7 +178,7 @@ return [
             'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.notify_email',
             'config' => [
                 'type' => 'input',
-                'eval'=> 'trim,'. NotifyEmailEvaluation::class,
+                'eval' => 'trim,' . NotifyEmailEvaluation::class,
             ],
         ],
 
@@ -252,7 +251,7 @@ return [
         ],
 
         'email' => [
-            'displayCond' => 'FIELD:status:=:'.Creator::STATUS_DONE,
+            'displayCond' => 'FIELD:status:=:' . Creator::STATUS_DONE,
             'label' => 'Email-Vorlage',
             'config' => [
                 'type' => 'email',
@@ -265,7 +264,6 @@ return [
                 'type' => 'none',
             ],
         ],
-
 
         'sourceuser' => [
             'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.sourceuser',
@@ -289,12 +287,12 @@ return [
             ],
         ],
 
-        'log'=>[
-            'label'=>'Log',
+        'log' => [
+            'label' => 'Log',
             'config' => [
                 'type' => 'user',
-                'renderType'=>'creatorLog'
-            ]
-        ]
+                'renderType' => 'creatorLog',
+            ],
+        ],
     ],
 ];

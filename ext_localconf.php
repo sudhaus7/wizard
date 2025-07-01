@@ -14,7 +14,6 @@
 use SUDHAUS7\Sudhaus7Wizard\Backend\TCA\Evaluation\DomainnameEvaluation;
 use SUDHAUS7\Sudhaus7Wizard\Backend\TCA\Evaluation\NotifyEmailEvaluation;
 use SUDHAUS7\Sudhaus7Wizard\Backend\TCA\Types\CreatorLogRenderType;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1742575212]                = [
     'nodeName' => 'creatorLog',
@@ -24,4 +23,3 @@ $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1742575212]    
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['tce']['formevals'][ DomainnameEvaluation::class] = '';
 
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['tce']['formevals'][ NotifyEmailEvaluation::class] = '';
-

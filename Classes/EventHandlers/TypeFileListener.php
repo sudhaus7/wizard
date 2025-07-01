@@ -32,7 +32,6 @@ final class TypeFileListener
             $origuid = $event->getCreateProcess()->getTranslateUidReverse($table, $record['uid']);
             $origSysFileReferences = $event->getCreateProcess()->getSource()->getRows('sys_file_reference', ['uid_foreign' => $origuid, 'tablenames' => $table, 'fieldname' => $fieldName]);
             foreach ($origSysFileReferences as $origSysFileReference) {
-
                 $event->getCreateProcess()->getSource()->getRows('sys_file', ['uid' => $origSysFileReference['uid_local']]);
 
                 $subEvent = new BeforeContentCloneEvent('sys_file_reference', $origSysFileReference['uid'], $origSysFileReference['pid'], $origSysFileReference, $event->getCreateProcess());
@@ -48,10 +47,7 @@ final class TypeFileListener
 
                 $event->getCreateProcess()->addContentMap('sys_file_reference', (int)$origSysFileReference['uid'], (int)$newUid);
                 $event->getCreateProcess()->addCleanupInline('sys_file_reference', (int)$newUid);
-
             }
-
         }
     }
-
 }

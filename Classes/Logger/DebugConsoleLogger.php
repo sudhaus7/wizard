@@ -13,12 +13,13 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard\Logger;
 
-use Psr\Log\LogLevel;
-use Symfony\Component\Console\Logger\ConsoleLogger;
-use Symfony\Component\Console\Output\OutputInterface;
 use function memory_get_peak_usage;
 use function memory_get_usage;
 use function microtime;
+
+use Psr\Log\LogLevel;
+use Symfony\Component\Console\Logger\ConsoleLogger;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class DebugConsoleLogger extends ConsoleLogger
 {

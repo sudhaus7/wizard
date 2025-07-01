@@ -15,10 +15,11 @@ declare(strict_types=1);
 
 namespace SUDHAUS7\Sudhaus7Wizard\EventHandlers;
 
-use SUDHAUS7\Sudhaus7Wizard\Events\TCA\ColumnType\FinalEvent;
-use SUDHAUS7\Sudhaus7Wizard\Tools;
 use function preg_match_all;
 use function str_contains;
+
+use SUDHAUS7\Sudhaus7Wizard\Events\TCA\ColumnType\FinalEvent;
+use SUDHAUS7\Sudhaus7Wizard\Tools;
 
 final class TypoLinkinRichTextFieldsEvent
 {
