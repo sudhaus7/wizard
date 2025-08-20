@@ -15,6 +15,7 @@ namespace SUDHAUS7\Sudhaus7Wizard\Backend\TCA\Types;
 
 use SUDHAUS7\Sudhaus7Wizard\Sources\RestWizardServerSource;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use function class_exists;
 
 final class RemoteSites
 {
@@ -22,7 +23,7 @@ final class RemoteSites
     {
         if (!empty($params['row']['sourceclass'])) {
             $class = $params['row']['sourceclass'];
-            if (\class_exists($class)) {
+            if ( class_exists($class)) {
                 $sourceObj = GeneralUtility::makeInstance(trim($class, '\\'));
                 if ($sourceObj instanceof RestWizardServerSource) {
                     $sites           = $sourceObj->getSites();
@@ -31,7 +32,7 @@ final class RemoteSites
                     });
                     $params['items'] = [];
                     foreach ($sites as $site) {
-                        $params['items'][] = [ $site['title'], $site['uid'] ];
+                        $params['items'][] = [ 'label'=>$site['title'], 'value'=>$site['uid'] ];
                     }
                 }
             }
