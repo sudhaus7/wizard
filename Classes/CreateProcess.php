@@ -301,7 +301,7 @@ final class CreateProcess implements LoggerAwareInterface
         if (GeneralUtility::makeInstance(Typo3Version::class)->getMajorVersion() > 11) {
             $event = new CreateFilemountEvent([
                 'title' => $name,
-                'path'  => trim($dir, '/'),
+                //'path'  => trim($dir, '/'),
                 'base'  => $storage->getUid(),
                 'pid'   => 0,
                 'identifier' => sprintf('%d:/%s', $storage->getUid(), trim($dir, '/')),
