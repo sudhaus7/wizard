@@ -35,7 +35,9 @@ final class PreSysFileReferenceEventHandler
                 return;
             }
 
-            $newIdentifier = '/' . trim($event->getCreateProcess()->getFilemount()['path'] . $sys_file['name'], '/');
+            $path = GeneralUtility::trimExplode( ':', $event->getCreateProcess()->getFilemount()['identifier'])[1];
+            $path = trim($path,'/').'/';
+            $newIdentifier = '/' . trim($path . $sys_file['name'], '/');
 
             $subEventDispatcher = GeneralUtility::makeInstance(EventDispatcher::class);
             $subEvent = new NewFileIdentifierEvent($sys_file['identifier'], $newIdentifier, $sys_file['storage'], $event->getCreateProcess());
