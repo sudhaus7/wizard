@@ -1141,7 +1141,7 @@ final class CreateProcess implements LoggerAwareInterface
     public function translateTypolinkString(string $s): string
     {
         $s = trim($s);
-        $a = str_getcsv($s, ' ', 'dasdhasdsalkdjsalk13');
+        $a = str_getcsv($s, ' ');
         $id = $a[0];
         if ($id === null) {
             return $s;
