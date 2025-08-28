@@ -301,8 +301,6 @@ final class CreateProcess implements LoggerAwareInterface
         if (GeneralUtility::makeInstance(Typo3Version::class)->getMajorVersion() > 11) {
             $event = new CreateFilemountEvent([
                 'title' => $name,
-                //'path'  => trim($dir, '/'),
-                'base'  => $storage->getUid(),
                 'pid'   => 0,
                 'identifier' => sprintf('%d:/%s', $storage->getUid(), trim($dir, '/')),
             ], $this);
@@ -319,10 +317,15 @@ final class CreateProcess implements LoggerAwareInterface
 
         if (GeneralUtility::makeInstance(Typo3Version::class)->getMajorVersion() > 11) {
             $dirOrIdentifier = $tmpl['identifier'];
-            $testField = 'identifier';
+            $testWhere = [
+                'identifier' => $dirOrIdentifier,
+            ];
         } else {
             $dirOrIdentifier = $tmpl['path'];
-            $testField = 'path';
+            $testWhere = [
+                'path' => $dirOrIdentifier,
+                'base' => $storage->getUid(),
+            ];
         }
 
         $name = $tmpl['title'];
@@ -334,10 +337,7 @@ final class CreateProcess implements LoggerAwareInterface
             ->select(
                 ['*'],
                 'sys_filemounts',
-                [
-                    $testField => $dirOrIdentifier,
-                    'base' => $storage->getUid(),
-                ]
+                $testWhere
             );
 
         $test = $res->fetchAssociative();
