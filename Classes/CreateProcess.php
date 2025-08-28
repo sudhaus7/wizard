@@ -317,10 +317,17 @@ final class CreateProcess implements LoggerAwareInterface
         $this->eventDispatcher->dispatch($event);
         $tmpl = $event->getRecord();
 
-        $dir = $tmpl['path'];
+        if (GeneralUtility::makeInstance(Typo3Version::class)->getMajorVersion() > 11) {
+            $dirOrIdentifier = $tmpl['identifier'];
+            $testField = 'identifier';
+        } else {
+            $dirOrIdentifier = $tmpl['path'];
+            $testField = 'path';
+        }
+
         $name = $tmpl['title'];
 
-        $this->log('Create Filemount 1 ' . $name . ' - ' . $dir);
+        $this->log('Create Filemount 1 ' . $name . ' - ' . $dirOrIdentifier);
         $this->source->ping();
 
         $res = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('sys_filemounts')
@@ -328,7 +335,7 @@ final class CreateProcess implements LoggerAwareInterface
                 ['*'],
                 'sys_filemounts',
                 [
-                    'path' => $dir,
+                    $testField => $dirOrIdentifier,
                     'base' => $storage->getUid(),
                 ]
             );
@@ -341,7 +348,7 @@ final class CreateProcess implements LoggerAwareInterface
             return;
         }
 
-        $folder = GeneralUtility::makeInstance(FolderService::class)->getOrCreateFromIdentifier($tmpl['path'], $storage);
+        $folder = GeneralUtility::makeInstance(FolderService::class)->getOrCreateFromIdentifier($dirOrIdentifier, $storage);
 
         $this->log('Create Filemount Directory ' . $folder->getReadablePath());
 
