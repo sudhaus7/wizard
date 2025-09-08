@@ -302,7 +302,7 @@ final class CreateProcess implements LoggerAwareInterface
             $event = new CreateFilemountEvent([
                 'title' => $name,
                 'pid'   => 0,
-                'identifier' => sprintf('%d:/%s', $storage->getUid(), trim($dir, '/')),
+                'identifier' => sprintf('%d:/%s/', $storage->getUid(), trim($dir, '/')),
             ], $this);
         } else {
             $event = new CreateFilemountEvent([
