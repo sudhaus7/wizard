@@ -19,11 +19,13 @@ use Doctrine\DBAL\Driver\Exception;
 use function in_array;
 
 use InvalidArgumentException;
+
 use Psr\Log\LoggerAwareTrait;
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use SUDHAUS7\Sudhaus7Wizard\Events\FinalContentEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\GetResourceStorageEvent;
+use SUDHAUS7\Sudhaus7Wizard\Events\PreHandleFileEvent;
 use SUDHAUS7\Sudhaus7Wizard\Services\FolderService;
 use SUDHAUS7\Sudhaus7Wizard\Traits\DbTrait;
 use Throwable;
@@ -232,6 +234,11 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     public function handleFile(array $sysFile, $newIdentifier): array
     {
         $this->logger->debug('handleFile ' . $newIdentifier . ' START');
+
+        $preEvent = new PreHandleFileEvent($newIdentifier, $sysFile, $this->getCreateProcess());
+        GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($preEvent);
+        $sysFile = $preEvent->getRecord();
+        $newIdentifier = $preEvent->getNewidentifier();
 
         /** @var ResourceStorage $storage */
         $storage           = GeneralUtility::makeInstance(StorageRepository::class)->getDefaultStorage();
