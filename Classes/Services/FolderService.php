@@ -52,6 +52,16 @@ final class FolderService
      */
     public function getOrCreateFromIdentifier(string $identifier, ResourceStorage $storage = null): Folder
     {
+        $testidentifier = explode(':', $identifier);
+        if (count($testidentifier) === 2) {
+            $storage = null;
+        }
+        if ($storage === null && count($testidentifier) === 2) {
+            $storage = $this->storageRepository->findByUid((int)$testidentifier[0]);
+            if ($storage !== null) {
+                $identifier = $testidentifier[1];
+            }
+        }
         if ($storage === null) {
             $storage = $this->defaultStorage;
         }

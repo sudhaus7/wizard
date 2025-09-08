@@ -19,5 +19,4 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['proc
 
 ExtensionManagementUtility::addToInsertRecords('tx_sudhaus7wizard_domain_model_creator');
 
-
 $GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['ctrl']['security']['ignorePageTypeRestriction'] = true;

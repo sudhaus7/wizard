@@ -63,10 +63,10 @@ class LocalDatabase implements SourceInterface
         'base'          => 'domainname',
         'baseVariants'  => [],
         'errorHandling' => [],
-        'languages'     =>
-            [
-                0 =>
-                    [
+        'languages'
+            => [
+                0
+                    => [
                         'title'           => 'Default',
                         'enabled'         => true,
                         'base'            => '/',
@@ -81,10 +81,10 @@ class LocalDatabase implements SourceInterface
                     ],
             ],
         'rootPageId'    => 0,
-        'routes'        =>
-            [
-                0 =>
-                    [
+        'routes'
+            => [
+                0
+                    => [
                         'route'   => 'robots.txt',
                         'type'    => 'staticText',
                         'content' => 'User-agent: *

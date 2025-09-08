@@ -32,11 +32,11 @@ final class TypoLinkinRichTextFieldsEvent
             $config = Tools::resolveFieldConfigurationAndRespectColumnsOverrides($event->getTable(), $fieldName, $record);
             if (
                 (
-                    isset($config['enableRichtext']) &&
-                    $config['enableRichtext']
+                    isset($config['enableRichtext'])
+                    && $config['enableRichtext']
                 ) || (
-                    isset($config['softref']) &&
-                    str_contains($config['softref'], 'typolink_tag')
+                    isset($config['softref'])
+                    && str_contains($config['softref'], 'typolink_tag')
                 )
             ) {
                 $proc = $event->getCreateProcess();

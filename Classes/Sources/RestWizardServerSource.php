@@ -82,10 +82,10 @@ abstract class RestWizardServerSource implements SourceInterface
         'base'          => 'domainname',
         'baseVariants'  => [],
         'errorHandling' => [],
-        'languages'     =>
-            [
-                0 =>
-                    [
+        'languages'
+            => [
+                0
+                    => [
                         'title'           => 'Default',
                         'enabled'         => true,
                         'base'            => '/',
@@ -100,10 +100,10 @@ abstract class RestWizardServerSource implements SourceInterface
                     ],
             ],
         'rootPageId'    => 0,
-        'routes'        =>
-            [
-                0 =>
-                    [
+        'routes'
+            => [
+                0
+                    => [
                         'route'   => 'robots.txt',
                         'type'    => 'staticText',
                         'content' => 'User-agent: *
