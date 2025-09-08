@@ -191,22 +191,20 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
             return [];
         }
 
-        $fields = array_keys($where);
-        $values = array_values($where);
-
-        if ((int)$values[0] < 0) {
+        if (empty($where)) {
             return [];
         }
 
-        $endpoint = sprintf('content/%s/%s/%d', $table, $fields[0], $values[0]);
+        $endpoint = sprintf('content/%s', $table);
         $this->logger->debug('getRows ' . $endpoint);
 
         try {
-            $content = $this->getAPI()->request($endpoint);
+            $content = $this->getAPI()->post($endpoint, $where);
+            //$content = $this->getAPI()->request($endpoint);
         } catch (Throwable $e) {
             $this->logger->warning('getRows ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
             sleep(5);
-            $content = $this->getAPI()->request($endpoint);
+            $content = $this->getAPI()->request($endpoint, $where);
         }
         foreach ($content as $row) {
             $cacheendpoint = sprintf('content/%s/uid/%d', $table, $row['uid']);
