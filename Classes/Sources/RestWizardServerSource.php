@@ -195,16 +195,32 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
             return [];
         }
 
-        $endpoint = sprintf('content/%s', $table);
-        $this->logger->debug('getRows ' . $endpoint);
+        $wherekeys = array_keys($where);
+        if (count($wherekeys) === 1) {
+            $key = $wherekeys[0];
+            $value = $where[$key];
+            $endpoint = sprintf('content/%s/%s/%s', $table, $key, $value);
+            $this->logger->debug('getRows ' . $endpoint);
 
-        try {
-            $content = $this->getAPI()->post($endpoint, $where);
-            //$content = $this->getAPI()->request($endpoint);
-        } catch (Throwable $e) {
-            $this->logger->warning('getRows ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
-            sleep(5);
-            $content = $this->getAPI()->request($endpoint, $where);
+            try {
+                $content = $this->getAPI()->request($endpoint);
+            } catch (Throwable $e) {
+                $this->logger->warning('getRows ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
+                sleep(5);
+                $content = $this->getAPI()->request($endpoint);
+            }
+        } else {
+            $endpoint = sprintf('content/%s', $table);
+            $this->logger->debug('getRows ' . $endpoint);
+
+            try {
+                $content = $this->getAPI()->post($endpoint, $where);
+                //$content = $this->getAPI()->request($endpoint);
+            } catch (Throwable $e) {
+                $this->logger->warning('getRows ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
+                sleep(5);
+                $content = $this->getAPI()->request($endpoint, $where);
+            }
         }
         foreach ($content as $row) {
             $cacheendpoint = sprintf('content/%s/uid/%d', $table, $row['uid']);
