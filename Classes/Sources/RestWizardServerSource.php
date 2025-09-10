@@ -18,24 +18,26 @@ use function array_intersect;
 use Doctrine\DBAL\Driver\Exception;
 
 use function file_get_contents;
-
 use function file_put_contents;
+
 use function in_array;
 
 use InvalidArgumentException;
 
 use function is_array;
-
 use function json_encode;
 
 use Psr\Log\LoggerAwareTrait;
 
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
+
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 
 use SUDHAUS7\Sudhaus7Wizard\Events\FinalContentEvent;
+
 use SUDHAUS7\Sudhaus7Wizard\Events\GetResourceStorageEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\PreHandleFileEvent;
+
 use SUDHAUS7\Sudhaus7Wizard\Services\FolderService;
 use SUDHAUS7\Sudhaus7Wizard\Services\RestWizardRequest;
 use SUDHAUS7\Sudhaus7Wizard\Traits\DbTrait;
@@ -44,17 +46,22 @@ use function sys_get_temp_dir;
 use function tempnam;
 
 use Throwable;
+
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Core\Environment;
+
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Resource\Exception\ExistingTargetFolderException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderAccessPermissionsException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderReadPermissionsException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderWritePermissionsException;
+use TYPO3\CMS\Core\Resource\MimeTypeDetector;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Validation\ResultException;
+use TYPO3\CMS\Core\Validation\ResultMessage;
 
 abstract class RestWizardServerSource implements SourceInterface
 {
@@ -87,36 +94,36 @@ abstract class RestWizardServerSource implements SourceInterface
         'baseVariants'  => [],
         'errorHandling' => [],
         'languages'
-            => [
-                0
-                    => [
-                        'title'           => 'Default',
-                        'enabled'         => true,
-                        'base'            => '/',
-                        'typo3Language'   => 'en',
-                        'locale'          => 'enUS.UTF-8',
-                        'iso-639-1'       => 'en',
-                        'navigationTitle' => 'English',
-                        'hreflang'        => 'en-US',
-                        'direction'       => 'ltr',
-                        'flag'            => 'en',
-                        'languageId'      => '0',
-                    ],
-            ],
+                        => [
+                            0
+                            => [
+                                'title'           => 'Default',
+                                'enabled'         => true,
+                                'base'            => '/',
+                                'typo3Language'   => 'en',
+                                'locale'          => 'enUS.UTF-8',
+                                'iso-639-1'       => 'en',
+                                'navigationTitle' => 'English',
+                                'hreflang'        => 'en-US',
+                                'direction'       => 'ltr',
+                                'flag'            => 'en',
+                                'languageId'      => '0',
+                            ],
+                        ],
         'rootPageId'    => 0,
         'routes'
-            => [
-                0
-                    => [
-                        'route'   => 'robots.txt',
-                        'type'    => 'staticText',
-                        'content' => 'User-agent: *
+                        => [
+                            0
+                            => [
+                                'route'   => 'robots.txt',
+                                'type'    => 'staticText',
+                                'content' => 'User-agent: *
 Disallow: /typo3/
 Disallow: /typo3_src/
 Allow: /typo3/sysext/frontend/Resources/Public/*
 ',
-                    ],
-            ],
+                            ],
+                        ],
         'imports' => [
 
         ],
@@ -331,17 +338,17 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $newFileName = $folder->getStorage()->sanitizeFileName(basename($newIdentifier));
         $newIdentifier = $folder->getIdentifier() . $newFileName;
         if ($folder->hasFile($newFileName)) {
-            $this->logger->debug('file exists - END' . Environment::getPublicPath() . '/fileadmin' . $newIdentifier);
+            $this->logger->debug('file exists - END' . $folder->getReadablePath() . basename($newIdentifier));
 
             $file = $folder->getFile($newFileName);
 
             $res = GeneralUtility::makeInstance(ConnectionPool::class)
-                ->getConnectionForTable('sys_file')
-                ->select(
-                    [ '*' ],
-                    'sys_file',
-                    ['uid' => $file->getUid()]
-                );
+                                 ->getConnectionForTable('sys_file')
+                                 ->select(
+                                     [ '*' ],
+                                     'sys_file',
+                                     ['uid' => $file->getUid()]
+                                 );
             return $res->fetchAssociative() ?: ['uid' => 0];
         }
 
@@ -356,7 +363,51 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $tempFile = tempnam(sys_get_temp_dir(), 'wizarddl');
         file_put_contents($tempFile, $buf);
 
-        $file = $folder->addFile($tempFile, basename($newIdentifier));
+        //$file = $folder->addFile($tempFile, basename($newIdentifier));
+        try {
+            $file = $folder->addFile($tempFile, basename($newIdentifier));
+        } catch (ResultException $result_exception) {
+            // Mime-type "image/jpeg" not allowed for file extension "png" (expected: image/png).
+
+            if (
+                isset($result_exception->messages[0])
+                && $result_exception->messages[0] instanceof ResultMessage
+                && str_starts_with($result_exception->messages[0]->message, 'Mime-type')
+                && \str_contains($result_exception->messages[0]->message, 'not allowed for file extension')
+            ) {
+                $aM = GeneralUtility::trimExplode('"', $result_exception->messages[0]->message);
+                $mimeType = $aM[1];
+                $fileExts = GeneralUtility::makeInstance(MimeTypeDetector::class)->getFileExtensionsForMimeType($mimeType);
+                if (is_array($fileExts) && isset($fileExts[0])) {
+                    $tmpIdentifier = GeneralUtility::trimExplode('.', $newIdentifier);
+                    array_pop($tmpIdentifier);
+                    $newIdentifier = implode('.', $tmpIdentifier) . '.' . $fileExts[0];
+
+                    if ($folder->hasFile(basename($newIdentifier))) {
+                        $this->logger->debug('file exists - END' . $folder->getReadablePath() . basename($newIdentifier));
+
+                        $file = $folder->getFile(basename($newIdentifier));
+
+                        $res = GeneralUtility::makeInstance(ConnectionPool::class)
+                                             ->getConnectionForTable('sys_file')
+                                             ->select(
+                                                 [ '*' ],
+                                                 'sys_file',
+                                                 ['uid' => $file->getUid()]
+                                             );
+                        return $res->fetchAssociative() ?: ['uid' => 0];
+                    }
+
+                    $file          = $folder->addFile($tempFile, basename($newIdentifier));
+                } else {
+                    @unlink($tempFile);
+                    throw $result_exception;
+                }
+            } else {
+                @unlink($tempFile);
+                throw $result_exception;
+            }
+        }
         @unlink($tempFile);
 
         $this->logger->debug('wrote file ' . Environment::getPublicPath() . '/fileadmin' . $newIdentifier);
