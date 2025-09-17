@@ -254,7 +254,7 @@ return [
             'displayCond' => 'FIELD:status:=:' . Creator::STATUS_DONE,
             'label' => 'Email-Vorlage',
             'config' => [
-                'type' => 'email',
+                'type' => 'text',
             ],
         ],
         'pid' => [
