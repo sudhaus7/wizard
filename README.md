@@ -5,7 +5,7 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/sudhaus7/sudhaus7-wizard.svg)](https://packagist.org/packages/sudhaus7/sudhaus7-wizard)
 [![Monthly Downloads](https://img.shields.io/packagist/dm/sudhaus7/sudhaus7-wizard.svg)](https://packagist.org/packages/sudhaus7/sudhaus7-wizard)
 
-A TYPO3 Plugin for duplicating Sites
+This is a TYPO3 extension with the extension key `sudhaus7_wizard`. With this extension a sitepackage can be extended to be able to completly clone an existing site by generating a wizard record, configuring the new name, url and user.
 
 Changelog
 0.4.0
