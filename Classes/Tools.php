@@ -64,6 +64,8 @@ final class Tools
                 status,base,sourceclass,sourcepid,projektname,longname,shortname,domainname,contact,email,notify_email,--div--;Benutzer,reduser,redpass,redemail,--div--;Template Konfigurationen,flexinfo,--div--;Log,log,stacktrace
             ' . $config->getAddFields(),
             ];
+
+            //@TODO this must be revisited. In setups with multiple sources this will override the default in a way that might not be desireable. Maybe this is something that can be done with a renderType or an event later
             $GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['columns']['sourcepid']['config']['default'] = $config->getSourcePid();
 
             $GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator'] = $config->modifyRecordTCA($GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']);
