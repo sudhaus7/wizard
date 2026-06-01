@@ -1,0 +1,101 @@
+"pages",
+,"uid","pid","is_siteroot","doktype","hidden","title","slug","perms_user","perms_userid","perms_group","perms_groupid","TSconfig"
+,1,0,1,1,0,"Start","/",31,10,28,21,"
+TCEMAIN.permissions {
+    groupid = 21
+}
+"
+,2,1,0,254,0,Defaults,"/defaults",31,10,28,21,
+,3,2,0,1,0,404,/defaults/404,31,10,28,21,
+,4,2,0,1,0,Impressum,"/defaults/impressum",31,10,28,21,
+,5,2,0,1,0,Datenschutz,"/defaults/datenschutz",31,10,28,21,
+,6,2,0,1,0,Kontakt,"/defaults/kontakt",31,10,28,21,
+,7,1,0,254,0,Footer,"/footer",31,10,28,21,
+,8,10,0,4,0,Impressum,"/impressum",31,10,28,21,
+,9,2,0,1,0,AGB,"/defaults/agb",31,10,28,21,
+,10,7,0,254,0,"Footer Standard","/footer/footer-standard",31,10,28,21,
+,11,10,0,4,0,AGB,"/agb",31,10,28,21,
+,12,10,0,4,0,Datenschutz,"/datenschutz",31,10,28,21,
+
+"tt_content",
+,"uid","pid","CType","header","media"
+,3,9,"uploads","Example File Download",1
+
+"tx_sudhaus7wizard_domain_model_creator",
+,"uid","pid","title","status","base","projektname","longname","shortname","domainname","contact","reduser","redpass","redemail","sourcepid","flexinfo"
+,1,1,"",10,FGTCLB\Wizard\Wizard\GeneralWizardConfiguration,"Ready Template","Ready Template","readytemplate","https://wizard.dev/","ready@wizard.de","ready","password","ready@wizard.de","1","<?xml version=""1.0"" encoding=""utf-8"" standalone=""yes"" ?>
+<T3FlexForms>
+    <data>
+        <sheet index=""sDEF"">
+            <language index=""lDEF"">
+                <field index=""primary"">
+                    <value index=""vDEF"">#0288D1</value>
+                </field>
+                <field index=""secondary"">
+                    <value index=""vDEF"">#FFEB3B</value>
+                </field>
+            </language>
+        </sheet>
+    </data>
+</T3FlexForms>"
+,2,1,"",5,FGTCLB\Wizard\Wizard\GeneralWizardConfiguration,"Not Ready Template","Not Ready Template","notreadytemplate","https://not-wizard.dev/","not-ready@wizard.de","not-ready","password","not-ready@wizard.de","1","<?xml version=""1.0"" encoding=""utf-8"" standalone=""yes"" ?>
+<T3FlexForms>
+    <data>
+        <sheet index=""sDEF"">
+            <language index=""lDEF"">
+                <field index=""primary"">
+                    <value index=""vDEF"">#0288D1</value>
+                </field>
+                <field index=""secondary"">
+                    <value index=""vDEF"">#FFEB3B</value>
+                </field>
+            </language>
+        </sheet>
+    </data>
+</T3FlexForms>"
+"sys_file_storage",
+,uid,pid,crdate,deleted,description,name,driver,configuration,is_default,is_browsable,is_public,is_writable,is_online,auto_extract_metadata
+,1,0,1675867468,0,"This is the local fileadmin/ directory. This storage mount has been created automatically by TYPO3.","fileadmin","Local","<?xml version=""1.0"" encoding=""utf-8"" standalone=""yes"" ?>
+<T3FlexForms>
+    <data>
+        <sheet index=""sDEF"">
+            <language index=""lDEF"">
+                <field index=""basePath"">
+                    <value index=""vDEF"">fileadmin/</value>
+                </field>
+                <field index=""pathType"">
+                    <value index=""vDEF"">relative</value>
+                </field>
+                <field index=""caseSensitive"">
+                    <value index=""vDEF"">1</value>
+                </field>
+            </language>
+        </sheet>
+    </data>
+</T3FlexForms>",1,1,1,1,1,1
+
+"sys_filemounts",
+,uid,pid,deleted,hidden,description,title,read_only,identifier
+,1,0,1,0,"","Downloads",0,"1:/global-content/themen/"
+,2,0,0,0,"","Themen",0,"1:/global-content/themen/"
+,3,0,0,0,"","demo content",0,"1:/demo-content/"
+,4,0,0,0,"","Root",0,"1:/"
+,5,0,0,0,"","Content - read only",1,"1:/global-content/"
+,6,0,0,0,"","Profilbilder",0,"1:/profile-images/"
+,7,0,0,0,"","Papierkorb",0,"1:/_recycler_/"
+,8,0,0,0,"","Formulare",1,"1:/form_definitions/"
+,9,0,0,0,"","Center for Data Science",0,"1:/global-content/themen/forschung/forschungseinrichtungen/center_for_data_science/"
+,10,0,0,0,"","Content - write",0,"1:/global-content/"
+,11,0,0,0,"","Form Definitions",0,"1:/form_definitions/"
+,12,0,0,0,"","Studiengänge",0,"1:/global-content/themen/studium/studiengaenge-von-a-bis-z/"
+,13,0,0,0,"","Berufung",0,"1:/global-content/themen/hochschule/arbeiten/Berufung/"
+,14,0,0,0,"","Weiterbildung",0,"1:/global-content/themen/hochschule/einrichtungen/weiterbildungszentrum/"
+,15,0,0,0,"Multisite Template Vorlage","Medien Template",0,1:/Multisites/template/
+
+"sys_file",
+,uid,pid,storage,type,identifier,extension,mime_type,name,sha1
+,1,0,1,1,"/Multisites/template/example.txt",txt,plain/text,"example.txt","da39a3ee5e6b4b0d3255bfef95601890afd80709"
+
+"sys_file_reference",
+,"uid","pid","uid_local","uid_foreign","tablenames","fieldname","title","description"
+,1,9,1,3,"tt_content","media","An example file","Downloads and copy tester"
