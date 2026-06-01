@@ -10,7 +10,8 @@
 			"typo3/cms-composer-installers": true,
 			"typo3/class-alias-loader": true,
 			"php-http/discovery": true
-		}
+		},
+		"sort-packages": true
 	},
 	"authors": [
 		{
@@ -31,19 +32,18 @@
 		"psr/log": "^3.0"
 	},
 	"require-dev": {
-		"typo3/cms-backend": "^12.4",
-		"typo3/cms-frontend": "^12.4",
-		"typo3/cms-tstemplate": "^12.4",
-		"typo3/cms-install": "^12.4",
-		"typo3/cms-info": "^12.4",
-		"typo3/cms-beuser": "^12.4",
-		"typo3/cms-lowlevel": "^12.4",
+		"friendsofphp/php-cs-fixer": "^3.95",
+		"phpstan/phpstan": "^2.2",
+		"phpunit/phpunit": "^11.5",
+		"saschaegerer/phpstan-typo3": "^3.0",
+		"typo3/cms-backend": "^13.4",
+		"typo3/cms-beuser": "^13.4",
+		"typo3/cms-frontend": "^13.4",
+		"typo3/cms-install": "^13.4",
+		"typo3/cms-lowlevel": "^13.4",
+		"typo3/cms-tstemplate": "^13.4",
 		"typo3/coding-standards": "^0.8",
-		"ssch/typo3-rector": "*",
-		"sudhaus7/template": "@dev",
-		"typo3/testing-framework": "^8.0",
-		"typo3/cms-composer-installers": "^5.0",
-		"helhum/typo3-console": "^8.1"
+		"typo3/testing-framework": "^9.5.0"
 	},
 	"autoload": {
 		"psr-4": {
@@ -54,26 +54,17 @@
 		"psr-4": {
 			"SUDHAUS7\\Sudhaus7Wizard\\Tests\\Unit\\": "Tests/Unit/",
 			"SUDHAUS7\\Sudhaus7Wizard\\Tests\\Functional\\": "Tests/Functional/",
-			"SUDHAUS7\\Sudhaus7Wizard\\Tests\\Mocks\\": "Tests/Mocks/",
 			"SUDHAUS7\\Sudhaus7Template\\": "Tests/Fixtures/template/Classes/"
 		}
 	},
 	"extra": {
 		"typo3/cms": {
 			"extension-key": "sudhaus7_wizard",
-			"cms-package-dir": "{$vendor-dir}/typo3/cms",
-			"web-dir": ".Build/public"
+			"web-dir": ".Build/Web",
+			"app-dir": ".Build"
 		}
 	},
 	"scripts": {
-		"pre-autoload-dump": [
-			"mkdir -p .Build/public/typo3conf/ext/",
-			"[ -L .Build/public/typo3conf/ext/sudhaus7_wizard ] && rm .Build/public/typo3conf/ext/sudhaus7_wizard; exit 0"
-		],
-		"post-autoload-dump": [
-			"mkdir -p .Build/public/typo3conf/ext/",
-			"[ -L .Build/public/typo3conf/ext/sudhaus7_wizard ] || ln -snvf ../../../../. .Build/public/typo3conf/ext/sudhaus7_wizard; exit 0"
-		],
 		"add-local-git-config": "git config --local include.path ../.gitconfig",
 		"cmscacheflush": "@php .Build/bin/typo3cms cache:flush",
 		"csfixer": "@php .Build/bin/php-cs-fixer fix",
