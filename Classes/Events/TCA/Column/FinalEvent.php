@@ -41,9 +41,9 @@ final class FinalEvent implements WizardEventInterface, WizardEventWriteableReco
     /**
      * @var array{
      *     table: string,
-     *     olduid: string|int,
-     *     oldpid: string|int,
-     *     newpid: string|int,
+     *     olduid?: string|int,
+     *     oldpid?: string|int,
+     *     newpid?: string|int,
      *     pObj: object
      * } configuration array
      */
@@ -52,7 +52,13 @@ final class FinalEvent implements WizardEventInterface, WizardEventWriteableReco
     /**
      * @param array<array-key, mixed> $columnConfig
      * @param array<array-key, mixed> $record
-     * @param array<array-key, mixed> $parameters
+     * @param array{
+     *      table: string,
+     *      olduid?: string|int,
+     *      oldpid?: string|int,
+     *      newpid?: string|int,
+     *      pObj: object
+     *  } $parameters
      */
     public function __construct(
         string $table,
@@ -79,7 +85,7 @@ final class FinalEvent implements WizardEventInterface, WizardEventWriteableReco
     }
 
     /**
-     * @return array
+     * @return array<array-key, mixed>
      */
     public function getColumnConfig(): array
     {
@@ -87,7 +93,13 @@ final class FinalEvent implements WizardEventInterface, WizardEventWriteableReco
     }
 
     /**
-     * @return array
+     * @return array{
+     *      table: string,
+     *      olduid?: string|int,
+     *      oldpid?: string|int,
+     *      newpid?: string|int,
+     *      pObj: object
+     *  }
      */
     public function getParameters(): array
     {

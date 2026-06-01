@@ -17,7 +17,7 @@ namespace SUDHAUS7\Sudhaus7Wizard\Backend\TCA\Evaluation;
 
 class NotifyEmailEvaluation
 {
-    public function evaluateFieldValue($value, $is_in, &$set)
+    public function evaluateFieldValue(string $value, mixed $is_in, bool &$set): ?string
     {
         $value = preg_replace('/\s*/', '', $value);
         if (!empty($value) && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
@@ -26,9 +26,18 @@ class NotifyEmailEvaluation
         return $value;
     }
 
-    public function deevaluateFieldValue(array $parameters)
+    /**
+     * @param array{
+     *     value?: ?string
+     * } $parameters
+     */
+    public function deevaluateFieldValue(array $parameters): ?string
     {
-        if (empty($parameters['value']) && isset($GLOBALS['BE_USER']) && !empty($GLOBALS['BE_USER']->user['email'])) {
+        if (
+            ($parameters['value'] ?? null) === null
+            && isset($GLOBALS['BE_USER'])
+            && !empty($GLOBALS['BE_USER']->user['email'])
+        ) {
             return $GLOBALS['BE_USER']->user['email'];
         }
         return $parameters['value'];

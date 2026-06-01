@@ -41,7 +41,7 @@ final class Tools
     }
 
     /**
-     * @param class-string $class
+     * @param class-string<WizardProcessInterface> $class
      */
     public static function registerWizardProcess(string $class): void
     {
@@ -49,7 +49,6 @@ final class Tools
             return;
         }
 
-        /** @var WizardProcessInterface $class */
         $config = $class::getWizardConfig();
 
         $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['Sudhaus7Wizard']['registeredTemplateExtentions'][$config->getExtension()] = $class;
@@ -106,7 +105,7 @@ final class Tools
     public static function array2xml(array $a): string
     {
         $flexObj = GeneralUtility::makeInstance(FlexFormTools::class);
-        return $flexObj->flexArray2Xml($a, true);
+        return $flexObj->flexArray2Xml($a);
     }
 
     /**

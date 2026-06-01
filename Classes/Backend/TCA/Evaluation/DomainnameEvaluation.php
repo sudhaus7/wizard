@@ -17,9 +17,8 @@ namespace SUDHAUS7\Sudhaus7Wizard\Backend\TCA\Evaluation;
 
 class DomainnameEvaluation
 {
-    public function evaluateFieldValue($value, $is_in, &$set)
+    public function evaluateFieldValue(string $value, mixed $is_in, bool &$set): ?string
     {
-        $value = preg_replace('/\s*/', '', $value);
-        return $value;
+        return preg_replace('/\s*/', '', $value);
     }
 }

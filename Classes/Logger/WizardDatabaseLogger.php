@@ -32,7 +32,11 @@ class WizardDatabaseLogger extends AbstractLogger
     protected Connection $connection;
     protected Creator $creator;
     protected ?LoggerInterface $console = null;
-    private $verbosityLevelMap = [
+
+    /**
+     * @var array<string, int>
+     */
+    private array $verbosityLevelMap = [
         LogLevel::EMERGENCY => OutputInterface::VERBOSITY_NORMAL,
         LogLevel::ALERT => OutputInterface::VERBOSITY_NORMAL,
         LogLevel::CRITICAL => OutputInterface::VERBOSITY_NORMAL,
@@ -42,7 +46,11 @@ class WizardDatabaseLogger extends AbstractLogger
         LogLevel::INFO => OutputInterface::VERBOSITY_VERY_VERBOSE,
         LogLevel::DEBUG => OutputInterface::VERBOSITY_DEBUG,
     ];
-    private $formatLevelMap = [
+
+    /**
+     * @var array<string, string>
+     */
+    private array $formatLevelMap = [
         LogLevel::EMERGENCY => self::ERROR,
         LogLevel::ALERT => self::ERROR,
         LogLevel::CRITICAL => self::ERROR,
@@ -53,6 +61,10 @@ class WizardDatabaseLogger extends AbstractLogger
         LogLevel::DEBUG => self::INFO,
     ];
 
+    /**
+     * @param array<string, int> $verbosityLevelMap
+     * @param array<string, string> $formatLevelMap
+     */
     public function __construct(Creator $creator, ?LoggerInterface $console, array $verbosityLevelMap = [], array $formatLevelMap = [])
     {
         $this->console = $console;

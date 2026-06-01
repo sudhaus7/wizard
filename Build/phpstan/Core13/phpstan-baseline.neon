@@ -1,0 +1,13 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Parameter \#1 \$row of static method SUDHAUS7\\Sudhaus7Wizard\\Domain\\Model\\Creator\:\:createFromDatabaseRow\(\) expects array\{uid\: int, pid\: int, sourcepid\: string, base\: string, projektname\: string, longname\: string, shortname\: string, domainname\: string, \.\.\.\}, non\-empty\-array\<string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 3
+			path: ../../../Classes/Domain/Repository/CreatorRepository.php
+
+		-
+			message: '#^Property SUDHAUS7\\Sudhaus7Wizard\\Sources\\RestWizardServerSource\:\:\$tree is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: ../../../Classes/Sources/RestWizardServerSource.php

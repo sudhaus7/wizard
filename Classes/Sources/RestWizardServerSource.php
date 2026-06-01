@@ -13,45 +13,23 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard\Sources;
 
-use function array_intersect;
-
 use Doctrine\DBAL\Driver\Exception;
-
-use function file_get_contents;
-use function file_put_contents;
-
-use function in_array;
-
 use InvalidArgumentException;
-
-use function is_array;
-use function json_encode;
-
 use Psr\Log\LoggerAwareTrait;
-
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
-
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
-
 use SUDHAUS7\Sudhaus7Wizard\Events\FinalContentEvent;
-
 use SUDHAUS7\Sudhaus7Wizard\Events\GetResourceStorageEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\PreHandleFileEvent;
-
 use SUDHAUS7\Sudhaus7Wizard\Services\FolderService;
 use SUDHAUS7\Sudhaus7Wizard\Services\RestWizardRequest;
 use SUDHAUS7\Sudhaus7Wizard\Traits\DbTrait;
-
-use function sys_get_temp_dir;
-use function tempnam;
-
 use Throwable;
-
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Core\Environment;
-
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
+use TYPO3\CMS\Core\Resource\AbstractFile;
 use TYPO3\CMS\Core\Resource\Exception\ExistingTargetFolderException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderAccessPermissionsException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderReadPermissionsException;
@@ -61,7 +39,6 @@ use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Validation\ResultException;
-use TYPO3\CMS\Core\Validation\ResultMessage;
 
 abstract class RestWizardServerSource implements SourceInterface
 {
@@ -73,7 +50,7 @@ abstract class RestWizardServerSource implements SourceInterface
      */
     protected array $remoteTables = [];
 
-    protected ?Creator $creator = null;
+    protected Creator $creator;
     protected ?CreateProcess $createProcess = null;
 
     /**
@@ -93,41 +70,36 @@ abstract class RestWizardServerSource implements SourceInterface
         'base'          => 'domainname',
         'baseVariants'  => [],
         'errorHandling' => [],
-        'languages'
-                        => [
-                            0
-                            => [
-                                'title'           => 'Default',
-                                'enabled'         => true,
-                                'base'            => '/',
-                                'typo3Language'   => 'en',
-                                'locale'          => 'enUS.UTF-8',
-                                'iso-639-1'       => 'en',
-                                'navigationTitle' => 'English',
-                                'hreflang'        => 'en-US',
-                                'direction'       => 'ltr',
-                                'flag'            => 'en',
-                                'languageId'      => '0',
-                            ],
-                        ],
+        'languages' => [
+            0 => [
+                'title'           => 'Default',
+                'enabled'         => true,
+                'base'            => '/',
+                'typo3Language'   => 'en',
+                'locale'          => 'enUS.UTF-8',
+                'iso-639-1'       => 'en',
+                'navigationTitle' => 'English',
+                'hreflang'        => 'en-US',
+                'direction'       => 'ltr',
+                'flag'            => 'en',
+                'languageId'      => '0',
+            ],
+        ],
         'rootPageId'    => 0,
-        'routes'
-                        => [
-                            0
-                            => [
-                                'route'   => 'robots.txt',
-                                'type'    => 'staticText',
-                                'content' => 'User-agent: *
+        'routes' => [
+            0 => [
+                'route'   => 'robots.txt',
+                'type'    => 'staticText',
+                'content' => 'User-agent: *
 Disallow: /typo3/
 Disallow: /typo3_src/
 Allow: /typo3/sysext/frontend/Resources/Public/*
 ',
-                            ],
-                        ],
-        'imports' => [
-
+            ],
         ],
+        'imports' => [],
     ];
+
     public function setCreator(Creator $creator): void
     {
         // modify username
@@ -135,18 +107,19 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $this->creator = $creator;
     }
 
-    public function getCreator(): ?Creator
+    public function getCreator(): Creator
     {
         return $this->creator;
     }
 
     /**
      * @inheritDoc
+     * @throws \Exception
      */
     public function getSiteConfig(mixed $id): array
     {
         $result = $this->getAPI()->request('/siteconfig/' . $id);
-        if (is_array($result) && isset($result['rootPageId'])) {
+        if (isset($result['rootPageId'])) {
             return $result;
         }
         return $this->siteconfig;
@@ -169,13 +142,13 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         } else {
             $endpoint = sprintf('content/%s/uid/%d', $table, $where['uid']);
         }
-        $this->logger->debug('getRow ' . $endpoint);
+        $this->logger?->debug('getRow ' . $endpoint);
 
         if (!isset($this->rowCache[$endpoint])) {
             try {
                 $content = $this->getAPI()->request($endpoint);
             } catch (Throwable $e) {
-                $this->logger->warning('getRow ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
+                $this->logger?->warning('getRow ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
                 sleep(5);
                 $content = $this->getAPI()->request($endpoint);
             }
@@ -207,26 +180,26 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
             $key = $wherekeys[0];
             $value = $where[$key];
             $endpoint = sprintf('content/%s/%s/%s', $table, $key, $value);
-            $this->logger->debug('getRows ' . $endpoint);
+            $this->logger?->debug('getRows ' . $endpoint);
 
             try {
                 $content = $this->getAPI()->request($endpoint);
             } catch (Throwable $e) {
-                $this->logger->warning('getRows ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
+                $this->logger?->warning('getRows ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
                 sleep(5);
                 $content = $this->getAPI()->request($endpoint);
             }
         } else {
             $endpoint = sprintf('content/%s', $table);
-            $this->logger->debug('getRows ' . $endpoint);
+            $this->logger?->debug('getRows ' . $endpoint);
 
             try {
                 $content = $this->getAPI()->post($endpoint, $where);
                 //$content = $this->getAPI()->request($endpoint);
             } catch (Throwable $e) {
-                $this->logger->warning('getRows ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
+                $this->logger?->warning('getRows ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
                 sleep(5);
-                $content = $this->getAPI()->request($endpoint, $where);
+                $content = $this->getAPI()->request($endpoint);
             }
         }
         foreach ($content as $row) {
@@ -245,11 +218,11 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     public function getTree(int $start): array
     {
         $endpoint = sprintf('tree/%d', $start);
-        $this->logger->debug('getTree ' . $endpoint);
+        $this->logger?->debug('getTree ' . $endpoint);
         try {
             $content = $this->getAPI()->request($endpoint);
         } catch (Throwable $e) {
-            $this->logger->warning('getTree ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
+            $this->logger?->warning('getTree ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
             sleep(5);
             $content = $this->getAPI()->request($endpoint);
         }
@@ -297,11 +270,11 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 
         $endpoint = sprintf('content/%s', $columnConfig['config']['foreign_table']);
 
-        $this->logger->debug('getIRRE ' . $endpoint . ' ' . json_encode($where));
+        $this->logger?->debug('getIRRE ' . $endpoint . ' ' . json_encode($where));
         try {
             $content = $this->getAPI()->post($endpoint, $where);
         } catch (Throwable $e) {
-            $this->logger->warning('getIrre ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
+            $this->logger?->warning('getIrre ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
             sleep(5);
             $content = $this->getAPI()->post($endpoint, $where);
         }
@@ -316,47 +289,51 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
      * @throws InsufficientFolderReadPermissionsException
      * @throws InsufficientFolderWritePermissionsException
      * @throws \Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function handleFile(array $sysFile, string $newIdentifier): array
     {
-        $this->logger->debug('handleFile ' . $newIdentifier . ' START');
+        $this->logger?->debug('handleFile ' . $newIdentifier . ' START');
 
         $preEvent = new PreHandleFileEvent($newIdentifier, $sysFile, $this->getCreateProcess());
         GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($preEvent);
         $sysFile = $preEvent->getRecord();
+        /** @var non-empty-string $newIdentifier */
         $newIdentifier = $preEvent->getNewidentifier();
 
         /** @var ResourceStorage $storage */
-        $storage           = GeneralUtility::makeInstance(StorageRepository::class)->getDefaultStorage();
+        $storage = GeneralUtility::makeInstance(StorageRepository::class)->getDefaultStorage();
 
         $defaultStorageEvent = new GetResourceStorageEvent($storage, $this->getCreateProcess());
         GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($defaultStorageEvent);
         $storage = $defaultStorageEvent->getStorage();
 
-        $folder = GeneralUtility::makeInstance(FolderService::class)->getOrCreateFromIdentifier(dirname($newIdentifier), $storage);
+        $folder = GeneralUtility::makeInstance(FolderService::class)
+            ->getOrCreateFromIdentifier(dirname($newIdentifier), $storage);
 
         $newFileName = $folder->getStorage()->sanitizeFileName(basename($newIdentifier));
         $newIdentifier = $folder->getIdentifier() . $newFileName;
         if ($folder->hasFile($newFileName)) {
-            $this->logger->debug('file exists - END' . $folder->getReadablePath() . basename($newIdentifier));
+            $this->logger?->debug('file exists - END' . $folder->getReadablePath() . basename($newIdentifier));
 
+            /** @var AbstractFile|null $file */
             $file = $folder->getFile($newFileName);
 
             $res = GeneralUtility::makeInstance(ConnectionPool::class)
-                                 ->getConnectionForTable('sys_file')
-                                 ->select(
-                                     [ '*' ],
-                                     'sys_file',
-                                     ['uid' => $file->getUid()]
-                                 );
+                ->getConnectionForTable('sys_file')
+                ->select(
+                    [ '*' ],
+                    'sys_file',
+                    ['uid' => (int)$file?->getUid()]
+                );
             return $res->fetchAssociative() ?: ['uid' => 0];
         }
 
-        $this->logger->debug('fetching ' . $this->getAPI()->getAPIFILEHOST() . 'fileadmin/' . trim($sysFile['identifier'], '/'));
+        $this->logger?->debug('fetching ' . $this->getAPI()->getAPIFILEHOST() . 'fileadmin/' . trim($sysFile['identifier'], '/'));
 
         $buf = @file_get_contents($this->getAPI()->getAPIFILEHOST() . 'fileadmin' . $sysFile['identifier']);
         if (!$buf) {
-            $this->logger->error('fetch failed' . $this->getAPI()->getAPIFILEHOST() . 'fileadmin/' . trim($sysFile['identifier'], '/'));
+            $this->logger?->error('fetch failed' . $this->getAPI()->getAPIFILEHOST() . 'fileadmin/' . trim($sysFile['identifier'], '/'));
             return ['uid' => 0];
         }
 
@@ -366,51 +343,51 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         //$file = $folder->addFile($tempFile, basename($newIdentifier));
         try {
             $file = $folder->addFile($tempFile, basename($newIdentifier));
-        } catch (ResultException $result_exception) {
+        } catch (ResultException $resultException) {
             // Mime-type "image/jpeg" not allowed for file extension "png" (expected: image/png).
 
             if (
-                isset($result_exception->messages[0])
-                && $result_exception->messages[0] instanceof ResultMessage
-                && str_starts_with($result_exception->messages[0]->message, 'Mime-type')
-                && \str_contains($result_exception->messages[0]->message, 'not allowed for file extension')
+                isset($resultException->messages[0])
+                && str_starts_with($resultException->messages[0]->message, 'Mime-type')
+                && \str_contains($resultException->messages[0]->message, 'not allowed for file extension')
             ) {
-                $aM = GeneralUtility::trimExplode('"', $result_exception->messages[0]->message);
+                $aM = GeneralUtility::trimExplode('"', $resultException->messages[0]->message);
                 $mimeType = $aM[1];
                 $fileExts = GeneralUtility::makeInstance(MimeTypeDetector::class)->getFileExtensionsForMimeType($mimeType);
-                if (is_array($fileExts) && isset($fileExts[0])) {
+                if (isset($fileExts[0])) {
                     $tmpIdentifier = GeneralUtility::trimExplode('.', $newIdentifier);
                     array_pop($tmpIdentifier);
                     $newIdentifier = implode('.', $tmpIdentifier) . '.' . $fileExts[0];
 
                     if ($folder->hasFile(basename($newIdentifier))) {
-                        $this->logger->debug('file exists - END' . $folder->getReadablePath() . basename($newIdentifier));
+                        $this->logger?->debug('file exists - END' . $folder->getReadablePath() . basename($newIdentifier));
 
+                        /** @var AbstractFile|null $file */
                         $file = $folder->getFile(basename($newIdentifier));
 
                         $res = GeneralUtility::makeInstance(ConnectionPool::class)
-                                             ->getConnectionForTable('sys_file')
-                                             ->select(
-                                                 [ '*' ],
-                                                 'sys_file',
-                                                 ['uid' => $file->getUid()]
-                                             );
+                            ->getConnectionForTable('sys_file')
+                            ->select(
+                                [ '*' ],
+                                'sys_file',
+                                ['uid' => $file?->getUid()]
+                            );
                         return $res->fetchAssociative() ?: ['uid' => 0];
                     }
 
-                    $file          = $folder->addFile($tempFile, basename($newIdentifier));
+                    $file = $folder->addFile($tempFile, basename($newIdentifier));
                 } else {
                     @unlink($tempFile);
-                    throw $result_exception;
+                    throw $resultException;
                 }
             } else {
                 @unlink($tempFile);
-                throw $result_exception;
+                throw $resultException;
             }
         }
         @unlink($tempFile);
 
-        $this->logger->debug('wrote file ' . Environment::getPublicPath() . '/fileadmin' . $newIdentifier);
+        $this->logger?->debug('wrote file ' . Environment::getPublicPath() . '/fileadmin' . $newIdentifier);
 
         $olduid = $sysFile['uid'];
 
@@ -420,30 +397,30 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 
         try {
             $endpoint = sprintf('content/%s/file/%d', 'sys_file_metadata', $olduid);
-            $this->logger->debug('FILE metadata fetching ' . $endpoint);
+            $this->logger?->debug('FILE metadata fetching ' . $endpoint);
 
             try {
                 $content  = $this->getAPI()->request($endpoint);
             } catch (Throwable $e) {
-                $this->logger->warning('handleFile ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
+                $this->logger?->warning('handleFile ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
                 sleep(5);
                 $content  = $this->getAPI()->request($endpoint);
             }
             if (!empty($content) && !empty($content[0])) {
-                $sys_file_metadata = $content[0];
+                $sysFileMetadata = $content[0];
 
                 $subEventDispatcher = GeneralUtility::makeInstance(EventDispatcher::class);
-                $subEvent = new FinalContentEvent('sys_file_metadata', $sys_file_metadata, $this->getCreateProcess());
+                $subEvent = new FinalContentEvent('sys_file_metadata', $sysFileMetadata, $this->getCreateProcess());
 
                 $subEventDispatcher->dispatch($subEvent);
-                $sys_file_metadata = $subEvent->getRecord();
+                $sysFileMetadata = $subEvent->getRecord();
 
                 $res = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('sys_file_metadata')
-                                     ->select(
-                                         [ '*' ],
-                                         'sys_file_metadata',
-                                         ['file' => $uid]
-                                     );
+                    ->select(
+                        [ '*' ],
+                        'sys_file_metadata',
+                        ['file' => $uid]
+                    );
                 $newSysFileMetadata = $res->fetchAssociative();
                 if (!empty($newSysFileMetadata)) {
                     $skipFields = [
@@ -455,10 +432,10 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                         'cruser_id',
                     ];
                     $update = [];
-                    foreach ($sys_file_metadata as $k => $v) {
-                        if (! in_array($k, $skipFields)) {
-                            if (! empty($v) || (int)$v > 0) {
-                                $update[ $k ] = $v;
+                    foreach ($sysFileMetadata as $fieldName => $value) {
+                        if (! in_array($fieldName, $skipFields)) {
+                            if ((int)$value > 0) {
+                                $update[ $fieldName ] = $value;
                             }
                         }
                     }
@@ -466,16 +443,16 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                         self::updateRecord('sys_file_metadata', $update, [ 'uid' => $newSysFileMetadata['uid'] ]);
                     }
                 } else {
-                    unset($sys_file_metadata['uid']);
-                    $sys_file_metadata['file'] = $uid;
-                    self::insertRecord('sys_file_metadata', $sys_file_metadata);
+                    unset($sysFileMetadata['uid']);
+                    $sysFileMetadata['file'] = $uid;
+                    self::insertRecord('sys_file_metadata', $sysFileMetadata);
                 }
             }
         } catch (\Exception $e) {
-            $this->logger->error('FILE fetching ' . $endpoint . ' : ' . $e->getMessage());
+            $this->logger?->error('FILE fetching ' . $endpoint . ' : ' . $e->getMessage());
         }
         $sysFile = BackendUtility::getRecord('sys_file', $uid);
-        $this->logger->debug('handleFile ' . $newIdentifier . ' END');
+        $this->logger?->debug('handleFile ' . $newIdentifier . ' END');
         return $sysFile ?? ['uid' => 0];
     }
 
@@ -489,18 +466,15 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
             return [];
         }
         $endpoint = sprintf('content/%s/uid_local/%d', $mmTable, $uid);
-        $this->logger->debug('getMM ' . $endpoint);
+        $this->logger?->debug('getMM ' . $endpoint);
         try {
             $content  = $this->getAPI()->request($endpoint);
         } catch (Throwable $e) {
-            $this->logger->warning('getMM ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
+            $this->logger?->warning('getMM ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
             sleep(5);
-            $content  = $this->getAPI()->request($endpoint);
+            $content = $this->getAPI()->request($endpoint);
         }
-        if (is_array($content)) {
-            return $content;
-        }
-        return [];
+        return $content;
     }
 
     /**
@@ -508,7 +482,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
      */
     public function sourcePid(): int
     {
-        return $this->creator->getSourcepid();
+        return $this->getCreator()->getSourcepid();
     }
 
     /**
@@ -517,12 +491,12 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
      */
     public function getTables(): array
     {
-        $this->logger->debug('getTables');
+        $this->logger?->debug('getTables');
         if (empty($this->remoteTables)) {
             try {
                 $this->remoteTables = $this->getAPI()->request('tables');
             } catch (Throwable $e) {
-                $this->logger->warning('tables failed retrying in 5 seconds once ' . $e->getMessage());
+                $this->logger?->warning('tables failed retrying in 5 seconds once ' . $e->getMessage());
                 sleep(5);
                 $this->remoteTables = $this->getAPI()->request('tables');
             }
@@ -537,11 +511,11 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     public function getSites(): array
     {
         $endpoint = 'content/pages/is_siteroot/1';
-        $this->logger->debug('getSites ' . $endpoint);
+        $this->logger?->debug('getSites ' . $endpoint);
         try {
             $content = $this->getAPI()->request($endpoint);
         } catch (Throwable $e) {
-            $this->logger->warning('getSites ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
+            $this->logger?->warning('getSites ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
             sleep(5);
             $content = $this->getAPI()->request($endpoint);
         }
@@ -569,11 +543,11 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $filteredList = [];
         if (count($preList) > 0) {
             $endpoint = sprintf('filter/%s/pid', $table);
-            $this->logger->debug('filterByPid ' . $endpoint);
+            $this->logger?->debug('filterByPid ' . $endpoint);
             try {
                 $filteredList = $this->getAPI()->post($endpoint, [ 'values' => implode(',', $preList) ]);
             } catch (Throwable $e) {
-                $this->logger->warning('filterByPid ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
+                $this->logger?->warning('filterByPid ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
                 sleep(5);
                 $filteredList = $this->getAPI()->post($endpoint, [ 'values' => implode(',', $preList) ]);
             }

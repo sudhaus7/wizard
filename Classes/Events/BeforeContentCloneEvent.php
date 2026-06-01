@@ -67,7 +67,7 @@ final class BeforeContentCloneEvent implements LoggerAwareInterface, WizardEvent
         return $this->oldpid;
     }
 
-    public function getLogger(): LoggerInterface
+    public function getLogger(): ?LoggerInterface
     {
         return $this->logger;
     }

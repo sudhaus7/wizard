@@ -20,7 +20,11 @@ use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 class TCAFieldActiveForThisRecordTest extends UnitTestCase
 {
     protected CreateProcess $create_process;
-    protected $record = [
+
+    /**
+     * @var array<array-key, mixed>
+     */
+    protected array $record = [
         'uid' => 1,
         'pid' => 1,
         'CType' => 'text',
@@ -30,7 +34,11 @@ class TCAFieldActiveForThisRecordTest extends UnitTestCase
         'bodytext' => '<p>bodytext</p>',
 
     ];
-    protected $tca = [
+
+    /**
+     * @var array<array-key, mixed>
+     */
+    protected array $tca = [
         'tt_content' => [
             'ctrl' => [
                 'type' => 'CType',

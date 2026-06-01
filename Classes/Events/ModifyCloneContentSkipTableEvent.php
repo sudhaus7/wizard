@@ -59,7 +59,7 @@ final class ModifyCloneContentSkipTableEvent implements LoggerAwareInterface, Wi
         $this->skipList = $skipList;
     }
 
-    public function getLogger(): LoggerInterface
+    public function getLogger(): ?LoggerInterface
     {
         return $this->logger;
     }

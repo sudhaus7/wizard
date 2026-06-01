@@ -43,15 +43,15 @@ final class AfterContentCloneEvent implements LoggerAwareInterface, WizardEventI
         int $oldpid,
         int $newuid,
         array $record,
-        CreateProcess $create_process
+        CreateProcess $createProcess
     ) {
         $this->table = $table;
         $this->newuid = $newuid;
         $this->olduid = $olduid;
         $this->oldpid = $oldpid;
-        $this->createProcess = $create_process;
+        $this->createProcess = $createProcess;
         $this->record         = $record;
-        $this->logger = $create_process->getLogger();
+        $this->logger = $createProcess->getLogger();
     }
 
     /**
@@ -70,7 +70,7 @@ final class AfterContentCloneEvent implements LoggerAwareInterface, WizardEventI
         return $this->oldpid;
     }
 
-    public function getLogger(): LoggerInterface
+    public function getLogger(): ?LoggerInterface
     {
         return $this->logger;
     }

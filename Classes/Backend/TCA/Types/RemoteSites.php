@@ -20,12 +20,24 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 final class RemoteSites
 {
-    public function itemsProcFunc(&$params): void
+    /**
+     * @param array{
+     *     row: array<string, mixed>,
+     *     items: list<array{label: mixed, value: mixed}>
+     * } $params
+     * @param-out array{
+     *      row: array<string, mixed>,
+     *      items: list<array{label: mixed, value: mixed}>
+     *  } $params
+     * @throws \Exception
+     */
+    public function itemsProcFunc(array &$params): void
     {
         if (!empty($params['row']['sourceclass'])) {
+            /** @var class-string<object> $class */
             $class = $params['row']['sourceclass'];
             if (class_exists($class)) {
-                $sourceObj = GeneralUtility::makeInstance(trim($class, '\\'));
+                $sourceObj = GeneralUtility::makeInstance($class);
                 if ($sourceObj instanceof RestWizardServerSource) {
                     $sites           = $sourceObj->getSites();
                     usort($sites, function ($a, $b) {

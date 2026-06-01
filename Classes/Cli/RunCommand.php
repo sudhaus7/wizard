@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the TYPO3 project.
  *
@@ -13,7 +15,6 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard\Cli;
 
-use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use Psr\Log\LoggerInterface;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
@@ -29,6 +30,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Contracts\Service\Attribute\Required;
 use Throwable;
 use TYPO3\CMS\Core\Core\Bootstrap;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -37,14 +39,29 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 final class RunCommand extends Command
 {
-    public ?LoggerInterface $logger = null;
-    private ?CreatorRepository $repository = null;
+    #[Required]
+    public LoggerInterface $logger;
+    #[Required]
+    private CreatorRepository $creatorRepository;
+    #[Required]
     private CreateProcessFactoryInterface $createProcessFactory;
 
-    public function __construct(CreateProcessFactoryInterface $createProcessFactory)
+    #[Required]
+    public function injectLogger(LoggerInterface $logger): void
     {
-        parent::__construct();
+        $this->logger = $logger;
+    }
+
+    #[Required]
+    public function injectProcessFactory(CreateProcessFactoryInterface $createProcessFactory): void
+    {
         $this->createProcessFactory = $createProcessFactory;
+    }
+
+    #[Required]
+    public function injectCreatorRepository(CreatorRepository $creatorRepository): void
+    {
+        $this->creatorRepository = $creatorRepository;
     }
 
     protected function configure(): void
@@ -120,12 +137,11 @@ final class RunCommand extends Command
         } else {
             $this->logger = new ConsoleLogger($output);
         }
-        $this->repository = GeneralUtility::makeInstance(CreatorRepository::class);
+        $this->creatorRepository = GeneralUtility::makeInstance(CreatorRepository::class);
     }
 
     /**
      * @throws Exception
-     * @throws DBALException
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
@@ -141,14 +157,14 @@ final class RunCommand extends Command
                     if ($input->getOption('force')) {
                         $force = true;
                     }
-                    $o = $this->repository->findByIdentifier($input->getOption('id'), $force);
+                    $o = $this->creatorRepository->findByIdentifier($input->getOption('id'), $force);
                     if ($o instanceof Creator) {
                         $this->getInfo($o, $input, $output);
                         return Command::SUCCESS;
                     }
                     $output->writeln('<info>Not found</info>');
                 } else {
-                    $o = $this->repository->findNext();
+                    $o = $this->creatorRepository->findNext();
                     if ($o instanceof Creator) {
                         $this->getInfo($o, $input, $output);
                         return Command::SUCCESS;
@@ -161,7 +177,7 @@ final class RunCommand extends Command
                     if ($input->getOption('force')) {
                         $force = true;
                     }
-                    $o = $this->repository->findByIdentifier($input->getOption('id'), $force);
+                    $o = $this->creatorRepository->findByIdentifier($input->getOption('id'), $force);
                     if ($o instanceof Creator) {
                         return $this->create($o, $input, $output, $mapFolder);
                     }
@@ -174,9 +190,9 @@ final class RunCommand extends Command
                 $this->getList($input, $output);
                 return 0;
             case 'next':
-                $o = $this->repository->findNext();
+                $o = $this->creatorRepository->findNext();
                 if ($o instanceof Creator) {
-                    if (!$this->repository->isRunning()) {
+                    if (!$this->creatorRepository->isRunning()) {
                         return $this->create($o, $input, $output, $mapFolder);
                     }
                 } else {
@@ -188,20 +204,6 @@ final class RunCommand extends Command
                 break;
         }
         return 1;
-    }
-
-    /**
-     * @deprecated
-     */
-    private function forceVisible(int $id): void
-    {
-        GeneralUtility::makeInstance(ConnectionPool::class)
-            ->getConnectionForTable('tx_sudhaus7wizard_domain_model_creator')
-            ->update(
-                'tx_sudhaus7wizard_domain_model_creator',
-                ['uid' => $id],
-                ['hidden' => 0, 'deleted' => 0, 'status' => 10]
-            );
     }
 
     public function getInfo(Creator $o, InputInterface $input, OutputInterface $output): void
@@ -220,7 +222,7 @@ final class RunCommand extends Command
         }
     }
 
-    public function create(Creator $creator, InputInterface $input, OutputInterface $output, $mapfolder = null): int
+    public function create(Creator $creator, InputInterface $input, OutputInterface $output, ?string $mapfolder = null): int
     {
         if ($input->getOption('logtodatabase')) {
             // Start a new log
@@ -233,7 +235,7 @@ final class RunCommand extends Command
 
         Bootstrap::initializeBackendAuthentication();
         $creator->setStatus(Creator::STATUS_PROCESSING);
-        $this->repository->updateStatus($creator);
+        $this->creatorRepository->updateStatus($creator);
 
         $this->getInfo($creator, $input, $output);
         //$output->write(implode("\n",)."\n");
@@ -243,8 +245,8 @@ final class RunCommand extends Command
                 $output->write("Fertig\n", true);
                 $creator->setStatus(Creator::STATUS_DONE);
 
-                $this->repository->updateStatus($creator);
-                $this->repository->updatePid($creator);
+                $this->creatorRepository->updateStatus($creator);
+                $this->creatorRepository->updatePid($creator);
 
                 if (!empty($creator->getNotifyEmail())) {
                     // Create the message
@@ -268,7 +270,7 @@ final class RunCommand extends Command
             $creator->setStatus(Creator::STATUS_FAILED);
         }
 
-        $this->repository->updateStatus($creator);
+        $this->creatorRepository->updateStatus($creator);
 
         return Command::FAILURE;
     }
@@ -290,10 +292,9 @@ final class RunCommand extends Command
         $table->setHeaderTitle('Todo List');
         $table->setHeaders(['ID', 'Baukasten', 'Status']);
 
-        $list = $this->repository->findAll();
-        /** @var $o Creator */
-        foreach ($list as $o) {
-            $table->addRow([$o->getUid(), $o->getLongname(), $o->getStatusLabel()]);
+        $list = $this->creatorRepository->findAll();
+        foreach ($list as $creator) {
+            $table->addRow([$creator->getUid(), $creator->getLongname(), $creator->getStatusLabel()]);
         }
         $table->render();
     }

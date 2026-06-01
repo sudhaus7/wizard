@@ -28,7 +28,14 @@ final class FinalTTContentFormFrameworkListener
             $row = $event->getRecord();
             if (!empty($row['pi_flexform'])) {
                 $flex = GeneralUtility::xml2array($row['pi_flexform']);
-
+                if (is_string($flex)) {
+                    $event->getCreateProcess()->log(
+                        message: 'Flexform could not be read',
+                        info: 'ERROR',
+                        context: [$flex],
+                    );
+                    return;
+                }
                 /** @var Random $rnd */
                 $rnd = GeneralUtility::makeInstance(Random::class);
                 foreach ($flex['data'] as $key => $config) {

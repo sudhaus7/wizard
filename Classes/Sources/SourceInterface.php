@@ -24,7 +24,7 @@ interface SourceInterface extends LoggerAwareInterface
     public function setCreateProcess(CreateProcess $createProcess): void;
     public function getCreateProcess(): CreateProcess;
     public function setCreator(Creator $creator): void;
-    public function getCreator(): ?Creator;
+    public function getCreator(): Creator;
     /**
      * Returns the Site Config as an array
      *

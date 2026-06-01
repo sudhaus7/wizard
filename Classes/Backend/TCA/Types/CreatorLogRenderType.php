@@ -15,6 +15,7 @@ declare(strict_types=1);
 
 namespace SUDHAUS7\Sudhaus7Wizard\Backend\TCA\Types;
 
+use Doctrine\DBAL\Exception;
 use SUDHAUS7\Sudhaus7Wizard\Logger\WizardDatabaseLogger;
 use TYPO3\CMS\Backend\Form\Element\AbstractFormElement;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -24,8 +25,18 @@ class CreatorLogRenderType extends AbstractFormElement
 {
     /**
      * @inheritDoc
+     *
+     * @return array{
+     *     additionalHiddenFields: array<string, mixed>,
+     *     additionalInlineLanguageLabelFiles: array<string,mixed>,
+     *     stylesheetFiles: array<string, mixed>,
+     *     javaScriptModules: list<\TYPO3\CMS\Core\Page\JavaScriptModuleInstruction>,
+     *     inlineData: array<string, mixed>,
+     *     html: string,
+     * }|non-empty-array<array-key, mixed>
+     * @throws Exception
      */
-    public function render()
+    public function render(): array
     {
         $result = $this->initializeResultArray();
         $parameterArray = $this->data['parameterArray'];
