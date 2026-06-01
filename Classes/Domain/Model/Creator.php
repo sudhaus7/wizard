@@ -302,7 +302,10 @@ class Creator implements LoggerAwareInterface
     {
         $a = [];
         foreach (self::$statusList as $k => $v) {
-            $a[] = [$v, $k];
+            $a[] = [
+                'label' => $v,
+                'value' => $k,
+            ];
         }
         return $a;
     }

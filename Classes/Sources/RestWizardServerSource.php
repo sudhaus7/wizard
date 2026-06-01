@@ -562,7 +562,9 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
      */
     public function filterByPid(string $table, array $pidList): array
     {
-        $preList = array_filter($pidList, function ($v) { return (int)$v > 0; });
+        $preList = array_filter($pidList, function ($v) {
+            return (int)$v > 0;
+        });
 
         $filteredList = [];
         if (count($preList) > 0) {

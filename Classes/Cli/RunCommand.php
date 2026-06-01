@@ -50,59 +50,60 @@ final class RunCommand extends Command
     protected function configure(): void
     {
         $this->setDescription('TYPO3 Baukasten Wizard - Manages and processes wizard-based content creation tasks');
-        $this->setHelp(<<<'HELP'
-The Baukasten Wizard command allows you to manage and execute wizard creation tasks within TYPO3.
+        $this->setHelp(
+            <<<'HELP'
+                The Baukasten Wizard command allows you to manage and execute wizard creation tasks within TYPO3.
 
-<info>Usage:</info>
-  vendor/bin/typo3 sudhaus7:wizard <mode> [options]
+                <info>Usage:</info>
+                  vendor/bin/typo3 sudhaus7:wizard <mode> [options]
 
-<info>Available Modes:</info>
-  <comment>status</comment>  Display configuration status including registered extensions and creator config
-  <comment>list</comment>    Show all wizard tasks in the queue with their IDs, names, and current status
-  <comment>info</comment>    Display detailed information about a specific task (requires --id) or the next pending task
-  <comment>next</comment>    Process the next pending wizard task in the queue (if not already running)
-  <comment>single</comment>  Execute a specific wizard task by ID (requires --id option)
+                <info>Available Modes:</info>
+                  <comment>status</comment>  Display configuration status including registered extensions and creator config
+                  <comment>list</comment>    Show all wizard tasks in the queue with their IDs, names, and current status
+                  <comment>info</comment>    Display detailed information about a specific task (requires --id) or the next pending task
+                  <comment>next</comment>    Process the next pending wizard task in the queue (if not already running)
+                  <comment>single</comment>  Execute a specific wizard task by ID (requires --id option)
 
-<info>Options:</info>
-  <comment>-i, --id=ID</comment>
-      Required for <comment>single</comment> mode, optional for <comment>info</comment> mode.
-      Specifies the UID of a specific wizard task to process or display.
+                <info>Options:</info>
+                  <comment>-i, --id=ID</comment>
+                      Required for <comment>single</comment> mode, optional for <comment>info</comment> mode.
+                      Specifies the UID of a specific wizard task to process or display.
 
-  <comment>-f, --force</comment>
-      Force execution of a task even if it has already been processed or is marked as running.
-      Use with caution as this bypasses normal status checks.
+                  <comment>-f, --force</comment>
+                      Force execution of a task even if it has already been processed or is marked as running.
+                      Use with caution as this bypasses normal status checks.
 
-  <comment>-m, --mapto=FOLDER</comment>
-      Write the processing map/log output to the specified folder path.
-      Useful for debugging and tracking task execution details.
+                  <comment>-m, --mapto=FOLDER</comment>
+                      Write the processing map/log output to the specified folder path.
+                      Useful for debugging and tracking task execution details.
 
-  <comment>--logtodatabase</comment>
-      Store detailed execution logs in the database for the current task.
-      Logs are linked to the creator record and can be reviewed later.
+                  <comment>--logtodatabase</comment>
+                      Store detailed execution logs in the database for the current task.
+                      Logs are linked to the creator record and can be reviewed later.
 
-  <comment>--debug</comment>
-      Enable debug mode to print detailed runtime information including memory usage
-      and execution time. Provides verbose output for troubleshooting.
+                  <comment>--debug</comment>
+                      Enable debug mode to print detailed runtime information including memory usage
+                      and execution time. Provides verbose output for troubleshooting.
 
-<info>Examples:</info>
-  # Show system status and configuration
-  vendor/bin/typo3 sudhaus7:wizard status
+                <info>Examples:</info>
+                  # Show system status and configuration
+                  vendor/bin/typo3 sudhaus7:wizard status
 
-  # List all pending and completed wizard tasks
-  vendor/bin/typo3 sudhaus7:wizard list
+                  # List all pending and completed wizard tasks
+                  vendor/bin/typo3 sudhaus7:wizard list
 
-  # Process the next pending task with debug output
-  vendor/bin/typo3 sudhaus7:wizard next --debug
+                  # Process the next pending task with debug output
+                  vendor/bin/typo3 sudhaus7:wizard next --debug
 
-  # Execute a specific task by ID with database logging
-  vendor/bin/typo3 sudhaus7:wizard single --id=42 --logtodatabase
+                  # Execute a specific task by ID with database logging
+                  vendor/bin/typo3 sudhaus7:wizard single --id=42 --logtodatabase
 
-  # Get detailed information about a specific task
-  vendor/bin/typo3 sudhaus7:wizard info --id=42
+                  # Get detailed information about a specific task
+                  vendor/bin/typo3 sudhaus7:wizard info --id=42
 
-  # Force re-execution of a task and save processing map
-  vendor/bin/typo3 sudhaus7:wizard single --id=42 --force --mapto=/tmp/wizard-logs
-HELP
+                  # Force re-execution of a task and save processing map
+                  vendor/bin/typo3 sudhaus7:wizard single --id=42 --force --mapto=/tmp/wizard-logs
+                HELP
         );
         $this->addArgument('mode', InputArgument::REQUIRED, 'The operation mode: status, list, info, next, or single');
         $this->addOption('id', 'i', InputOption::VALUE_REQUIRED, 'UID of a specific wizard task (required for "single" mode, optional for "info" mode)');
