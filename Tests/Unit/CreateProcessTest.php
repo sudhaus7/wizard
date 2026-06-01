@@ -145,7 +145,7 @@ class CreateProcessTest extends UnitTestCase
      */
     public function getTranslateTypolinkStringTranslatesWizardGeneratedLinkConfig(): void
     {
-        self::assertEquals('t3://page?uid=10#20 _blank cssclass "My great link"', $this->create_process->translateTypolinkString('t3://page?uid=1#2 _blank cssclass "My great link"'));
+        self::assertEquals('t3://page?uid=10#20 _blank cssclass My great link', $this->create_process->translateTypolinkString('t3://page?uid=1#2 _blank cssclass "My great link"'));
     }
 
     /**
