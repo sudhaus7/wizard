@@ -1,0 +1,21 @@
+<?php
+
+/*
+ * This file is part of the TYPO3 project.
+ *
+ * @author Frank Berger <fberger@sudhaus7.de>
+ *
+ * For the full copyright and license information, please view
+ * the LICENSE file that was distributed with this source code.
+ *
+ * The TYPO3 project - inspiring people to share!
+ */
+
+use SUDHAUS7\Sudhaus7Template\Wizard\WizardProcessRemote;
+
+(static function() :void {
+    $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['Sudhaus7Wizard']['registeredTemplateExtentions'][ 'template' ]
+        = \SUDHAUS7\Sudhaus7Template\Wizard\WizardProcess::class;
+    $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['Sudhaus7Wizard']['registeredTemplateExtentions'][ 'template_remote' ]
+        = WizardProcessRemote::class;
+})();

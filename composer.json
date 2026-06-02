@@ -9,7 +9,8 @@
 		"allow-plugins": {
 			"typo3/cms-composer-installers": true,
 			"typo3/class-alias-loader": true,
-			"php-http/discovery": true
+			"php-http/discovery": true,
+			"sbuerk/fixture-packages": true
 		},
 		"sort-packages": true
 	},
@@ -22,7 +23,7 @@
 	"repositories": [
 		{
 			"type": "path",
-			"url": "Tests/Fixtures/*"
+			"url": "Tests/Functional/Fixtures/Extensions/*"
 		}
 	],
 	"require": {
@@ -36,6 +37,7 @@
 		"phpstan/phpstan": "^2.2",
 		"phpunit/phpunit": "^11.5",
 		"saschaegerer/phpstan-typo3": "^3.0",
+		"sbuerk/fixture-packages": "^1.1",
 		"typo3/cms-backend": "^13.4",
 		"typo3/cms-beuser": "^13.4",
 		"typo3/cms-frontend": "^13.4",
@@ -52,9 +54,7 @@
 	},
 	"autoload-dev": {
 		"psr-4": {
-			"SUDHAUS7\\Sudhaus7Wizard\\Tests\\Unit\\": "Tests/Unit/",
-			"SUDHAUS7\\Sudhaus7Wizard\\Tests\\Functional\\": "Tests/Functional/",
-			"SUDHAUS7\\Sudhaus7Template\\": "Tests/Fixtures/template/Classes/"
+			"SUDHAUS7\\Sudhaus7Wizard\\Tests\\": "Tests/"
 		}
 	},
 	"extra": {
@@ -62,6 +62,14 @@
 			"extension-key": "sudhaus7_wizard",
 			"web-dir": ".Build/Web",
 			"app-dir": ".Build"
+		},
+		"sbuerk/fixture-packages": {
+			"paths": {
+				"Tests/Functional/Fixtures/Extensions/*": [
+					"autoload",
+					"autoload-dev"
+				]
+			}
 		}
 	},
 	"scripts": {

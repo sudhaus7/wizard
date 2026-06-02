@@ -14,6 +14,7 @@ final class WizardTest extends FunctionalTestCase
 {
     protected array $testExtensionsToLoad = [
         'sudhaus7/sudhaus7-wizard',
+        'sudhaus7/template',
     ];
 
     protected array $pathsToProvideInTestInstance = [

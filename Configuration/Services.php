@@ -48,12 +48,6 @@ return static function (ContainerConfigurator $containerConfigurator, ContainerB
 
     $services->alias(CreateProcessFactoryInterface::class, CreateProcessFactory::class);
     $services->alias(SourceInterface::class, LocalDatabase::class);
-    $services->set(RunCommand::class)
-        ->tag('console.command', [
-            'command' => 'sudhaus7:wizard',
-            'description' => 'run wizard tasks',
-            'schedulable' => true,
-        ]);
 
     $services->set(PreSysFileReferenceEventHandler::class)
              ->tag('event.listener', ['identifier' => 's7wizardBaseHandleSysFileReferences']);

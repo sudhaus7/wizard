@@ -43,7 +43,7 @@ abstract class AbstractCreateProcessFactory implements CreateProcessFactoryInter
         $task->setTask($creator);
         $task->setTemplateKey($creator->getBase());
         /** @var class-string $processInterface */
-        $processInterface              = $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['Sudhaus7Wizard']['registeredTemplateExtentions'][ $task->getTemplateKey() ];
+        $processInterface = $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['Sudhaus7Wizard']['registeredTemplateExtentions'][ $task->getTemplateKey() ];
         /** @var WizardProcessInterface $wizardProcess */
         $wizardProcess = GeneralUtility::makeInstance($processInterface);
         $task->setTemplate($wizardProcess);

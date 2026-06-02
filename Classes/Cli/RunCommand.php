@@ -16,6 +16,8 @@ declare(strict_types=1);
 namespace SUDHAUS7\Sudhaus7Wizard\Cli;
 
 use Doctrine\DBAL\Driver\Exception;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Repository\CreatorRepository;
@@ -23,6 +25,7 @@ use SUDHAUS7\Sudhaus7Wizard\Logger\DebugConsoleLogger;
 use SUDHAUS7\Sudhaus7Wizard\Logger\WizardDatabaseLogger;
 use SUDHAUS7\Sudhaus7Wizard\Services\CreateProcessFactoryInterface;
 use SUDHAUS7\Sudhaus7Wizard\Tools;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
@@ -30,6 +33,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
+use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 use Symfony\Contracts\Service\Attribute\Required;
 use Throwable;
 use TYPO3\CMS\Core\Core\Bootstrap;
@@ -37,20 +42,13 @@ use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Mail\MailMessage;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-final class RunCommand extends Command
+#[AsCommand(name: 'sudhaus7.wizard')]
+final class RunCommand extends Command implements LoggerAwareInterface
 {
-    #[Required]
-    public LoggerInterface $logger;
-    #[Required]
-    private CreatorRepository $creatorRepository;
-    #[Required]
-    private CreateProcessFactoryInterface $createProcessFactory;
+    use LoggerAwareTrait;
 
-    #[Required]
-    public function injectLogger(LoggerInterface $logger): void
-    {
-        $this->logger = $logger;
-    }
+    private CreatorRepository $creatorRepository;
+    private CreateProcessFactoryInterface $createProcessFactory;
 
     #[Required]
     public function injectProcessFactory(CreateProcessFactoryInterface $createProcessFactory): void

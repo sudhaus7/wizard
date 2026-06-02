@@ -38,7 +38,7 @@ class WizardProcess implements WizardProcessInterface
      */
     public function getTemplateBackendUser(CreateProcess $pObj): array
     {
-        return BackendUtility::getRecord('be_users', 3) ?? [];
+        return BackendUtility::getRecord('be_users', 10) ?? [];
     }
 
     /**
@@ -46,12 +46,12 @@ class WizardProcess implements WizardProcessInterface
      */
     public function getTemplateBackendUserGroup(CreateProcess $pObj): array
     {
-        return BackendUtility::getRecord('be_groups', 4) ?? [];
+        return BackendUtility::getRecord('be_groups', 11) ?? [];
     }
 
     public function getMediaBaseDir(): string
     {
-        return 'sites/';
+        return 'Multisites/';
     }
 
     public function finalize(CreateProcess &$pObj): void {}

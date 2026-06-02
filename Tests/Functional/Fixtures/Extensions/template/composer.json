@@ -4,9 +4,6 @@
 	"type": "typo3-cms-extension",
 	"license": "MIT",
 	"config": {
-		"platform": {
-			"php": "8.3.0"
-		},
 		"allow-plugins": {
 			"typo3/cms-composer-installers": true,
 			"typo3/class-alias-loader": true,
@@ -15,7 +12,7 @@
 	},
 	"require": {
 		"georgringer/news": "^12.0",
-		"typo3/cms-introduction": "^4.6"
+		"typo3/cms-introduction": "^4.7"
 	},
 	"autoload": {
 		"psr-4": {

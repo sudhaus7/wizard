@@ -60,6 +60,7 @@ use SUDHAUS7\Sudhaus7Wizard\Services\TyposcriptService;
 use SUDHAUS7\Sudhaus7Wizard\Sources\LocalDatabase;
 use SUDHAUS7\Sudhaus7Wizard\Sources\SourceInterface;
 use SUDHAUS7\Sudhaus7Wizard\Traits\DbTrait;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
@@ -74,6 +75,7 @@ use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
+#[Autoconfigure(public: true)]
 final class CreateProcess implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
