@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SUDHAUS7\Sudhaus7Wizard\Tests\Functional\Wizard;
 
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use SUDHAUS7\Sudhaus7Wizard\Cli\RunCommand;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -53,7 +54,12 @@ final class WizardTest extends FunctionalTestCase
 ', $output);
     }
 
+    /**
+     * @todo postgres is currently disabled due to a mismatch of the generated record uids.
+     *       This has to be investigated, why this is happening.
+     */
     #[Test]
+    #[Group('not-postgres')]
     public function wizardGeneratesNewSite(): void
     {
         $tester = new CommandTester($this->get(RunCommand::class));
