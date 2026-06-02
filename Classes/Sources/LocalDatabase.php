@@ -23,6 +23,7 @@ use SUDHAUS7\Sudhaus7Wizard\Events\GetResourceStorageEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\PreHandleFileEvent;
 use SUDHAUS7\Sudhaus7Wizard\Services\FolderService;
 use SUDHAUS7\Sudhaus7Wizard\Traits\DbTrait;
+use Symfony\Component\DependencyInjection\Attribute\AsAlias;
 use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Throwable;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
@@ -41,12 +42,12 @@ use TYPO3\CMS\Core\Resource\Exception\FileDoesNotExistException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderAccessPermissionsException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderReadPermissionsException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderWritePermissionsException;
-use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
+#[AsAlias(id: SourceInterface::class, public: true)]
 #[Autoconfigure(public: true)]
 class LocalDatabase implements SourceInterface
 {

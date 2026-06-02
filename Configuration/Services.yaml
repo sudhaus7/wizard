@@ -6,3 +6,8 @@ services:
 
   SUDHAUS7\Sudhaus7Wizard\:
     resource: '../Classes'
+    exclude:
+      - '../Classes/Domain/Model/'
+      - '../Classes/Events/'
+      - '../Classes/Backend/'
+      - '../Classes/Logger/'

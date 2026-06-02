@@ -15,10 +15,10 @@ declare(strict_types=1);
 
 namespace SUDHAUS7\Sudhaus7Wizard\EventHandlers;
 
-use TYPO3\CMS\Core\Attribute\AsEventListener;
-
 use SUDHAUS7\Sudhaus7Wizard\Events\TCA\ColumnType\FinalEvent;
+
 use SUDHAUS7\Sudhaus7Wizard\Tools;
+use TYPO3\CMS\Core\Attribute\AsEventListener;
 
 #[AsEventListener]
 final class TypoLinkinRichTextFieldsEvent
