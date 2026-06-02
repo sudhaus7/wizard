@@ -249,9 +249,9 @@ final class CreateProcess implements LoggerAwareInterface
     /**
      * @param string[] $context
      */
-    public function log(string $message, string $info = 'DEBUG', string $section = null, array $context = []): void
+    public function log(string $message, string $info = 'DEBUG', ?string $section = null, array $context = []): void
     {
-        if (! is_null($section)) {
+        if ($section !== null) {
             $this->debugSection = $section;
         }
 
@@ -1122,7 +1122,11 @@ final class CreateProcess implements LoggerAwareInterface
     public function translateTypolinkString(string $s): string
     {
         $s = trim($s);
-        $a = str_getcsv($s, ' ');
+        $a = str_getcsv(
+            string: $s,
+            separator: ' ',
+            escape: '\\'
+        );
         $id = $a[0];
         if ($id === null) {
             return $s;
