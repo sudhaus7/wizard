@@ -18,11 +18,11 @@ use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardProcessInterface;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardTemplateConfigInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 
-class WizardProcessRemote implements WizardProcessInterface
+class WizardProcess implements WizardProcessInterface
 {
     public static function getWizardConfig(): WizardTemplateConfigInterface
     {
-        return new WizardConfigRemote();
+        return new WizardConfig();
     }
 
     /**
@@ -38,17 +38,7 @@ class WizardProcessRemote implements WizardProcessInterface
      */
     public function getTemplateBackendUser(CreateProcess $pObj): array
     {
-        if ($pObj->getTask()->getSourceuser() > 0) {
-            $user = $pObj->getSource()->getRow('be_users', ['uid' => $pObj->getTask()->getSourceuser()]);
-            $pObj->getTask()->setReduser($user['username']);
-            if (!empty($user['email'])) {
-                $pObj->getTask()->setRedemail($user['email']);
-            }
-            $pObj->getTask()->setRedpass($user['password']);
-        } else {
-            $user = BackendUtility::getRecord('be_users', 3);
-        }
-        return $user ?? [];
+        return BackendUtility::getRecord('be_users', 10) ?? [];
     }
 
     /**
@@ -56,12 +46,17 @@ class WizardProcessRemote implements WizardProcessInterface
      */
     public function getTemplateBackendUserGroup(CreateProcess $pObj): array
     {
-        return BackendUtility::getRecord('be_groups', 4) ?? [];
+        return BackendUtility::getRecord('be_groups', 22) ?? [];
     }
 
     public function getMediaBaseDir(): string
     {
-        return 'sites/';
+        return 'Multisites/';
+    }
+
+    public function getTemplateFileMountpoints(CreateProcess $pObj): array
+    {
+        return [15];
     }
 
     public function finalize(CreateProcess &$pObj): void {}

@@ -38,9 +38,9 @@ final class FinalEvent implements WizardEventInterface, WizardEventWriteableReco
     /**
      * @var array{
      *     table: string,
-     *     olduid: string|int,
-     *     oldpid: string|int,
-     *     newpid: string|int,
+     *     olduid?: string|int,
+     *     oldpid?: string|int,
+     *     newpid?: string|int,
      *     pObj: object
      * } configuration array
      */
@@ -51,9 +51,9 @@ final class FinalEvent implements WizardEventInterface, WizardEventWriteableReco
      * @param array<array-key, mixed> $record
      * @param array{
      *      table: string,
-     *      olduid: string|int,
-     *      oldpid: string|int,
-     *      newpid: string|int,
+     *      olduid?: string|int,
+     *      oldpid?: string|int,
+     *      newpid?: string|int,
      *      pObj: object
      *  } $parameters
      */
@@ -94,9 +94,9 @@ final class FinalEvent implements WizardEventInterface, WizardEventWriteableReco
     /**
      * @return array{
      *      table: string,
-     *      olduid: string|int,
-     *      oldpid: string|int,
-     *      newpid: string|int,
+     *      olduid?: string|int,
+     *      oldpid?: string|int,
+     *      newpid?: string|int,
      *      pObj: object
      *  }
      */

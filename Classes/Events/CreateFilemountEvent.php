@@ -41,7 +41,7 @@ final class CreateFilemountEvent implements LoggerAwareInterface, WizardEventInt
         $this->table = 'sys_filemounts';
     }
 
-    public function getLogger(): LoggerInterface
+    public function getLogger(): ?LoggerInterface
     {
         return $this->logger;
     }

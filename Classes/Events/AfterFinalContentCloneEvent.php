@@ -31,7 +31,7 @@ final class AfterFinalContentCloneEvent implements LoggerAwareInterface, WizardE
         $this->logger = $createProcess->getLogger();
     }
 
-    public function getLogger(): LoggerInterface
+    public function getLogger(): ?LoggerInterface
     {
         return $this->logger;
     }

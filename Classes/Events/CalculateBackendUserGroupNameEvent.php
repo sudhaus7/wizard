@@ -27,9 +27,6 @@ class CalculateBackendUserGroupNameEvent implements WizardEventInterface, Logger
 
     protected string $groupName;
 
-    /**
-     * @param array<array-key, mixed> $record
-     */
     public function __construct(string $groupName, CreateProcess $createProcess)
     {
         $this->createProcess = $createProcess;
@@ -37,7 +34,7 @@ class CalculateBackendUserGroupNameEvent implements WizardEventInterface, Logger
         $this->groupName     = $groupName;
     }
 
-    public function getLogger(): LoggerInterface
+    public function getLogger(): ?LoggerInterface
     {
         return $this->logger;
     }

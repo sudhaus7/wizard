@@ -26,11 +26,12 @@ class CalculateMountpointDirectoryNameEvent implements WizardEventInterface, Log
     use EventTrait;
 
     protected string $mountpointDirectoryName;
-    protected array $config;
 
     /**
-     * @param array<array-key, mixed> $record
+     * @var array<array-key, mixed>
      */
+    protected array $config;
+
     public function __construct(string $mountpointDirectoryName, CreateProcess $createProcess)
     {
         $this->createProcess = $createProcess;
@@ -38,7 +39,7 @@ class CalculateMountpointDirectoryNameEvent implements WizardEventInterface, Log
         $this->mountpointDirectoryName     = $mountpointDirectoryName;
     }
 
-    public function getLogger(): LoggerInterface
+    public function getLogger(): ?LoggerInterface
     {
         return $this->logger;
     }

@@ -26,11 +26,11 @@ class CalcualteMountpointNameEvent implements WizardEventInterface, LoggerAwareI
     use EventTrait;
 
     protected string $mountpointName;
+    /**
+     * @var array<array-key, mixed>
+     */
     protected array $config;
 
-    /**
-     * @param array<array-key, mixed> $record
-     */
     public function __construct(string $mountpointName, CreateProcess $createProcess)
     {
         $this->createProcess = $createProcess;
@@ -38,7 +38,7 @@ class CalcualteMountpointNameEvent implements WizardEventInterface, LoggerAwareI
         $this->mountpointName     = $mountpointName;
     }
 
-    public function getLogger(): LoggerInterface
+    public function getLogger(): ?LoggerInterface
     {
         return $this->logger;
     }

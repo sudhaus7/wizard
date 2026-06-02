@@ -18,11 +18,11 @@ use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardProcessInterface;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardTemplateConfigInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 
-class WizardProcess implements WizardProcessInterface
+class WizardProcessRemote implements WizardProcessInterface
 {
     public static function getWizardConfig(): WizardTemplateConfigInterface
     {
-        return new WizardConfig();
+        return new WizardConfigRemote();
     }
 
     /**
@@ -38,7 +38,17 @@ class WizardProcess implements WizardProcessInterface
      */
     public function getTemplateBackendUser(CreateProcess $pObj): array
     {
-        return BackendUtility::getRecord('be_users', 3) ?? [];
+        if ($pObj->getTask()->getSourceuser() > 0) {
+            $user = $pObj->getSource()->getRow('be_users', ['uid' => $pObj->getTask()->getSourceuser()]);
+            $pObj->getTask()->setReduser($user['username']);
+            if (!empty($user['email'])) {
+                $pObj->getTask()->setRedemail($user['email']);
+            }
+            $pObj->getTask()->setRedpass($user['password']);
+        } else {
+            $user = BackendUtility::getRecord('be_users', 3);
+        }
+        return $user ?? [];
     }
 
     /**
@@ -52,6 +62,11 @@ class WizardProcess implements WizardProcessInterface
     public function getMediaBaseDir(): string
     {
         return 'sites/';
+    }
+
+    public function getTemplateFileMountpoints(CreateProcess $pObj): array
+    {
+        return [];
     }
 
     public function finalize(CreateProcess &$pObj): void {}

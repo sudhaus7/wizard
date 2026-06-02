@@ -24,8 +24,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 class DebugConsoleLogger extends ConsoleLogger
 {
     protected float $timer = 0.0;
-    private $output;
-    private $verbosityLevelMap = [
+    private OutputInterface $output;
+
+    /**
+     * @var array<string, int>
+     */
+    private array $verbosityLevelMap = [
         LogLevel::EMERGENCY => OutputInterface::VERBOSITY_NORMAL,
         LogLevel::ALERT => OutputInterface::VERBOSITY_NORMAL,
         LogLevel::CRITICAL => OutputInterface::VERBOSITY_NORMAL,
@@ -35,7 +39,11 @@ class DebugConsoleLogger extends ConsoleLogger
         LogLevel::INFO => OutputInterface::VERBOSITY_VERY_VERBOSE,
         LogLevel::DEBUG => OutputInterface::VERBOSITY_DEBUG,
     ];
-    private $formatLevelMap = [
+
+    /**
+     * @var array<string, string>
+     */
+    private array $formatLevelMap = [
         LogLevel::EMERGENCY => self::ERROR,
         LogLevel::ALERT => self::ERROR,
         LogLevel::CRITICAL => self::ERROR,
@@ -45,7 +53,11 @@ class DebugConsoleLogger extends ConsoleLogger
         LogLevel::INFO => self::INFO,
         LogLevel::DEBUG => self::INFO,
     ];
-    private $errored = false;
+
+    /**
+     * @param array<string, int> $verbosityLevelMap
+     * @param array<string, string> $formatLevelMap
+     */
     public function __construct(OutputInterface $output, array $verbosityLevelMap = [], array $formatLevelMap = [])
     {
         parent::__construct($output, $verbosityLevelMap, $formatLevelMap);
@@ -55,6 +67,11 @@ class DebugConsoleLogger extends ConsoleLogger
         $this->timer = microtime(true);
     }
 
+    /**
+     * @param LogLevel::* $level
+     * @param string|\Stringable $message
+     * @param array<array-key, mixed> $context
+     */
     public function log($level, $message, array $context = []): void
     {
         $output = $this->output;

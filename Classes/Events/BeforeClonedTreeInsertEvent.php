@@ -54,7 +54,7 @@ final class BeforeClonedTreeInsertEvent implements LoggerAwareInterface, WizardE
         return $this->oldid;
     }
 
-    public function getLogger(): LoggerInterface
+    public function getLogger(): ?LoggerInterface
     {
         return $this->logger;
     }

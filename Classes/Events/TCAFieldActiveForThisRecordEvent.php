@@ -26,9 +26,15 @@ class TCAFieldActiveForThisRecordEvent implements LoggerAwareInterface, WizardEv
 
     protected string $table;
     protected string $column;
+    /**
+     * @var array<array-key, mixed>
+     */
     protected array $record;
     protected bool $isAllowed = false;
 
+    /**
+     * @param array<array-key, mixed> $record
+     */
     public function __construct(string $table, string $column, array $record, CreateProcess $createProcess)
     {
         $this->record = $record;
@@ -47,6 +53,9 @@ class TCAFieldActiveForThisRecordEvent implements LoggerAwareInterface, WizardEv
         return $this->column;
     }
 
+    /**
+     * @return array<array-key, mixed>
+     */
     public function getRecord(): array
     {
         return $this->record;

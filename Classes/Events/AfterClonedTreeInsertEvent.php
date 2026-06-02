@@ -33,15 +33,19 @@ final class AfterClonedTreeInsertEvent implements LoggerAwareInterface, WizardEv
      * @var array<array-key, mixed> the page Record
      */
     protected array $record;
+
+    /**
+     * @param array<array-key, mixed> $record
+     */
     public function __construct(
         string|int $oldId,
         array $record,
-        CreateProcess $create_process
+        CreateProcess $createProcess
     ) {
-        $this->createProcess = $create_process;
+        $this->createProcess = $createProcess;
         $this->oldId = $oldId;
         $this->record = $record;
-        $this->logger = $create_process->getLogger();
+        $this->logger = $createProcess->getLogger();
     }
 
     /**
@@ -53,14 +57,14 @@ final class AfterClonedTreeInsertEvent implements LoggerAwareInterface, WizardEv
     }
 
     /**
-     * @return array
+     * @return array<array-key, mixed>
      */
     public function getRecord(): array
     {
         return $this->record;
     }
 
-    public function getLogger(): LoggerInterface
+    public function getLogger(): ?LoggerInterface
     {
         return $this->logger;
     }

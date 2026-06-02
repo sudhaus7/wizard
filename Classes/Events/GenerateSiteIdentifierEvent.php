@@ -42,7 +42,7 @@ final class GenerateSiteIdentifierEvent implements WizardEventInterface
     }
 
     /**
-     * @return array
+     * @return array<array-key, mixed>
      */
     public function getSiteconfig(): array
     {

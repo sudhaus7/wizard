@@ -84,7 +84,7 @@ return [
             'config' => [
                 'type' => 'select',
                 'renderType' => 'selectSingle',
-                'default' => '1',
+                'default' => 1,
                 'items' => [
                     ['label' => 'Bitte wählen', 'value' => 1],
                 ],

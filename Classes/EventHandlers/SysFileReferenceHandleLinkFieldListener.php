@@ -16,7 +16,9 @@ declare(strict_types=1);
 namespace SUDHAUS7\Sudhaus7Wizard\EventHandlers;
 
 use SUDHAUS7\Sudhaus7Wizard\Events\TCA\Inlines\CleanEvent;
+use TYPO3\CMS\Core\Attribute\AsEventListener;
 
+#[AsEventListener]
 final class SysFileReferenceHandleLinkFieldListener
 {
     public function __invoke(CleanEvent $event): void

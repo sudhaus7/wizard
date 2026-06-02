@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the TYPO3 project.
  *
@@ -13,15 +15,16 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard\Cli;
 
-use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
-use Psr\Log\LoggerInterface;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Repository\CreatorRepository;
 use SUDHAUS7\Sudhaus7Wizard\Logger\DebugConsoleLogger;
 use SUDHAUS7\Sudhaus7Wizard\Logger\WizardDatabaseLogger;
 use SUDHAUS7\Sudhaus7Wizard\Services\CreateProcessFactoryInterface;
 use SUDHAUS7\Sudhaus7Wizard\Tools;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
@@ -29,80 +32,90 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Contracts\Service\Attribute\Required;
 use Throwable;
 use TYPO3\CMS\Core\Core\Bootstrap;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Mail\MailMessage;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-final class RunCommand extends Command
+#[AsCommand(name: 'sudhaus7.wizard')]
+final class RunCommand extends Command implements LoggerAwareInterface
 {
-    public ?LoggerInterface $logger = null;
-    private ?CreatorRepository $repository = null;
+    use LoggerAwareTrait;
+
+    private CreatorRepository $creatorRepository;
     private CreateProcessFactoryInterface $createProcessFactory;
 
-    public function __construct(CreateProcessFactoryInterface $createProcessFactory)
+    #[Required]
+    public function injectProcessFactory(CreateProcessFactoryInterface $createProcessFactory): void
     {
-        parent::__construct();
         $this->createProcessFactory = $createProcessFactory;
+    }
+
+    #[Required]
+    public function injectCreatorRepository(CreatorRepository $creatorRepository): void
+    {
+        $this->creatorRepository = $creatorRepository;
     }
 
     protected function configure(): void
     {
         $this->setDescription('TYPO3 Baukasten Wizard - Manages and processes wizard-based content creation tasks');
-        $this->setHelp(<<<'HELP'
-The Baukasten Wizard command allows you to manage and execute wizard creation tasks within TYPO3.
+        $this->setHelp(
+            <<<'HELP'
+                The Baukasten Wizard command allows you to manage and execute wizard creation tasks within TYPO3.
 
-<info>Usage:</info>
-  vendor/bin/typo3 sudhaus7:wizard <mode> [options]
+                <info>Usage:</info>
+                  vendor/bin/typo3 sudhaus7:wizard <mode> [options]
 
-<info>Available Modes:</info>
-  <comment>status</comment>  Display configuration status including registered extensions and creator config
-  <comment>list</comment>    Show all wizard tasks in the queue with their IDs, names, and current status
-  <comment>info</comment>    Display detailed information about a specific task (requires --id) or the next pending task
-  <comment>next</comment>    Process the next pending wizard task in the queue (if not already running)
-  <comment>single</comment>  Execute a specific wizard task by ID (requires --id option)
+                <info>Available Modes:</info>
+                  <comment>status</comment>  Display configuration status including registered extensions and creator config
+                  <comment>list</comment>    Show all wizard tasks in the queue with their IDs, names, and current status
+                  <comment>info</comment>    Display detailed information about a specific task (requires --id) or the next pending task
+                  <comment>next</comment>    Process the next pending wizard task in the queue (if not already running)
+                  <comment>single</comment>  Execute a specific wizard task by ID (requires --id option)
 
-<info>Options:</info>
-  <comment>-i, --id=ID</comment>
-      Required for <comment>single</comment> mode, optional for <comment>info</comment> mode.
-      Specifies the UID of a specific wizard task to process or display.
+                <info>Options:</info>
+                  <comment>-i, --id=ID</comment>
+                      Required for <comment>single</comment> mode, optional for <comment>info</comment> mode.
+                      Specifies the UID of a specific wizard task to process or display.
 
-  <comment>-f, --force</comment>
-      Force execution of a task even if it has already been processed or is marked as running.
-      Use with caution as this bypasses normal status checks.
+                  <comment>-f, --force</comment>
+                      Force execution of a task even if it has already been processed or is marked as running.
+                      Use with caution as this bypasses normal status checks.
 
-  <comment>-m, --mapto=FOLDER</comment>
-      Write the processing map/log output to the specified folder path.
-      Useful for debugging and tracking task execution details.
+                  <comment>-m, --mapto=FOLDER</comment>
+                      Write the processing map/log output to the specified folder path.
+                      Useful for debugging and tracking task execution details.
 
-  <comment>--logtodatabase</comment>
-      Store detailed execution logs in the database for the current task.
-      Logs are linked to the creator record and can be reviewed later.
+                  <comment>--logtodatabase</comment>
+                      Store detailed execution logs in the database for the current task.
+                      Logs are linked to the creator record and can be reviewed later.
 
-  <comment>--debug</comment>
-      Enable debug mode to print detailed runtime information including memory usage
-      and execution time. Provides verbose output for troubleshooting.
+                  <comment>--debug</comment>
+                      Enable debug mode to print detailed runtime information including memory usage
+                      and execution time. Provides verbose output for troubleshooting.
 
-<info>Examples:</info>
-  # Show system status and configuration
-  vendor/bin/typo3 sudhaus7:wizard status
+                <info>Examples:</info>
+                  # Show system status and configuration
+                  vendor/bin/typo3 sudhaus7:wizard status
 
-  # List all pending and completed wizard tasks
-  vendor/bin/typo3 sudhaus7:wizard list
+                  # List all pending and completed wizard tasks
+                  vendor/bin/typo3 sudhaus7:wizard list
 
-  # Process the next pending task with debug output
-  vendor/bin/typo3 sudhaus7:wizard next --debug
+                  # Process the next pending task with debug output
+                  vendor/bin/typo3 sudhaus7:wizard next --debug
 
-  # Execute a specific task by ID with database logging
-  vendor/bin/typo3 sudhaus7:wizard single --id=42 --logtodatabase
+                  # Execute a specific task by ID with database logging
+                  vendor/bin/typo3 sudhaus7:wizard single --id=42 --logtodatabase
 
-  # Get detailed information about a specific task
-  vendor/bin/typo3 sudhaus7:wizard info --id=42
+                  # Get detailed information about a specific task
+                  vendor/bin/typo3 sudhaus7:wizard info --id=42
 
-  # Force re-execution of a task and save processing map
-  vendor/bin/typo3 sudhaus7:wizard single --id=42 --force --mapto=/tmp/wizard-logs
-HELP
+                  # Force re-execution of a task and save processing map
+                  vendor/bin/typo3 sudhaus7:wizard single --id=42 --force --mapto=/tmp/wizard-logs
+                HELP
         );
         $this->addArgument('mode', InputArgument::REQUIRED, 'The operation mode: status, list, info, next, or single');
         $this->addOption('id', 'i', InputOption::VALUE_REQUIRED, 'UID of a specific wizard task (required for "single" mode, optional for "info" mode)');
@@ -119,12 +132,11 @@ HELP
         } else {
             $this->logger = new ConsoleLogger($output);
         }
-        $this->repository = GeneralUtility::makeInstance(CreatorRepository::class);
+        $this->creatorRepository = GeneralUtility::makeInstance(CreatorRepository::class);
     }
 
     /**
      * @throws Exception
-     * @throws DBALException
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
@@ -140,14 +152,14 @@ HELP
                     if ($input->getOption('force')) {
                         $force = true;
                     }
-                    $o = $this->repository->findByIdentifier($input->getOption('id'), $force);
+                    $o = $this->creatorRepository->findByIdentifier($input->getOption('id'), $force);
                     if ($o instanceof Creator) {
                         $this->getInfo($o, $input, $output);
                         return Command::SUCCESS;
                     }
                     $output->writeln('<info>Not found</info>');
                 } else {
-                    $o = $this->repository->findNext();
+                    $o = $this->creatorRepository->findNext();
                     if ($o instanceof Creator) {
                         $this->getInfo($o, $input, $output);
                         return Command::SUCCESS;
@@ -160,7 +172,7 @@ HELP
                     if ($input->getOption('force')) {
                         $force = true;
                     }
-                    $o = $this->repository->findByIdentifier($input->getOption('id'), $force);
+                    $o = $this->creatorRepository->findByIdentifier($input->getOption('id'), $force);
                     if ($o instanceof Creator) {
                         return $this->create($o, $input, $output, $mapFolder);
                     }
@@ -173,9 +185,9 @@ HELP
                 $this->getList($input, $output);
                 return 0;
             case 'next':
-                $o = $this->repository->findNext();
+                $o = $this->creatorRepository->findNext();
                 if ($o instanceof Creator) {
-                    if (!$this->repository->isRunning()) {
+                    if (!$this->creatorRepository->isRunning()) {
                         return $this->create($o, $input, $output, $mapFolder);
                     }
                 } else {
@@ -187,20 +199,6 @@ HELP
                 break;
         }
         return 1;
-    }
-
-    /**
-     * @deprecated
-     */
-    private function forceVisible(int $id): void
-    {
-        GeneralUtility::makeInstance(ConnectionPool::class)
-            ->getConnectionForTable('tx_sudhaus7wizard_domain_model_creator')
-            ->update(
-                'tx_sudhaus7wizard_domain_model_creator',
-                ['uid' => $id],
-                ['hidden' => 0, 'deleted' => 0, 'status' => 10]
-            );
     }
 
     public function getInfo(Creator $o, InputInterface $input, OutputInterface $output): void
@@ -219,7 +217,7 @@ HELP
         }
     }
 
-    public function create(Creator $creator, InputInterface $input, OutputInterface $output, $mapfolder = null): int
+    public function create(Creator $creator, InputInterface $input, OutputInterface $output, ?string $mapfolder = null): int
     {
         if ($input->getOption('logtodatabase')) {
             // Start a new log
@@ -232,7 +230,7 @@ HELP
 
         Bootstrap::initializeBackendAuthentication();
         $creator->setStatus(Creator::STATUS_PROCESSING);
-        $this->repository->updateStatus($creator);
+        $this->creatorRepository->updateStatus($creator);
 
         $this->getInfo($creator, $input, $output);
         //$output->write(implode("\n",)."\n");
@@ -242,8 +240,8 @@ HELP
                 $output->write("Fertig\n", true);
                 $creator->setStatus(Creator::STATUS_DONE);
 
-                $this->repository->updateStatus($creator);
-                $this->repository->updatePid($creator);
+                $this->creatorRepository->updateStatus($creator);
+                $this->creatorRepository->updatePid($creator);
 
                 if (!empty($creator->getNotifyEmail())) {
                     // Create the message
@@ -262,12 +260,12 @@ HELP
                 return Command::SUCCESS;
             }
         } catch (Throwable $e) {
-            $this->logger->warning($e->getMessage() . ' (' . $e->getCode() . ")\n" . $e->getTraceAsString(), []);
+            $this->logger?->warning($e->getMessage() . ' (' . $e->getCode() . ")\n" . $e->getTraceAsString(), []);
             $creator->setStacktrace($e->getMessage() . ' (' . $e->getCode() . ")\n" . $e->getTraceAsString());
             $creator->setStatus(Creator::STATUS_FAILED);
         }
 
-        $this->repository->updateStatus($creator);
+        $this->creatorRepository->updateStatus($creator);
 
         return Command::FAILURE;
     }
@@ -289,10 +287,9 @@ HELP
         $table->setHeaderTitle('Todo List');
         $table->setHeaders(['ID', 'Baukasten', 'Status']);
 
-        $list = $this->repository->findAll();
-        /** @var $o Creator */
-        foreach ($list as $o) {
-            $table->addRow([$o->getUid(), $o->getLongname(), $o->getStatusLabel()]);
+        $list = $this->creatorRepository->findAll();
+        foreach ($list as $creator) {
+            $table->addRow([$creator->getUid(), $creator->getLongname(), $creator->getStatusLabel()]);
         }
         $table->render();
     }

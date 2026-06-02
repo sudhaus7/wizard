@@ -32,15 +32,27 @@ final class CreateBackendUserGroupEvent implements LoggerAwareInterface, WizardE
 
     /**
      * @param array<array-key, mixed> $record
+     * @param int[] $templateFileMountpoints
      */
-    public function __construct(array $record, CreateProcess $createProcess)
-    {
+    public function __construct(
+        array $record,
+        CreateProcess $createProcess,
+        private readonly array $templateFileMountpoints,
+    ) {
         $this->createProcess = $createProcess;
-        $this->record         = $record;
+        $this->record = $record;
         $this->logger = $createProcess->getLogger();
     }
 
-    public function getLogger(): LoggerInterface
+    /**
+     * @return int[]
+     */
+    public function getTemplateFileMountpoints(): array
+    {
+        return $this->templateFileMountpoints;
+    }
+
+    public function getLogger(): ?LoggerInterface
     {
         return $this->logger;
     }

@@ -1,0 +1,39 @@
+<T3DataStructure>
+    <meta>
+        <langDisable>1</langDisable>
+    </meta>
+    <ROOT>
+        <type>array</type>
+        <el>
+            <primary>
+                <label>Primary Color</label>
+                <config>
+                    <type>color</type>
+                    <default>#0288D1</default>
+                </config>
+            </primary>
+
+            <secondary>
+                <label>secondary Color</label>
+                <config>
+                    <type>color</type>
+                    <default>#FFEB3B</default>
+                </config>
+            </secondary>
+            <breadcrumb>
+                <label>breadcrumb Color</label>
+                <config>
+                    <type>color</type>
+                    <default>#FFEB3B</default>
+                </config>
+            </breadcrumb>
+            <preloader>
+                <label>preloader Color</label>
+                <config>
+                    <type>color</type>
+                    <default>#F2F2F2</default>
+                </config>
+            </preloader>
+        </el>
+    </ROOT>
+</T3DataStructure>

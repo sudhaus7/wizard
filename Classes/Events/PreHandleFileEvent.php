@@ -40,6 +40,9 @@ class PreHandleFileEvent implements WizardEventInterface
         $this->record = $record;
     }
 
+    /**
+     * @return array<array-key, mixed>
+     */
     public function getRecord(): array
     {
         return $this->record;
@@ -55,6 +58,9 @@ class PreHandleFileEvent implements WizardEventInterface
         $this->newidentifier = $newidentifier;
     }
 
+    /**
+     * @param array<array-key, mixed> $record
+     */
     public function setRecord(array $record): void
     {
         $this->record = $record;

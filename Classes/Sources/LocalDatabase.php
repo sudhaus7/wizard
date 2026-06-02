@@ -13,13 +13,8 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard\Sources;
 
-use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
-
-use function in_array;
-
 use InvalidArgumentException;
-
 use Psr\Log\LoggerAwareTrait;
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
@@ -28,6 +23,8 @@ use SUDHAUS7\Sudhaus7Wizard\Events\GetResourceStorageEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\PreHandleFileEvent;
 use SUDHAUS7\Sudhaus7Wizard\Services\FolderService;
 use SUDHAUS7\Sudhaus7Wizard\Traits\DbTrait;
+use Symfony\Component\DependencyInjection\Attribute\AsAlias;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Throwable;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Core\Environment;
@@ -39,7 +36,9 @@ use TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
 use TYPO3\CMS\Core\Database\Query\Restriction\StartTimeRestriction;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
+use TYPO3\CMS\Core\Resource\AbstractFile;
 use TYPO3\CMS\Core\Resource\Exception\ExistingTargetFolderException;
+use TYPO3\CMS\Core\Resource\Exception\FileDoesNotExistException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderAccessPermissionsException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderReadPermissionsException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderWritePermissionsException;
@@ -48,6 +47,8 @@ use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
+#[AsAlias(id: SourceInterface::class, public: true)]
+#[Autoconfigure(public: true)]
 class LocalDatabase implements SourceInterface
 {
     use LoggerAwareTrait;
@@ -101,8 +102,13 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         ],
     ];
 
-    private ?Creator $creator = null;
+    private Creator $creator;
     protected ?CreateProcess $createProcess = null;
+
+    public function __construct(
+        private readonly ConnectionPool $connectionPool,
+    ) {}
+
     /**
      * @return Creator
      */
@@ -121,13 +127,13 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 
     /**
      * @inheritDoc
-     * @throws DBALException
      * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function getTree(int $start): array
     {
         /** @var QueryBuilder $query */
-        $query = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('pages');
+        $query = $this->connectionPool->getQueryBuilderForTable('pages');
         $query->getRestrictions()->removeAll();
         $query->getRestrictions()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
 
@@ -152,26 +158,23 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         try {
             $site = $siteFinder->getSiteByRootPageId((int)$id);
             return $site->getConfiguration();
-        } catch (SiteNotFoundException $e) {
-            $this->logger->debug($e->getMessage(), [$id]);
-        } catch (\Exception $e) {
-            $this->logger->debug($e->getMessage(), [$id]);
+        } catch (SiteNotFoundException|\Exception $e) {
+            $this->logger?->debug($e->getMessage(), [$id]);
         }
         return $this->siteconfig;
     }
 
     public function ping(): void
     {
-        $db = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionByName('Default');
+        $db = $this->connectionPool->getConnectionByName('Default');
         if (!$db->isConnected()) {
-            $db->connect();
+            $db->getNativeConnection();
         }
     }
 
     /**
      * @inheritDoc
-     * @throws Exception
-     * @throws DBALException
+     * @throws \Doctrine\DBAL\Exception
      */
     public function getIrre(
         string $table,
@@ -182,7 +185,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         array $pidList = [],
         string $column = ''
     ): array {
-        $query = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($columnConfig['config']['foreign_table']);
+        $query = $this->connectionPool->getQueryBuilderForTable($columnConfig['config']['foreign_table']);
 
         $query->getRestrictions()->removeAll();
         $query->getRestrictions()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
@@ -207,8 +210,8 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 
         if (isset($columnConfig['config']['foreign_table_where'])) {
             $tmp = $columnConfig['config']['foreign_table_where'];
-            $tmp = str_replace('###CURRENT_PID###', $pid, (string)$tmp);
-            $tmp = str_replace('###THIS_UID###', $uid, $tmp);
+            $tmp = str_replace('###CURRENT_PID###', (string)$pid, (string)$tmp);
+            $tmp = str_replace('###THIS_UID###', (string)$uid, $tmp);
             foreach (array_keys($GLOBALS['TCA'][$columnConfig['config']['foreign_table']]['columns']) as $key) {
                 $tmp = str_replace('###REC_FIELD_' . $key . '###', $oldRow[$key], $tmp);
             }
@@ -225,23 +228,28 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 
     /**
      * @inheritDoc
+     * @param array<array-key, mixed> $sysFile
+     *
+     * @return array<array-key, mixed>
      * @throws Exception
      * @throws ExistingTargetFolderException
      * @throws InsufficientFolderAccessPermissionsException
      * @throws InsufficientFolderReadPermissionsException
      * @throws InsufficientFolderWritePermissionsException
+     * @throws \Doctrine\DBAL\Exception
      */
-    public function handleFile(array $sysFile, $newIdentifier): array
+    public function handleFile(array $sysFile, string $newIdentifier): array
     {
-        $this->logger->debug('handleFile ' . $newIdentifier . ' START');
+        $this->logger?->debug('handleFile ' . $newIdentifier . ' START');
 
         $preEvent = new PreHandleFileEvent($newIdentifier, $sysFile, $this->getCreateProcess());
         GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($preEvent);
         $sysFile = $preEvent->getRecord();
+        /** @var non-empty-string $newIdentifier */
         $newIdentifier = $preEvent->getNewidentifier();
 
         /** @var ResourceStorage $storage */
-        $storage           = GeneralUtility::makeInstance(StorageRepository::class)->getDefaultStorage();
+        $storage = GeneralUtility::makeInstance(StorageRepository::class)->getDefaultStorage();
 
         $defaultStorageEvent = new GetResourceStorageEvent($storage, $this->getCreateProcess());
         GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($defaultStorageEvent);
@@ -253,8 +261,8 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $newFileName = $folder->getStorage()->sanitizeFileName(basename($newIdentifier));
         $newIdentifier = $folder->getIdentifier() . $newFileName;
         if ($folder->hasFile($newFileName)) {
-            $this->logger->debug('file exists - END' . Environment::getPublicPath() . '/fileadmin' . $newIdentifier);
-            $res = GeneralUtility::makeInstance(ConnectionPool::class)
+            $this->logger?->debug('file exists - END' . Environment::getPublicPath() . '/fileadmin' . $newIdentifier);
+            $res = $this->connectionPool
                 ->getConnectionForTable('sys_file')
                 ->select(
                     [ '*' ],
@@ -264,11 +272,16 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
             return $res->fetchAssociative() ?: [];
         }
 
-        $this->logger->notice('cp ' . Environment::getPublicPath() . '/fileadmin' . $sysFile['identifier'] . ' ' . Environment::getPublicPath() . '/fileadmin' . $newIdentifier);
+        $this->logger?->notice('cp ' . Environment::getPublicPath() . '/fileadmin' . $sysFile['identifier'] . ' ' . Environment::getPublicPath() . '/fileadmin' . $newIdentifier);
 
         try {
             $oldfile = $folder->getStorage()->getFileByIdentifier($sysFile['identifier']);
-
+            if (!$oldfile instanceof AbstractFile) {
+                throw new FileDoesNotExistException(
+                    'File is not found',
+                    1780324354
+                );
+            }
             $file = $oldfile->copyTo($folder);
         } catch (Throwable $t) {
             // We're on the local system, and the original file is missing. shouldn't happen
@@ -276,7 +289,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
             // continues and at least there is a broken image. I don't see a better solution for this
             // problem at the moment (FB 31.03.2025)
 
-            $this->logger->error($t->getMessage());
+            $this->logger?->error($t->getMessage());
             return $sysFile;
         }
 
@@ -284,27 +297,28 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 
         $uid = $file->getUid();
 
-        $query = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('sys_file_metadata');
+        $query = $this->connectionPool->getConnectionForTable('sys_file_metadata');
         $res = $query->select(
             [ '*' ],
             'sys_file_metadata',
             ['file' => $sysFile['uid']]
         );
-        $sys_file_metadata = $res->fetchAssociative();
+        $sysFileMetadata = $res->fetchAssociative();
 
-        if (!empty($sys_file_metadata)) {
+        if (!empty($sysFileMetadata)) {
             $subEventDispatcher = GeneralUtility::makeInstance(EventDispatcher::class);
-            $subEvent = new FinalContentEvent('sys_file_metadata', $sys_file_metadata, $this->getCreateProcess());
+            $subEvent = new FinalContentEvent('sys_file_metadata', $sysFileMetadata, $this->getCreateProcess());
 
             $subEventDispatcher->dispatch($subEvent);
-            $sys_file_metadata = $subEvent->getRecord();
+            $sysFileMetadata = $subEvent->getRecord();
 
-            $res = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('sys_file_metadata')
-                                 ->select(
-                                     [ '*' ],
-                                     'sys_file_metadata',
-                                     ['file' => $uid]
-                                 );
+            $res = $this->connectionPool
+                ->getConnectionForTable('sys_file_metadata')
+                ->select(
+                    [ '*' ],
+                    'sys_file_metadata',
+                    ['file' => $uid]
+                );
             $newSysFileMetadata = $res->fetchAssociative();
             if (!empty($newSysFileMetadata)) {
                 $skipFields = [
@@ -316,10 +330,10 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                     'cruser_id',
                 ];
                 $update = [];
-                foreach ($sys_file_metadata as $k => $v) {
-                    if (! in_array($k, $skipFields)) {
-                        if (! empty($v) || (int)$v > 0) {
-                            $update[ $k ] = $v;
+                foreach ($sysFileMetadata as $fieldName => $value) {
+                    if (! in_array($fieldName, $skipFields)) {
+                        if ((int)$value > 0) {
+                            $update[ $fieldName ] = $value;
                         }
                     }
                 }
@@ -327,30 +341,29 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                     self::updateRecord('sys_file_metadata', $update, [ 'uid' => $newSysFileMetadata['uid'] ]);
                 }
             } else {
-                unset($sys_file_metadata['uid']);
-                $sys_file_metadata['file'] = $uid;
-                self::insertRecord('sys_file_metadata', $sys_file_metadata);
+                unset($sysFileMetadata['uid']);
+                $sysFileMetadata['file'] = $uid;
+                self::insertRecord('sys_file_metadata', $sysFileMetadata);
             }
         }
 
-        return BackendUtility::getRecord('sys_file', $uid);
+        return BackendUtility::getRecord('sys_file', $uid) ?? [];
     }
 
     /**
      * @inheritDoc
-     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
-    public function getMM($mmTable, $uid, $tableName): array
+    public function getMM(string $mmTable, int|string $uid, string $tableName): array
     {
-        $query = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($mmTable);
-        $res = $query->select(
+        $query = $this->connectionPool->getConnectionForTable($mmTable);
+        $result = $query->select(
             [ '*' ],
             $mmTable,
             ['uid_local' => $uid]
         );
 
-        $ret = $res->fetchAllAssociative();
-        return $ret ?? [];
+        return $result->fetchAllAssociative() ?: [];
     }
 
     public function sourcePid(): int
@@ -368,12 +381,15 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 
     /**
      * @inheritDoc
-     * @throws DBALException
-     * @throws Exception
+     *
+     * @param array<array-key, mixed> $where
+     *
+     * @return array<array-key, mixed>
+     * @throws \Doctrine\DBAL\Exception
      */
-    public function getRow($table, $where = []): array
+    public function getRow(string $table, array $where = []): array
     {
-        $query = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
+        $query = $this->connectionPool->getQueryBuilderForTable($table);
         $query
             ->getRestrictions()
             ->removeByType(HiddenRestriction::class)
@@ -391,12 +407,15 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 
     /**
      * @inheritDoc
-     * @throws Exception
-     * @throws DBALException
+     *
+     * @param array<array-key, mixed> $where
+     *
+     * @return array<array-key, mixed>
+     * @throws \Doctrine\DBAL\Exception
      */
-    public function getRows($table, $where = []): array
+    public function getRows(string $table, array $where = []): array
     {
-        $query = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
+        $query = $this->connectionPool->getQueryBuilderForTable($table);
         $query
             ->getRestrictions()
             ->removeByType(HiddenRestriction::class)
@@ -413,16 +432,18 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 
     /**
      * @inheritDoc
-     * @throws Exception
-     * @throws DBALException
+     * @throws \Doctrine\DBAL\Exception
      */
     public function filterByPid(string $table, array $pidList): array
     {
-        $preList = array_filter($pidList, function ($v) { return (int)$v > 0; });
+        $preList = array_filter($pidList, function ($v) {
+            return (int)$v > 0;
+        });
 
         $filteredPidList = [];
         if (count($preList) > 0) {
-            $query = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
+            $query = $this->connectionPool
+                ->getQueryBuilderForTable($table);
             $stmt  = $query
                 ->selectLiteral('distinct pid')
                 ->from($table)

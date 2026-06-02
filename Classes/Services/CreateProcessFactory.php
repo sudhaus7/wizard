@@ -15,10 +15,13 @@ declare(strict_types=1);
 
 namespace SUDHAUS7\Sudhaus7Wizard\Services;
 
+use Symfony\Component\DependencyInjection\Attribute\AsAlias;
+
 /**
  * Default factory implementation to retrieve a `CreateProcess` instance
  * based on the passed `Creator` dataset.
  *
  * @internal not part of public API.
  */
+#[AsAlias(id: CreateProcessFactoryInterface::class, public: true)]
 final class CreateProcessFactory extends AbstractCreateProcessFactory {}

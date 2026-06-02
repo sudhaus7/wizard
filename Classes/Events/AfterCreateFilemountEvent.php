@@ -31,15 +31,15 @@ final class AfterCreateFilemountEvent implements LoggerAwareInterface, WizardEve
     /**
      * @param array<array-key, mixed> $record
      */
-    public function __construct(array $record, CreateProcess $create_process)
+    public function __construct(array $record, CreateProcess $createProcess)
     {
         $this->record = $record;
-        $this->createProcess = $create_process;
-        $this->logger = $create_process->getLogger();
+        $this->createProcess = $createProcess;
+        $this->logger = $createProcess->getLogger();
         $this->table = 'sys_filemounts';
     }
 
-    public function getLogger(): LoggerInterface
+    public function getLogger(): ?LoggerInterface
     {
         return $this->logger;
     }

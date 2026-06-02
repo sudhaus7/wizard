@@ -16,10 +16,12 @@ declare(strict_types=1);
 namespace SUDHAUS7\Sudhaus7Wizard\EventHandlers;
 
 use SUDHAUS7\Sudhaus7Wizard\Events\TCA\ColumnType\FinalEvent;
+use TYPO3\CMS\Core\Attribute\AsEventListener;
 
 /**
  * handles the new TCA Type 'link'
  */
+#[AsEventListener]
 final class TypeLinkListener
 {
     public function __invoke(FinalEvent $event): void

@@ -1,0 +1,26 @@
+includes:
+  - ../../../.Build/vendor/saschaegerer/phpstan-typo3/extension.neon
+  - phpstan-baseline.neon
+
+parameters:
+  ignoreErrors:
+    - message: '#Variable \$_EXTKEY might not be defined.#'
+      path: **/*/ext_emconf.php
+  # Use local .cache dir instead of /tmp
+  tmpDir: ../../.cache/phpstan
+
+  level: 8
+
+  paths:
+    - ../../../Classes/
+    - ../../../Configuration/
+    - ../../../Tests/
+    - ../../../ext_emconf.php
+    - ../../../ext_localconf.php
+
+  excludePaths:
+    - ../../../.Build
+
+  # @todo recheck rules.
+  inferPrivatePropertyTypeFromConstructor: true
+  reportUnmatchedIgnoredErrors: true

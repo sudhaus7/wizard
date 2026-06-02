@@ -5,18 +5,12 @@
     <ROOT>
         <type>array</type>
         <el>
-
             <theme>
-                <TCEforms>
-                    <label>Diese Vorlage hat keine weiteren Konfigurationsoptionen - Bitte Quelle/Typ wählen</label>
-                    <config>
-                        <type>none</type>
-                    </config>
-                </TCEforms>
+                <label>Diese Vorlage hat keine weiteren Konfigurationsoptionen - Bitte Quelle/Typ wählen</label>
+                <config>
+                    <type>none</type>
+                </config>
             </theme>
-
-
-
         </el>
     </ROOT>
 </T3DataStructure>

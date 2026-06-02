@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the TYPO3 project.
  *
@@ -13,9 +15,8 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard\Domain\Repository;
 
-use Doctrine\DBAL\DBALException;
-use Doctrine\DBAL\Driver\Exception;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
@@ -24,22 +25,24 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 /**
  * Class CreatorRepository
  */
-class CreatorRepository
+#[Autoconfigure(public: true)]
+final class CreatorRepository
 {
-    protected static string $table = 'tx_sudhaus7wizard_domain_model_creator';
+    public function __construct(
+        private readonly ConnectionPool $connectionPool,
+    ) {}
 
     /**
      * @return Creator[]
-     * @throws DBALException
-     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function findAll(): array
     {
-        $db = GeneralUtility::makeInstance(ConnectionPool::class)
-            ->getQueryBuilderForTable(self::$table);
-        $statement = $db
+        $queryBuilder = $this->connectionPool
+            ->getQueryBuilderForTable('tx_sudhaus7wizard_domain_model_creator');
+        $statement = $queryBuilder
             ->select('*')
-            ->from(self::$table);
+            ->from('tx_sudhaus7wizard_domain_model_creator');
         $found = [];
 
         $result = $statement->executeQuery();
@@ -52,20 +55,19 @@ class CreatorRepository
     }
 
     /**
-     * @throws Exception
-     * @throws DBALException
+     * @throws \Doctrine\DBAL\Exception
      */
     public function findNext(): ?Creator
     {
-        $db = GeneralUtility::makeInstance(ConnectionPool::class)
-            ->getQueryBuilderForTable(self::$table);
-        $statement = $db
+        $queryBuilder = $this->connectionPool
+            ->getQueryBuilderForTable('tx_sudhaus7wizard_domain_model_creator');
+        $statement = $queryBuilder
             ->select('*')
-            ->from(self::$table)
+            ->from('tx_sudhaus7wizard_domain_model_creator')
             ->where(
-                $db->expr()->eq(
+                $queryBuilder->expr()->eq(
                     'status',
-                    $db->createNamedParameter(10, Connection::PARAM_INT)
+                    $queryBuilder->createNamedParameter(10, Connection::PARAM_INT)
                 )
             )
             ->setMaxResults(1);
@@ -81,23 +83,22 @@ class CreatorRepository
     }
 
     /**
-     * @throws Exception
-     * @throws DBALException
+     * @throws \Doctrine\DBAL\Exception
      */
     public function findByIdentifier(int|string $identifier, bool $force = false): ?Creator
     {
-        $db = GeneralUtility::makeInstance(ConnectionPool::class)
-            ->getQueryBuilderForTable(self::$table);
+        $queryBuilder = $this->connectionPool
+            ->getQueryBuilderForTable('tx_sudhaus7wizard_domain_model_creator');
         if ($force) {
-            $db->getRestrictions()->removeAll();
+            $queryBuilder->getRestrictions()->removeAll();
         }
-        $statement = $db
+        $statement = $queryBuilder
             ->select('*')
-            ->from(self::$table)
+            ->from('tx_sudhaus7wizard_domain_model_creator')
             ->where(
-                $db->expr()->eq(
+                $queryBuilder->expr()->eq(
                     'uid',
-                    $db->createNamedParameter($identifier, Connection::PARAM_INT)
+                    $queryBuilder->createNamedParameter($identifier, Connection::PARAM_INT)
                 )
             )
             ->setMaxResults(1);
@@ -113,32 +114,32 @@ class CreatorRepository
     }
 
     /**
-     * @throws DBALException
+     * @throws \Doctrine\DBAL\Exception
      */
     public function isRunning(): bool
     {
-        $db = GeneralUtility::makeInstance(ConnectionPool::class)
-            ->getQueryBuilderForTable(self::$table);
-        $statement = $db
-            ->select('*')
-            ->from(self::$table)
+        $queryBuilder = $this->connectionPool
+            ->getQueryBuilderForTable('tx_sudhaus7wizard_domain_model_creator');
+        $statement = $queryBuilder
+            ->count('*')
+            ->from('tx_sudhaus7wizard_domain_model_creator')
             ->where(
-                $db->expr()->eq(
+                $queryBuilder->expr()->eq(
                     'status',
-                    $db->createNamedParameter(15, Connection::PARAM_INT)
+                    $queryBuilder->createNamedParameter(15, Connection::PARAM_INT)
                 )
             )
             ->setMaxResults(1);
 
         $result = $statement->executeQuery();
 
-        return $result->rowCount() > 0;
+        return $result->fetchOne() > 0;
     }
 
     public function updateStatus(Creator $creator): void
     {
         $data = [
-            self::$table => [
+            'tx_sudhaus7wizard_domain_model_creator' => [
                 $creator->getUid() => [
                     'status' => $creator->getStatus(),
                     'stacktrace' => $creator->getStacktrace(),
@@ -153,7 +154,7 @@ class CreatorRepository
     public function updatePid(Creator $creator): void
     {
         $cmd = [
-            self::$table => [
+            'tx_sudhaus7wizard_domain_model_creator' => [
                 $creator->getUid() => [
                     'move' => $creator->getPid(),
                 ],

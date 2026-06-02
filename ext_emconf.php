@@ -15,14 +15,14 @@ $EM_CONF[$_EXTKEY] = [
     'title' => '(Sudhaus7) Wizard',
     'description' => '',
     'category' => 'fe',
-    'state' => 'beta',
+    'state' => 'stable',
     'author' => 'Frank Berger',
     'author_email' => 'fberger@b-factor.de',
     'author_company' => 'Sudhaus 7',
-    'version' => '0.5.21',
+    'version' => '1.0.0',
     'constraints' => [
         'depends' => [
-            'typo3' => '12.4.0-13.4.99',
+            'typo3' => '13.4.0-13.4.99',
         ],
         'conflicts' => [
         ],

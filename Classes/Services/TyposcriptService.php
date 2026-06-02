@@ -15,11 +15,12 @@ namespace SUDHAUS7\Sudhaus7Wizard\Services;
 
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use TYPO3\CMS\Core\TypoScript\AST\AstBuilderInterface;
-use TYPO3\CMS\Core\TypoScript\Parser\TypoScriptParser;
 use TYPO3\CMS\Core\TypoScript\TypoScriptStringFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
+#[Autoconfigure(public: true)]
 final class TyposcriptService implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
@@ -43,10 +44,6 @@ final class TyposcriptService implements LoggerAwareInterface
 
         $result = $service->factory->parseFromString($s, $service->astBuilder)->toArray();
         return $result;
-        /** @var  TypoScriptParser $oTSparser */
-        //$oTSparser = GeneralUtility::makeInstance(TypoScriptParser::class);
-        //$oTSparser->parse($s);
-        //return $oTSparser->setup;
     }
 
     /**

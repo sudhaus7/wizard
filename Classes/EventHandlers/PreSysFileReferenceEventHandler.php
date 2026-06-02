@@ -18,9 +18,11 @@ namespace SUDHAUS7\Sudhaus7Wizard\EventHandlers;
 use SUDHAUS7\Sudhaus7Wizard\Events\BeforeContentCloneEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\NewFileIdentifierEvent;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Attribute\AsEventListener;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
+#[AsEventListener]
 final class PreSysFileReferenceEventHandler
 {
     public function __invoke(BeforeContentCloneEvent $event): void

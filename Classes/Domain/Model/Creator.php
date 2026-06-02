@@ -40,6 +40,9 @@ class Creator implements LoggerAwareInterface
     public const STATUS_FAILED = 17;
     public const STATUS_DONE = 20;
 
+    /**
+     * @var array<self::STATUS_*, string>
+     */
     public static array $statusList = [
         self::STATUS_EDITING    => 'editing',
         self::STATUS_NOTREADY   => 'Not ready',
@@ -51,6 +54,9 @@ class Creator implements LoggerAwareInterface
 
     protected string $stacktrace = '';
 
+    /**
+     * @param array<array-key, mixed> $valuemappingcache
+     */
     protected function __construct(
         protected int $uid,
         protected int $pid,
@@ -58,16 +64,16 @@ class Creator implements LoggerAwareInterface
         protected string $base,
         protected ?string $projektname,
         protected ?string $longname,
-        protected ?string $shortname,
-        protected ?string $domainname,
+        protected string $shortname,
+        protected string $domainname,
         protected ?string $contact,
         protected ?string $reduser,
         protected ?string $redemail,
-        protected ?string $redpass,
+        protected string $redpass,
         protected int $status,
         protected ?string $flexinfo,
         protected ?string $email,
-        protected ?string $valuemapping,
+        protected string $valuemapping,
         protected int $sourceuser,
         protected int $sourcefilemount,
         protected string $sourceclass,
@@ -77,25 +83,26 @@ class Creator implements LoggerAwareInterface
 
     /**
      * @param array{
-     * uid: int,
-     * sourcepid: string,
-     * base: string,
-     * projektname: string,
-     * longname: string,
-     * shortname: string,
-     * domainname: string,
-     * contact: string,
-     * reduser: string,
-     * redemail: string,
-     * redpass: string,
-     *  status: string,
-     *  flexinfo: string,
-     * email: string,
-     * valuemapping: string,
-     * sourceuser: int,
-     * sourcefilemount: int,
-     * sourceclass: string
-     * notify_email: string
+     *     uid: int,
+     *     pid:int,
+     *     sourcepid: string,
+     *     base: string,
+     *     projektname: string,
+     *     longname: string,
+     *     shortname: string,
+     *     domainname: string,
+     *     contact: string,
+     *     reduser: string,
+     *     redemail: string,
+     *     redpass: string,
+     *     status: int,
+     *     flexinfo?: ?string,
+     *     email?: string,
+     *     valuemapping: string,
+     *     sourceuser: int,
+     *     sourcefilemount: int,
+     *     sourceclass: string,
+     *     notify_email: string
      * } $row
      */
     public static function createFromDatabaseRow(array $row): Creator
@@ -114,7 +121,7 @@ class Creator implements LoggerAwareInterface
             $row['redemail'],
             $row['redpass'],
             $row['status'],
-            $row['flexinfo'],
+            $row['flexinfo'] ?? null,
             $row['email'] ?? '',
             $row['valuemapping'],
             (int)$row['sourceuser'],
@@ -162,22 +169,15 @@ class Creator implements LoggerAwareInterface
         return $this->longname;
     }
 
-    /**
-     * Shortname
-     *
-     * @return string|null shortname
-     */
-    public function getShortname(): ?string
+    public function getShortname(): string
     {
         return $this->shortname;
     }
 
     /**
      * Domainname
-     *
-     * @return string|null domainname
      */
-    public function getDomainname(): ?string
+    public function getDomainname(): string
     {
         return $this->domainname;
     }
@@ -213,11 +213,9 @@ class Creator implements LoggerAwareInterface
     }
 
     /**
-     * Redpass
-     *
-     * @return string|null redpass
+     * Password for backend editor
      */
-    public function getRedpass(): ?string
+    public function getRedpass(): string
     {
         return $this->redpass;
     }
@@ -244,13 +242,17 @@ class Creator implements LoggerAwareInterface
      *
      * @param bool $useTypo3Service returns in a flattened format
      *
-     * @return array flexform array
+     * @return array<array-key, mixed> flexform array
      */
-    public function getFlexinfo(bool $useTypo3Service = false)
+    public function getFlexinfo(bool $useTypo3Service = false): array
     {
         if ($this->flexinfo === null && isset($GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['types'][$this->base]) && strpos((string)$GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['types'][$this->base]['showitem'], 'flexinfo')) {
             $row = BackendUtility::getRecord('tx_sudhaus7wizard_domain_model_creator', $this->getUid());
-            $this->flexinfo = $row['flexinfo'];
+            $this->flexinfo = $row['flexinfo'] ?? null;
+        }
+
+        if ($this->flexinfo === null) {
+            return [];
         }
 
         if ($useTypo3Service) {
@@ -258,16 +260,23 @@ class Creator implements LoggerAwareInterface
                 ->convertFlexFormContentToArray($this->flexinfo);
         }
 
-        return GeneralUtility::xml2array($this->flexinfo);
+        $parsedArray = GeneralUtility::xml2array($this->flexinfo);
+
+        // xml2array returns string with parsing error if parsing fails.
+        if (is_string($parsedArray)) {
+            $this->logger?->error('Flex form parsing error: ' . $parsedArray);
+            return [];
+        }
+
+        return $parsedArray;
     }
 
     /**
      * Flexinfo
      *
-     * @param array $flexinfo
-     * @return $this
+     * @param array<array-key, mixed> $flexinfo
      */
-    public function setFlexinfo($flexinfo)
+    public function setFlexinfo(array $flexinfo): self
     {
         $this->flexinfo = Tools::array2xml($flexinfo);
         return $this;
@@ -296,13 +305,16 @@ class Creator implements LoggerAwareInterface
     /**
      * Status
      *
-     * @return array<int, mixed[]> status
+     * @return array<int, array{label: string, value: int}> status
      */
     public static function getStatusTca(): array
     {
         $a = [];
         foreach (self::$statusList as $k => $v) {
-            $a[] = [$v, $k];
+            $a[] = [
+                'label' => $v,
+                'value' => $k,
+            ];
         }
         return $a;
     }
@@ -312,6 +324,9 @@ class Creator implements LoggerAwareInterface
         return $this->valuemapping;
     }
 
+    /**
+     * @return array<array-key, mixed>
+     */
     public function getValuemappingArray(): array
     {
         if (!empty($this->valuemapping)) {

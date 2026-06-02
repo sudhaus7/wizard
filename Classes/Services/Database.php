@@ -16,21 +16,23 @@ namespace SUDHAUS7\Sudhaus7Wizard\Services;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\DataHandling\ReferenceIndexUpdater;
 use TYPO3\CMS\Core\SingletonInterface;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class Database implements SingletonInterface
 {
-    protected ReferenceIndexUpdater $referenceIndexUpdater;
-    public function __construct(ReferenceIndexUpdater $referenceIndexUpdater)
-    {
-        $this->referenceIndexUpdater = $referenceIndexUpdater;
-    }
+    public function __construct(
+        protected readonly ReferenceIndexUpdater $referenceIndexUpdater,
+        private readonly ConnectionPool $connectionPool,
+    ) {}
 
+    /**
+     * @param array<string, mixed> $data
+     * @return int[]
+     */
     public function insert(string $table, array $data): array
     {
-        $conn = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($table);
+        $conn = $this->connectionPool->getConnectionForTable($table);
         $rows = $conn->insert($table, $data);
-        $newid = $conn->lastInsertId($table);
+        $newid = (int)$conn->lastInsertId();
 
         $this->referenceIndexUpdater->registerForUpdate($table, $newid, 0);
 
@@ -42,15 +44,21 @@ class Database implements SingletonInterface
         $this->referenceIndexUpdater->update();
     }
 
+    /**
+     * @param array<array-key, mixed> $data
+     * @param array<string, mixed> $where
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function update(string $table, array $data, array $where): int
     {
         if (!isset($where['uid'])) {
-            $res = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($table)
-                                 ->select(
-                                     [ '*' ],
-                                     $table,
-                                     $where
-                                 );
+            $res = $this->connectionPool
+                ->getConnectionForTable($table)
+                ->select(
+                    [ '*' ],
+                    $table,
+                    $where
+                );
             $affected = 0;
             while ($row = $res->fetchAssociative()) {
                 $this->update($table, $data, ['uid' => $row['uid']]);
@@ -59,7 +67,7 @@ class Database implements SingletonInterface
             return $affected;
         }
 
-        $affected = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($table)->update($table, $data, $where);
+        $affected = $this->connectionPool->getConnectionForTable($table)->update($table, $data, $where);
 
         if (isset($data['deleted']) && (int)$data['deleted'] === 1) {
             $this->referenceIndexUpdater->registerForDrop($table, $where['uid'], 0);

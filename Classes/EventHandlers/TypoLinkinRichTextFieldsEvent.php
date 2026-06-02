@@ -15,12 +15,12 @@ declare(strict_types=1);
 
 namespace SUDHAUS7\Sudhaus7Wizard\EventHandlers;
 
-use function preg_match_all;
-use function str_contains;
-
 use SUDHAUS7\Sudhaus7Wizard\Events\TCA\ColumnType\FinalEvent;
-use SUDHAUS7\Sudhaus7Wizard\Tools;
 
+use SUDHAUS7\Sudhaus7Wizard\Tools;
+use TYPO3\CMS\Core\Attribute\AsEventListener;
+
+#[AsEventListener]
 final class TypoLinkinRichTextFieldsEvent
 {
     public function __invoke(FinalEvent $event): void

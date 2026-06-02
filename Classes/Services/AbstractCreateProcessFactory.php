@@ -35,33 +35,35 @@ abstract class AbstractCreateProcessFactory implements CreateProcessFactoryInter
 {
     public function get(Creator $creator, ?LoggerInterface $logger = null): CreateProcess
     {
-        /** @var CreateProcess $tsk */
-        $tsk = GeneralUtility::makeInstance(CreateProcess::class);
+        /** @var CreateProcess $task */
+        $task = GeneralUtility::makeInstance(CreateProcess::class);
         if ($logger instanceof LoggerInterface) {
-            $tsk->setLogger($logger);
+            $task->setLogger($logger);
         }
-        $tsk->setTask($creator);
-        $tsk->setTemplateKey($creator->getBase());
+        $task->setTask($creator);
+        $task->setTemplateKey($creator->getBase());
         /** @var class-string $processInterface */
-        $processInterface              = $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['Sudhaus7Wizard']['registeredTemplateExtentions'][ $tsk->getTemplateKey() ];
+        $processInterface = $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['Sudhaus7Wizard']['registeredTemplateExtentions'][ $task->getTemplateKey() ];
         /** @var WizardProcessInterface $wizardProcess */
         $wizardProcess = GeneralUtility::makeInstance($processInterface);
-        $tsk->setTemplate($wizardProcess);
+        $task->setTemplate($wizardProcess);
         $sourceClassName = $creator->getSourceclass();
         if (class_exists($sourceClassName)) {
             $sourceClass = GeneralUtility::makeInstance(ltrim($sourceClassName, '\\'));
-            $tsk->setSource($sourceClass instanceof SourceInterface ? $sourceClass : GeneralUtility::makeInstance(LocalDatabase::class));
-            $tsk->getSource()->setCreateProcess($tsk);
-            $tsk->getSource()->setCreator($creator);
-            $tsk->getSource()->setLogger($logger);
+            $task->setSource($sourceClass instanceof SourceInterface ? $sourceClass : GeneralUtility::makeInstance(LocalDatabase::class));
+            $task->getSource()->setCreateProcess($task);
+            $task->getSource()->setCreator($creator);
+            if ($logger instanceof LoggerInterface) {
+                $task->getSource()->setLogger($logger);
+            }
         }
         $pid = $creator->getSourcepid();
-        $siteconfig = $tsk->getSource()->getSiteConfig($pid);
+        $siteconfig = $task->getSource()->getSiteConfig($pid);
 
         // wanted to do this early to have more control over where the source is loaded
-        $event = new LoadInitialSiteConfigEvent($pid, $siteconfig, $tsk);
+        $event = new LoadInitialSiteConfigEvent($pid, $siteconfig, $task);
         GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
-        $tsk->setSiteConfig($event->getSiteconfig());
-        return $tsk;
+        $task->setSiteConfig($event->getSiteconfig());
+        return $task;
     }
 }

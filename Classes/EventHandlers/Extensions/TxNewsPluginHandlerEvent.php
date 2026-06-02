@@ -28,6 +28,14 @@ final class TxNewsPluginHandlerEvent
             $record = $event->getRecord();
             if (!empty($record['pi_flexform'])) {
                 $flex = GeneralUtility::xml2array($record['pi_flexform']);
+                if (is_string($flex)) {
+                    $event->getCreateProcess()->log(
+                        message: 'Flexform could not be read',
+                        info: 'ERROR',
+                        context: [$flex],
+                    );
+                    return;
+                }
 
                 if (isset($flex['data']['additional']['lDEF']['settings.detailPid']['vDEF'])) {
                     $flex['data']['additional']['lDEF']['settings.detailPid']['vDEF'] = $process->getTranslateUid('pages', $flex['data']['additional']['lDEF']['settings.detailPid']['vDEF']);

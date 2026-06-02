@@ -18,11 +18,9 @@ namespace SUDHAUS7\Sudhaus7Wizard\Traits;
 use function in_array;
 
 use SUDHAUS7\Sudhaus7Wizard\Services\Database;
-use TYPO3\CMS\Core\Cache\Frontend\NullFrontend;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
-use TYPO3\CMS\Core\Database\Schema\SchemaInformation;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 trait DbTrait
@@ -67,12 +65,12 @@ trait DbTrait
 
     public static function tableHasField(string $tableName, string $field): bool
     {
-        $conn = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($tableName);
+        $databaseConnection = GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getConnectionForTable($tableName);
 
-        /** @var SchemaInformation $schemaInformation */
-        $columns = GeneralUtility::makeInstance(SchemaInformation::class, $conn, new NullFrontend('wizard-dummy-cache'))->introspectTable($tableName);
+        $columns = $databaseConnection->getSchemaInformation()->listTableColumnNames($tableName);
         foreach ($columns as $column) {
-            if ($column->getName() === $field) {
+            if ($column === $field) {
                 return true;
             }
         }

@@ -15,15 +15,18 @@ declare(strict_types=1);
 
 namespace SUDHAUS7\Sudhaus7Wizard\Services;
 
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use TYPO3\CMS\Core\Resource\Exception\ExistingTargetFolderException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderAccessPermissionsException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderReadPermissionsException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderWritePermissionsException;
 use TYPO3\CMS\Core\Resource\Folder;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
+use TYPO3\CMS\Core\Resource\ResourceStorageInterface;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
+#[Autoconfigure(public: true)]
 final class FolderService
 {
     protected StorageRepository $storageRepository;
@@ -45,26 +48,23 @@ final class FolderService
     }
 
     /**
+     * @param non-empty-string $identifier
      * @throws ExistingTargetFolderException
      * @throws InsufficientFolderAccessPermissionsException
      * @throws InsufficientFolderWritePermissionsException
      * @throws InsufficientFolderReadPermissionsException
      */
-    public function getOrCreateFromIdentifier(string $identifier, ResourceStorage $storage = null): Folder
+    public function getOrCreateFromIdentifier(string $identifier, ?ResourceStorageInterface $storage = null): Folder
     {
         $testidentifier = explode(':', $identifier);
         if (count($testidentifier) === 2) {
-            $storage = null;
+            $storage = $this->storageRepository->findByCombinedIdentifier($identifier);
         }
-        if ($storage === null && count($testidentifier) === 2) {
-            $storage = $this->storageRepository->findByUid((int)$testidentifier[0]);
-            if ($storage !== null) {
-                $identifier = $testidentifier[1];
-            }
-        }
+
         if ($storage === null) {
             $storage = $this->defaultStorage;
         }
+        /** @var ResourceStorage $storage */
         $identifier = trim($identifier, '/');
         $identifierList = GeneralUtility::trimExplode('/', $identifier);
         $folder = null;

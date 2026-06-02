@@ -17,9 +17,11 @@ namespace SUDHAUS7\Sudhaus7Wizard\EventHandlers;
 
 use SUDHAUS7\Sudhaus7Wizard\Events\TtContent\FinalContentByCtypeEvent;
 use SUDHAUS7\Sudhaus7Wizard\Tools;
+use TYPO3\CMS\Core\Attribute\AsEventListener;
 use TYPO3\CMS\Core\Crypto\Random;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
+#[AsEventListener]
 final class FinalTTContentFormFrameworkListener
 {
     public function __invoke(FinalContentByCtypeEvent $event): void
@@ -28,7 +30,14 @@ final class FinalTTContentFormFrameworkListener
             $row = $event->getRecord();
             if (!empty($row['pi_flexform'])) {
                 $flex = GeneralUtility::xml2array($row['pi_flexform']);
-
+                if (is_string($flex)) {
+                    $event->getCreateProcess()->log(
+                        message: 'Flexform could not be read',
+                        info: 'ERROR',
+                        context: [$flex],
+                    );
+                    return;
+                }
                 /** @var Random $rnd */
                 $rnd = GeneralUtility::makeInstance(Random::class);
                 foreach ($flex['data'] as $key => $config) {

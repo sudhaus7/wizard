@@ -44,6 +44,12 @@ interface WizardProcessInterface
     public function getTemplateBackendUserGroup(CreateProcess $pObj): array;
 
     /**
+     * Returns the templated file mountpoint mainly for removing from the mountpoint list
+     * @param CreateProcess $pObj
+     * @return int[]
+     */
+    public function getTemplateFileMountpoints(CreateProcess $pObj): array;
+    /**
      * Returns the base directory under 1:fileadmin where to create the new Sites folder structure
      * for example 'oursites/primaryschools/' - translating to '1:fileadmin/oursites/primaryschools'
      * @return string

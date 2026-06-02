@@ -38,9 +38,9 @@ final class AfterEvent implements WizardEventInterface, WizardEventWriteableReco
     /**
      * @var array{
      *     table: string,
-     *     olduid: string|int,
-     *     oldpid: string|int,
-     *     newpid: string|int,
+     *     olduid?: string|int,
+     *     oldpid?: string|int,
+     *     newpid?: string|int,
      *     pObj: object
      * } configuration array
      */
@@ -49,7 +49,13 @@ final class AfterEvent implements WizardEventInterface, WizardEventWriteableReco
     /**
      * @param array<array-key, mixed> $columnConfig
      * @param array<array-key, mixed> $record
-     * @param array<array-key, mixed> $parameters
+     * @param array{
+     *      table: string,
+     *      olduid?: string|int,
+     *      oldpid?: string|int,
+     *      newpid?: string|int,
+     *      pObj: object
+     *  } $parameters
      */
     public function __construct(
         string $table,
