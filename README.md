@@ -8,6 +8,16 @@
 This is a TYPO3 extension with the extension key `sudhaus7_wizard`. With this extension a sitepackage can be extended to be able to completly clone an existing site by generating a wizard record, configuring the new name, url and user.
 
 Changelog
+
+1.0.0
+* Requires TYPO3 13.4 (dependency updated from `^13.0` to `^13.4`)
+* Requires PHP 8.2 or higher
+* Breaking change: `WizardProcessInterface` has been extended by a new method providing the template-defined file mountpoints to replace. Add this to your implementations:
+```php
+public function getFileMountPoints(): array;
+```
+The file mountpoint is now **replaced** (not appended) on wizard run during `be_groups` generation. To restore the previous append behaviour, listen to `CreateBackendUserGroupEvent`, which now exposes the template file mountpoints via `getTemplateFileMountPoints()`.
+
 0.4.0
 * breaking change a Source has been defined from SourceInterface. Sources need now a connection to the CreateProcess. Upgrade your source by adding this code-snippet:
 ```php
