@@ -17,12 +17,14 @@ namespace SUDHAUS7\Sudhaus7Wizard\EventHandlers;
 
 use Doctrine\DBAL\Exception;
 use SUDHAUS7\Sudhaus7Wizard\Events\PageSortEvent;
+use TYPO3\CMS\Core\Attribute\AsEventListener;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
+#[AsEventListener]
 final class DefaultSiteSorterListener
 {
     /**

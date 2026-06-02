@@ -18,9 +18,11 @@ namespace SUDHAUS7\Sudhaus7Wizard\EventHandlers;
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
 use SUDHAUS7\Sudhaus7Wizard\Events\BeforeContentCloneEvent;
 use SUDHAUS7\Sudhaus7Wizard\Events\TCA\ColumnType\CleanEvent;
+use TYPO3\CMS\Core\Attribute\AsEventListener;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
+#[AsEventListener]
 final class TypeFileListener
 {
     public function __invoke(CleanEvent $event): void
