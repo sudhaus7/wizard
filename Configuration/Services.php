@@ -13,7 +13,6 @@ declare(strict_types=1);
  * The TYPO3 project - inspiring people to share!
  */
 
-use SUDHAUS7\Sudhaus7Wizard\Cli\RunCommand;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\DefaultSiteSorterListener;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\Extensions\TxNewsFixRecordHandler;
 use SUDHAUS7\Sudhaus7Wizard\EventHandlers\Extensions\TxNewsPluginHandlerEvent;

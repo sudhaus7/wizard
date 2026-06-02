@@ -13,7 +13,7 @@
 
 use SUDHAUS7\Sudhaus7Template\Wizard\WizardProcessRemote;
 
-(static function() :void {
+(static function (): void {
     $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['Sudhaus7Wizard']['registeredTemplateExtentions'][ 'template' ]
         = \SUDHAUS7\Sudhaus7Template\Wizard\WizardProcess::class;
     $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['Sudhaus7Wizard']['registeredTemplateExtentions'][ 'template_remote' ]

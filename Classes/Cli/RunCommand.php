@@ -18,7 +18,6 @@ namespace SUDHAUS7\Sudhaus7Wizard\Cli;
 use Doctrine\DBAL\Driver\Exception;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
-use Psr\Log\LoggerInterface;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Repository\CreatorRepository;
 use SUDHAUS7\Sudhaus7Wizard\Logger\DebugConsoleLogger;
@@ -33,8 +32,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
-use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 use Symfony\Contracts\Service\Attribute\Required;
 use Throwable;
 use TYPO3\CMS\Core\Core\Bootstrap;
@@ -263,7 +260,7 @@ final class RunCommand extends Command implements LoggerAwareInterface
                 return Command::SUCCESS;
             }
         } catch (Throwable $e) {
-            $this->logger->warning($e->getMessage() . ' (' . $e->getCode() . ")\n" . $e->getTraceAsString(), []);
+            $this->logger?->warning($e->getMessage() . ' (' . $e->getCode() . ")\n" . $e->getTraceAsString(), []);
             $creator->setStacktrace($e->getMessage() . ' (' . $e->getCode() . ")\n" . $e->getTraceAsString());
             $creator->setStatus(Creator::STATUS_FAILED);
         }

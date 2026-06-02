@@ -3,6 +3,9 @@ includes:
   - phpstan-baseline.neon
 
 parameters:
+  ignoreErrors:
+    - message: '#Variable \$_EXTKEY might not be defined.#'
+      path: **/*/ext_emconf.php
   # Use local .cache dir instead of /tmp
   tmpDir: ../../.cache/phpstan
 
@@ -12,6 +15,8 @@ parameters:
     - ../../../Classes/
     - ../../../Configuration/
     - ../../../Tests/
+    - ../../../ext_emconf.php
+    - ../../../ext_localconf.php
 
   excludePaths:
     - ../../../.Build
