@@ -64,5 +64,10 @@ class WizardProcessRemote implements WizardProcessInterface
         return 'sites/';
     }
 
+    public function getTemplateFileMountpoints(CreateProcess $pObj): array
+    {
+        return [];
+    }
+
     public function finalize(CreateProcess &$pObj): void {}
 }

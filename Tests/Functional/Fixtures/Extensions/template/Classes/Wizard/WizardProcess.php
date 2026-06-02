@@ -54,5 +54,10 @@ class WizardProcess implements WizardProcessInterface
         return 'Multisites/';
     }
 
+    public function getTemplateFileMountpoints(CreateProcess $pObj): array
+    {
+        return [15];
+    }
+
     public function finalize(CreateProcess &$pObj): void {}
 }

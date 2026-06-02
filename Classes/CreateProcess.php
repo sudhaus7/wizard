@@ -138,6 +138,10 @@ final class CreateProcess implements LoggerAwareInterface
      * @var array<array-key, mixed>
      */
     private array $confArr = [];
+    /**
+     * @var int[]
+     */
+    private array $templateFileMountpoints;
 
     public function __construct(
         EventDispatcherInterface $eventDispatcher
@@ -337,8 +341,9 @@ final class CreateProcess implements LoggerAwareInterface
      */
     private function createGroup(): void
     {
-        $tmpl = $this->template->getTemplateBackendUserGroup($this);
-        $this->tmplGroup = $tmpl['uid'];
+        $templateBackendUserGroup = $this->template->getTemplateBackendUserGroup($this);
+        $this->tmplGroup = $templateBackendUserGroup['uid'];
+        $this->templateFileMountpoints = $this->template->getTemplateFileMountpoints($this);
 
         $groupName = $this->confArr['groupprefix'] . ' ' . $this->task->getProjektname();
 
@@ -363,27 +368,35 @@ final class CreateProcess implements LoggerAwareInterface
             return;
         }
 
-        unset($tmpl['uid']);
-        $tmpl['title'] = $groupName;
-        $tmp = GeneralUtility::trimExplode(',', $tmpl['file_mountpoints']);
-        $tmp[] = $this->filemount['uid'];
-        $tmpl['file_mountpoints'] = implode(',', $tmp);
-        $tmpl['crdate'] = time();
-        $tmpl['tstamp'] = time();
+        unset($templateBackendUserGroup['uid']);
+        $templateBackendUserGroup['title'] = $groupName;
+        $templateMountPoints = GeneralUtility::trimExplode(',', $templateBackendUserGroup['file_mountpoints']);
+        $newMountPoints = [];
+        $newMountPoints[] = $this->filemount['uid'];
 
-        $event = new CreateBackendUserGroupEvent($tmpl, $this);
+        // ensure the main entry mountpoints are not added
+        foreach ($templateMountPoints as $mountPoint) {
+            if (!in_array($mountPoint, $this->templateFileMountpoints)) {
+                $newMountPoints[] = $mountPoint;
+            }
+        }
+        $templateBackendUserGroup['file_mountpoints'] = implode(',', $newMountPoints);
+        $templateBackendUserGroup['crdate'] = time();
+        $templateBackendUserGroup['tstamp'] = time();
+
+        $event = new CreateBackendUserGroupEvent($templateBackendUserGroup, $this, $this->templateFileMountpoints);
         $this->eventDispatcher->dispatch($event);
-        $tmpl = $event->getRecord();
+        $templateBackendUserGroup = $event->getRecord();
 
         $this->getSource()->ping();
 
-        [$rows, $newUid] = self::insertRecord('be_groups', $tmpl);
+        [$rows, $newUid] = self::insertRecord('be_groups', $templateBackendUserGroup);
 
         if (!$rows) {
             throw new \Exception('cant create group', 1616680548);
         }
-        $tmpl['uid'] = $newUid;
-        $this->group = $tmpl;
+        $templateBackendUserGroup['uid'] = $newUid;
+        $this->group = $templateBackendUserGroup;
     }
 
     /**
