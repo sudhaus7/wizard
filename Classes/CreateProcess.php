@@ -380,7 +380,7 @@ final class CreateProcess implements LoggerAwareInterface
         [$rows, $newUid] = self::insertRecord('be_groups', $tmpl);
 
         if (!$rows) {
-            throw new \Exception('cant create group', 1_616_680_548);
+            throw new \Exception('cant create group', 1616680548);
         }
         $tmpl['uid'] = $newUid;
         $this->group = $tmpl;
@@ -1312,7 +1312,7 @@ final class CreateProcess implements LoggerAwareInterface
                         [$rowAffected, $newInlineUid] = self::insertRecord($columnConfig['config']['foreign_table'], $inline);
 
                         if (!$rowAffected) {
-                            throw new \Exception(sprintf('error insert to %s with %s', $columnConfig['config']['foreign_table'], json_encode($inline)), 1_616_700_010);
+                            throw new \Exception(sprintf('error insert to %s with %s', $columnConfig['config']['foreign_table'], json_encode($inline)), 1616700010);
                         }
 
                         $this->addContentMap($columnConfig['config']['foreign_table'], $inlineUid, $newInlineUid);

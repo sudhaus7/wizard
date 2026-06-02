@@ -558,7 +558,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     public function getCreateProcess(): CreateProcess
     {
         if ($this->createProcess === null) {
-            throw new InvalidArgumentException('Create Process must be defined', 1715795482);
+            throw new InvalidArgumentException('Create Process must be defined', 1780401412);
         }
         return $this->createProcess;
     }
