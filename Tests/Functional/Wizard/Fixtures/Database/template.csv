@@ -93,8 +93,8 @@ TCEMAIN.permissions {
 ,15,0,0,0,"Multisite Template Vorlage","Medien Template",0,1:/Multisites/template/
 
 "sys_file",
-,uid,pid,storage,type,identifier,extension,mime_type,name,sha1
-,1,0,1,1,"/Multisites/template/example.txt",txt,plain/text,"example.txt","da39a3ee5e6b4b0d3255bfef95601890afd80709"
+,uid,pid,storage,type,identifier,extension,mime_type,name,sha1,identifier_hash,folder_hash
+,1,0,1,5,"/Multisites/template/example.txt",txt,"application/x-empty","example.txt","da39a3ee5e6b4b0d3255bfef95601890afd80709","2634bfcf297c5b4d16335990aaafac4cbe006f1b","97bf57ec8c0422accfd69ad2e0a97f52cd2aa665"
 
 "sys_file_reference",
 ,"uid","pid","uid_local","uid_foreign","tablenames","fieldname","title","description"
