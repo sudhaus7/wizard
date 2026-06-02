@@ -6,45 +6,33 @@
         <type>array</type>
         <el>
             <primary>
-                <TCEforms>
-                    <label>Primary Color</label>
-                    <config>
-                        <type>input</type>
-                        <renderType>colorpicker</renderType>
-                        <default>#0288D1</default>
-                    </config>
-                </TCEforms>
+                <label>Primary Color</label>
+                <config>
+                    <type>color</type>
+                    <default>#0288D1</default>
+                </config>
             </primary>
 
             <secondary>
-                <TCEforms>
-                    <label>secondary Color</label>
-                    <config>
-                        <type>input</type>
-                        <renderType>colorpicker</renderType>
-                        <default>#FFEB3B</default>
-                    </config>
-                </TCEforms>
+                <label>secondary Color</label>
+                <config>
+                    <type>color</type>
+                    <default>#FFEB3B</default>
+                </config>
             </secondary>
             <breadcrumb>
-                <TCEforms>
-                    <label>breadcrumb Color</label>
-                    <config>
-                        <type>input</type>
-                        <renderType>colorpicker</renderType>
-                        <default>#FFEB3B</default>
-                    </config>
-                </TCEforms>
+                <label>breadcrumb Color</label>
+                <config>
+                    <type>color</type>
+                    <default>#FFEB3B</default>
+                </config>
             </breadcrumb>
             <preloader>
-                <TCEforms>
-                    <label>preloader Color</label>
-                    <config>
-                        <type>input</type>
-                        <renderType>colorpicker</renderType>
-                        <default>#F2F2F2</default>
-                    </config>
-                </TCEforms>
+                <label>preloader Color</label>
+                <config>
+                    <type>color</type>
+                    <default>#F2F2F2</default>
+                </config>
             </preloader>
         </el>
     </ROOT>
