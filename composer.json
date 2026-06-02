@@ -30,7 +30,7 @@
 		"php": "^8.2 || ^8.3 || ^8.4 || ^8.5",
 		"ext-curl": "*",
 		"psr/log": "^3.0",
-		"typo3/cms-core": "12.4.*||13.4.*"
+		"typo3/cms-core": "^13.4"
 	},
 	"require-dev": {
 		"friendsofphp/php-cs-fixer": "^3.95",
