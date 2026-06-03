@@ -109,3 +109,4 @@ fabric.properties
 /composer.json.testing
 /.cache/
 /Build/testing-docker/.env
+/Build/.cache
