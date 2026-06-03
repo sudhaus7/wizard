@@ -58,7 +58,8 @@ final class FolderService
     {
         $testidentifier = explode(':', $identifier);
         if (count($testidentifier) === 2) {
-            $storage = $this->storageRepository->findByCombinedIdentifier($identifier);
+            $storage = $this->storageRepository->findByUid((int)$testidentifier[0]);
+            $identifier = $testidentifier[1];
         }
 
         if ($storage === null) {
