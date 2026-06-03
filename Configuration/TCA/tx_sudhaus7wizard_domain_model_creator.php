@@ -291,9 +291,10 @@ return [
                 'renderType' => 'creatorLog',
             ],
         ],
+        // @TODO Wizard should have its own site set collector in order for a template to be able to register only supported optional site sets
         'site_sets' => [
             'displayCond' => 'FIELD:status:<:' . Creator::STATUS_READY,
-            'exclude' => false,
+            'exclude' => true,
             'label' => 'LLL:EXT:backend/Resources/Private/Language/locallang_siteconfiguration_tca.xlf:site.dependencies',
             'description' => 'LLL:EXT:backend/Resources/Private/Language/siteconfiguration_fieldinformation.xlf:site.dependencies',
             'config' => [
