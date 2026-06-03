@@ -9,6 +9,12 @@ This is a TYPO3 extension with the extension key `sudhaus7_wizard`. With this ex
 
 Changelog
 
+1.0.1
+* Feature: Added site set support
+* Bugfix: Corrected sites config path for classic installations
+* Bugfix: Corrected wizard command
+* Bugfix: Ensured correct folder creation
+
 1.0.0
 * Requires TYPO3 13.4 (dependency updated from `^13.0` to `^13.4`)
 * Requires PHP 8.2 or higher
