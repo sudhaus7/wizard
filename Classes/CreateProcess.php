@@ -1683,10 +1683,10 @@ final class CreateProcess implements LoggerAwareInterface
      */
     private function finalYaml(): void
     {
-        $path = Environment::getProjectPath();
+        $path = Environment::getConfigPath();
         try {
-            GeneralUtility::mkdir_deep($path . '/config/sites');
-        } catch (\Exception $e) {
+            GeneralUtility::mkdir_deep($path . '/sites');
+        } catch (\Exception) {
         }
 
         $event = new GenerateSiteIdentifierEvent($this->siteConfig, $path, $this);
@@ -1698,7 +1698,7 @@ final class CreateProcess implements LoggerAwareInterface
         if (empty($identifier)) {
             $identifier = Tools::generateSlug($this->getTask()->getShortname());
 
-            if (is_dir($path . '/config/sites/' . $identifier)) {
+            if (is_dir($path . '/sites/' . $identifier)) {
                 $identifier = Tools::generateSlug($this->getTask()->getLongname() ?? $this->getTask()->getDomainname());
             }
         }

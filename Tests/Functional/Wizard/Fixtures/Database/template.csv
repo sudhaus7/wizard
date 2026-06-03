@@ -23,7 +23,7 @@ TCEMAIN.permissions {
 
 "tx_sudhaus7wizard_domain_model_creator",
 ,"uid","pid","title","status","base","projektname","longname","shortname","domainname","contact","reduser","redpass","redemail","sourcepid","flexinfo"
-,1,1,"",10,"template","Ready Template","Ready Template","readytemplate","https://wizard.dev/","ready@wizard.de","ready","password","ready@wizard.de","1","<?xml version=""1.0"" encoding=""utf-8"" standalone=""yes"" ?>
+,1,1,"",10,"template","Ready Template","Ready Template","readytemplate","wizard.dev","ready@wizard.de","ready","password","ready@wizard.de","1","<?xml version=""1.0"" encoding=""utf-8"" standalone=""yes"" ?>
 <T3FlexForms>
     <data>
         <sheet index=""sDEF"">

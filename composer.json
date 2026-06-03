@@ -38,6 +38,7 @@
 		"phpunit/phpunit": "^11.5",
 		"saschaegerer/phpstan-typo3": "^3.0",
 		"sbuerk/fixture-packages": "^1.1",
+		"sbuerk/typo3-site-based-test-trait": "^2.0 || ^3.0",
 		"typo3/cms-backend": "^13.4",
 		"typo3/cms-beuser": "^13.4",
 		"typo3/cms-frontend": "^13.4",
