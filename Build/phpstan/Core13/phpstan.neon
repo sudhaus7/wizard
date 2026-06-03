@@ -24,3 +24,7 @@ parameters:
   # @todo recheck rules.
   inferPrivatePropertyTypeFromConstructor: true
   reportUnmatchedIgnoredErrors: true
+
+  typo3:
+    siteGetAttributeMapping:
+      dependencies: array|null
