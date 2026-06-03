@@ -56,6 +56,7 @@ class Creator implements LoggerAwareInterface
 
     /**
      * @param array<array-key, mixed> $valuemappingcache
+     * @param string[] $siteSets
      */
     protected function __construct(
         protected int $uid,
@@ -78,7 +79,8 @@ class Creator implements LoggerAwareInterface
         protected int $sourcefilemount,
         protected string $sourceclass,
         protected string $notifyEmail = '',
-        private array $valuemappingcache = []
+        private readonly array $siteSets = [],
+        private array $valuemappingcache = [],
     ) {}
 
     /**
@@ -102,7 +104,8 @@ class Creator implements LoggerAwareInterface
      *     sourceuser: int,
      *     sourcefilemount: int,
      *     sourceclass: string,
-     *     notify_email: string
+     *     notify_email: string,
+     *     site_sets?: string
      * } $row
      */
     public static function createFromDatabaseRow(array $row): Creator
@@ -127,7 +130,8 @@ class Creator implements LoggerAwareInterface
             (int)$row['sourceuser'],
             (int)$row['sourcefilemount'],
             $row['sourceclass'],
-            $row['notify_email']
+            $row['notify_email'],
+            GeneralUtility::trimExplode(',', ($row['site_sets'] ?? ''), true),
         );
     }
 
@@ -395,5 +399,13 @@ class Creator implements LoggerAwareInterface
     public function getNotifyEmail(): string
     {
         return $this->notifyEmail;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getSiteSets(): array
+    {
+        return $this->siteSets;
     }
 }

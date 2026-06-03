@@ -15,36 +15,33 @@ use SUDHAUS7\Sudhaus7Wizard\Backend\TCA\Evaluation\DomainnameEvaluation;
 use SUDHAUS7\Sudhaus7Wizard\Backend\TCA\Evaluation\NotifyEmailEvaluation;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use SUDHAUS7\Sudhaus7Wizard\Sources\LocalDatabase;
-use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 
 if (!defined('TYPO3')) {
     die('Access denied.');
 }
 
 return [
-
     'ctrl' => [
-        'title'             => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator',
+        'title' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator',
         'label' => 'projektname',
+        'label_alt' => 'status',
+        'label_alt_force' => true,
         'rootLevel' => -1,
-        'tstamp'            => 'tstamp',
-        'crdate'            => 'crdate',
-        'delete'            => 'deleted',
-        'enablecolumns'     => [
+        'tstamp' => 'tstamp',
+        'crdate' => 'crdate',
+        'delete' => 'deleted',
+        'enablecolumns' => [
             'disabled' => 'hidden',
         ],
         'type' => 'base',
         'searchFields' => 'projektname,longname,domainname,',
-        'dynamicConfigFile' => ExtensionManagementUtility::extPath('sudhaus7_wizard') . 'Configuration/TCA/tx_sudhaus7wizard_domain_model_creator.php',
         'iconfile' => 'EXT:sudhaus7_wizard/Resources/Public/Icons/icon.svg',
         'subtype_value_field' => 'sourceclass',
     ],
     'types' => [
         '1' => ['showitem' => 'base'],
     ],
-    'palettes' => [
-        //'1' => Array('showitem' => 'hidden,sys_language_uid,t3ver_label,l10n_parent'),
-    ],
+    'palettes' => [],
     'columns' => [
 
         't3ver_label' => [
@@ -292,6 +289,19 @@ return [
             'config' => [
                 'type' => 'user',
                 'renderType' => 'creatorLog',
+            ],
+        ],
+        'site_sets' => [
+            'displayCond' => 'FIELD:status:<:' . Creator::STATUS_READY,
+            'exclude' => false,
+            'label' => 'LLL:EXT:backend/Resources/Private/Language/locallang_siteconfiguration_tca.xlf:site.dependencies',
+            'description' => 'LLL:EXT:backend/Resources/Private/Language/siteconfiguration_fieldinformation.xlf:site.dependencies',
+            'config' => [
+                'type' => 'select',
+                'renderType' => 'selectMultipleSideBySide',
+                'size' => 5,
+                'itemsProcFunc' => TYPO3\CMS\Core\Site\TcaSiteSetCollector::class . '->populateSiteSets',
+                'maxitems' => 9999,
             ],
         ],
     ],

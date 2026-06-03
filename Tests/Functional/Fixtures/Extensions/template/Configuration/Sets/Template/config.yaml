@@ -1,0 +1,9 @@
+name: sudhaus7/template
+label: Example Site Set
+settings:
+  website:
+    background:
+      color: '#386492'
+dependencies: []
+optionalDependencies:
+  - typo3/form

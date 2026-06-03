@@ -107,7 +107,9 @@ final class WizardTest extends FunctionalTestCase
         /** @var SiteFinder $siteFinder */
         $siteFinder = $this->get(SiteFinder::class);
         $site = $siteFinder->getSiteByIdentifier('readytemplate');
-        $this->assertInstanceOf(Site::class, $site);
-        $this->assertEquals('wizard.dev', $site->getBase()->getHost());
+        self::assertInstanceOf(Site::class, $site);
+        self::assertEquals('wizard.dev', $site->getBase()->getHost());
+        self::assertIsArray($site->getAttribute('dependencies'));
+        self::assertEquals(['sudhaus7/template'], $site->getAttribute('dependencies'));
     }
 }

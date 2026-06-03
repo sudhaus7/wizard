@@ -22,8 +22,8 @@ TCEMAIN.permissions {
 ,3,9,"uploads","Example File Download",1
 
 "tx_sudhaus7wizard_domain_model_creator",
-,"uid","pid","title","status","base","projektname","longname","shortname","domainname","contact","reduser","redpass","redemail","sourcepid","flexinfo"
-,1,1,"",10,"template","Ready Template","Ready Template","readytemplate","wizard.dev","ready@wizard.de","ready","password","ready@wizard.de","1","<?xml version=""1.0"" encoding=""utf-8"" standalone=""yes"" ?>
+,"uid","pid","status","base","projektname","longname","shortname","domainname","contact","reduser","redpass","redemail","sourcepid","flexinfo","site_sets"
+,1,1,10,"template","Ready Template","Ready Template","readytemplate","wizard.dev","ready@wizard.de","ready","password","ready@wizard.de","1","<?xml version=""1.0"" encoding=""utf-8"" standalone=""yes"" ?>
 <T3FlexForms>
     <data>
         <sheet index=""sDEF"">
@@ -37,8 +37,8 @@ TCEMAIN.permissions {
             </language>
         </sheet>
     </data>
-</T3FlexForms>"
-,2,1,"",5,"template","Not Ready Template","Not Ready Template","notreadytemplate","https://not-wizard.dev/","not-ready@wizard.de","not-ready","password","not-ready@wizard.de","1","<?xml version=""1.0"" encoding=""utf-8"" standalone=""yes"" ?>
+</T3FlexForms>","sudhaus7/template"
+,2,1,5,"template","Not Ready Template","Not Ready Template","notreadytemplate","https://not-wizard.dev/","not-ready@wizard.de","not-ready","password","not-ready@wizard.de","1","<?xml version=""1.0"" encoding=""utf-8"" standalone=""yes"" ?>
 <T3FlexForms>
     <data>
         <sheet index=""sDEF"">
@@ -52,7 +52,7 @@ TCEMAIN.permissions {
             </language>
         </sheet>
     </data>
-</T3FlexForms>"
+</T3FlexForms>",""
 "sys_file_storage",
 ,uid,pid,crdate,deleted,description,name,driver,configuration,is_default,is_browsable,is_public,is_writable,is_online,auto_extract_metadata
 ,1,0,1675867468,0,"This is the local fileadmin/ directory. This storage mount has been created automatically by TYPO3.","fileadmin","Local","<?xml version=""1.0"" encoding=""utf-8"" standalone=""yes"" ?>

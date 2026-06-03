@@ -1711,6 +1711,10 @@ final class CreateProcess implements LoggerAwareInterface
             }
         }
 
+        if ($this->getTask()->getSiteSets() !== []) {
+            $this->siteConfig['dependencies'] = $this->getTask()->getSiteSets();
+        }
+
         $event = new BeforeSiteConfigWriteEvent($this->siteConfig, $this);
         $this->eventDispatcher->dispatch($event);
         $this->siteConfig = $event->getSiteconfig();
