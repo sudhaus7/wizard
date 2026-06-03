@@ -39,7 +39,7 @@ use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Mail\MailMessage;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-#[AsCommand(name: 'sudhaus7.wizard')]
+#[AsCommand(name: 'sudhaus7:wizard')]
 final class RunCommand extends Command implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
