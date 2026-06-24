@@ -127,6 +127,19 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 
     /**
      * @inheritDoc
+     * @throws \Exception
+     */
+    public function getSiteSettings(mixed $id): array
+    {
+        $result = $this->getAPI()->request('/sitesettings/' . $id);
+        if (is_array($result) && $result !== []) {
+            return $result;
+        }
+        return [];
+    }
+
+    /**
+     * @inheritDoc
      */
     public function getRow(string $table, array $where = []): mixed
     {
