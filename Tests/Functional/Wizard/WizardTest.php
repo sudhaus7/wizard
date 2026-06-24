@@ -10,6 +10,8 @@ use SBUERK\TYPO3\Testing\SiteHandling\SiteBasedTestTrait;
 use SBUERK\TYPO3\Testing\TestCase\FunctionalTestCase;
 use SUDHAUS7\Sudhaus7Wizard\Cli\RunCommand;
 use Symfony\Component\Console\Tester\CommandTester;
+use TYPO3\CMS\Core\Configuration\Event\SiteConfigurationChangedEvent;
+use TYPO3\CMS\Core\Configuration\SiteWriter;
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Site\SiteFinder;
@@ -111,5 +113,29 @@ final class WizardTest extends FunctionalTestCase
         self::assertEquals('wizard.dev', $site->getBase()->getHost());
         self::assertIsArray($site->getAttribute('dependencies'));
         self::assertEquals(['sudhaus7/template'], $site->getAttribute('dependencies'));
+    }
+
+    #[Test]
+    #[Group('not-postgres')]
+    public function wizardGeneratesNewSiteWithSettings(): void
+    {
+        /** @var SiteWriter $siteWriter */
+        $siteWriter = $this->get(SiteWriter::class);
+        $siteWriter->writeSettings('acme', ['my_setting' => 'my_value']);
+        $this->get(\Psr\EventDispatcher\EventDispatcherInterface::class)->dispatch(new SiteConfigurationChangedEvent('acme'));
+        $this->get('cache.core')->flush();
+
+        $tester = new CommandTester($this->get(RunCommand::class));
+        $tester->execute([
+            'mode' => 'next',
+        ]);
+
+        $tester->assertCommandIsSuccessful($tester->getDisplay());
+
+        /** @var SiteFinder $siteFinder */
+        $siteFinder = $this->get(SiteFinder::class);
+        $site = $siteFinder->getSiteByIdentifier('readytemplate');
+        self::assertInstanceOf(Site::class, $site);
+        self::assertEquals('my_value', $site->getSettings()->get('my_setting'));
     }
 }
