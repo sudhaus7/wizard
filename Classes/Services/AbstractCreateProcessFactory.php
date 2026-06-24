@@ -21,6 +21,7 @@ use Psr\Log\LoggerInterface;
 use SUDHAUS7\Sudhaus7Wizard\CreateProcess;
 use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use SUDHAUS7\Sudhaus7Wizard\Events\LoadInitialSiteConfigEvent;
+use SUDHAUS7\Sudhaus7Wizard\Events\LoadInitialSiteSettingsEvent;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardProcessInterface;
 use SUDHAUS7\Sudhaus7Wizard\Sources\LocalDatabase;
 use SUDHAUS7\Sudhaus7Wizard\Sources\SourceInterface;
@@ -59,11 +60,17 @@ abstract class AbstractCreateProcessFactory implements CreateProcessFactoryInter
         }
         $pid = $creator->getSourcepid();
         $siteconfig = $task->getSource()->getSiteConfig($pid);
+        $settings = $task->getSource()->getSiteSettings($pid);
 
         // wanted to do this early to have more control over where the source is loaded
         $event = new LoadInitialSiteConfigEvent($pid, $siteconfig, $task);
         GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
         $task->setSiteConfig($event->getSiteconfig());
+
+        $event = new LoadInitialSiteSettingsEvent($pid, $settings, $task);
+        GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+        $task->setSiteSettings($event->getSettings());
+
         return $task;
     }
 }
