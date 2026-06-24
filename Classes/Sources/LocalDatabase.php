@@ -284,7 +284,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                     'sys_file',
                     ['identifier' => $newIdentifier]
                 );
-            return $res->fetchAssociative() ?: [];
+            return $res->fetchAssociative() ?: $sysFile;
         }
 
         $this->logger?->notice('cp ' . Environment::getPublicPath() . '/fileadmin' . $sysFile['identifier'] . ' ' . Environment::getPublicPath() . '/fileadmin' . $newIdentifier);
