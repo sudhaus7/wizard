@@ -164,6 +164,21 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         return $this->siteconfig;
     }
 
+    /**
+     * @return array<array-key, mixed>
+     */
+    public function getSiteSettings(mixed $id): array
+    {
+        $siteFinder = GeneralUtility::makeInstance(SiteFinder::class);
+        try {
+            $site = $siteFinder->getSiteByRootPageId((int)$id);
+            return $site->getSettings()->getAll();
+        } catch (SiteNotFoundException|\Exception $e) {
+            $this->logger?->debug($e->getMessage(), [$id]);
+        }
+        return [];
+    }
+
     public function ping(): void
     {
         $db = $this->connectionPool->getConnectionByName('Default');
