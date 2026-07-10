@@ -59,5 +59,7 @@ class WizardProcess implements WizardProcessInterface
         return [15];
     }
 
-    public function finalize(CreateProcess &$pObj): void {}
+    public function finalize(CreateProcess &$pObj): void
+    {
+    }
 }

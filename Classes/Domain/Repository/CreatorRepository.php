@@ -30,7 +30,8 @@ final class CreatorRepository
 {
     public function __construct(
         private readonly ConnectionPool $connectionPool,
-    ) {}
+    ) {
+    }
 
     /**
      * @return Creator[]

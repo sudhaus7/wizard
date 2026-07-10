@@ -22,7 +22,8 @@ class Database implements SingletonInterface
     public function __construct(
         protected readonly ReferenceIndexUpdater $referenceIndexUpdater,
         private readonly ConnectionPool $connectionPool,
-    ) {}
+    ) {
+    }
 
     /**
      * @param array<string, mixed> $data

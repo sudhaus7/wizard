@@ -107,7 +107,8 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
 
     public function __construct(
         private readonly ConnectionPool $connectionPool,
-    ) {}
+    ) {
+    }
 
     /**
      * @return Creator

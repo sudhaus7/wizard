@@ -27,10 +27,10 @@
 		}
 	],
 	"require": {
-		"php": "^8.2 || ^8.3 || ^8.4 || ^8.5",
+		"php": "^8.3 || ^8.4 || ^8.5",
 		"ext-curl": "*",
 		"psr/log": "^3.0",
-		"typo3/cms-core": "^13.4"
+		"typo3/cms-core": "^14.3"
 	},
 	"require-dev": {
 		"friendsofphp/php-cs-fixer": "^3.95",
@@ -39,14 +39,14 @@
 		"saschaegerer/phpstan-typo3": "^3.0",
 		"sbuerk/fixture-packages": "^1.1",
 		"sbuerk/typo3-site-based-test-trait": "^2.0 || ^3.0",
-		"typo3/cms-backend": "^13.4",
-		"typo3/cms-beuser": "^13.4",
-		"typo3/cms-frontend": "^13.4",
-		"typo3/cms-install": "^13.4",
-		"typo3/cms-lowlevel": "^13.4",
-		"typo3/cms-tstemplate": "^13.4",
+		"typo3/cms-backend": "^14.3",
+		"typo3/cms-beuser": "^14.3",
+		"typo3/cms-frontend": "^14.3",
+		"typo3/cms-install": "^14.3",
+		"typo3/cms-lowlevel": "^14.3",
+		"typo3/cms-tstemplate": "^14.3",
 		"typo3/coding-standards": "^0.8",
-		"typo3/testing-framework": "^9.5.0"
+		"typo3/testing-framework": "^9.5"
 	},
 	"autoload": {
 		"psr-4": {

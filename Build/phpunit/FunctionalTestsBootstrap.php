@@ -1,4 +1,5 @@
 <?php
+
 /*
  * This file is part of the TYPO3 CMS project.
  *
@@ -22,7 +23,7 @@
  * This file is defined in FunctionalTests.xml and called by phpunit
  * before instantiating the test suites.
  */
-(static function () {
+(static function (): void {
     if (class_exists(\SBUERK\AvailableFixturePackages::class)) {
         (new \SBUERK\AvailableFixturePackages())->adoptFixtureExtensions();
     }

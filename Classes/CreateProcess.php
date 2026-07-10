@@ -1451,7 +1451,7 @@ final class CreateProcess implements LoggerAwareInterface
         $table = 'pages';
         $config = $GLOBALS['TCA']['pages'];
 
-        foreach ($this->pageMap as $oldPid => $newPid) {
+        foreach ($this->pageMap as $newPid) {
             $this->getSource()->ping();
 
             $query = self::getQueryBuilderWithoutRestriction($table);

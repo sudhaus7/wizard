@@ -24,4 +24,6 @@ use Symfony\Component\DependencyInjection\Attribute\AsAlias;
  * @internal not part of public API.
  */
 #[AsAlias(id: CreateProcessFactoryInterface::class, public: true)]
-final class CreateProcessFactory extends AbstractCreateProcessFactory {}
+final class CreateProcessFactory extends AbstractCreateProcessFactory
+{
+}
