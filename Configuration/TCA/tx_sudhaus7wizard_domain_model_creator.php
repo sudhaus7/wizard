@@ -34,7 +34,6 @@ return [
             'disabled' => 'hidden',
         ],
         'type' => 'base',
-        'searchFields' => 'projektname,longname,domainname,',
         'iconfile' => 'EXT:sudhaus7_wizard/Resources/Public/Icons/icon.svg',
         'subtype_value_field' => 'sourceclass',
     ],
@@ -222,6 +221,7 @@ return [
                 'size' => 30,
                 'eval' => 'trim',
                 'required' => true,
+                'searchable' => false,
             ],
         ],
         'status' => [
@@ -281,6 +281,7 @@ return [
             'label' => 'Stacktrace',
             'config' => [
                 'type' => 'text',
+                'searchable' => false,
             ],
         ],
 
