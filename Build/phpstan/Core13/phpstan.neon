@@ -19,7 +19,7 @@ parameters:
     - ../../../ext_localconf.php
 
   excludePaths:
-    - ../../../.Build
+    - ../../../.Build/*
 
   # @todo recheck rules.
   inferPrivatePropertyTypeFromConstructor: true
