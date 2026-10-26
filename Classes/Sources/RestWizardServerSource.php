@@ -131,11 +131,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
      */
     public function getSiteSettings(mixed $id): array
     {
-        $result = $this->getAPI()->request('/sitesettings/' . $id);
-        if (is_array($result) && $result !== []) {
-            return $result;
-        }
-        return [];
+        return $this->getAPI()->request('/sitesettings/' . $id);
     }
 
     /**
