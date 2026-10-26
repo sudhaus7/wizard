@@ -158,6 +158,17 @@ final class PageAndContentGenerationTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function shortcutContentElementReferencesTheClonedContentElement(): void
+    {
+        $this->runWizard();
+
+        $textElement = $this->findClonedRecord('tt_content', 'header', 'Text with links', 100);
+        $reference = $this->findClonedRecord('tt_content', 'header', 'Reference to text', 103);
+
+        self::assertSame('tt_content_' . $textElement['uid'], $reference['records']);
+    }
+
+    #[Test]
     public function translatedContentElementPointsToTheClonedDefaultLanguageElement(): void
     {
         $this->runWizard();
