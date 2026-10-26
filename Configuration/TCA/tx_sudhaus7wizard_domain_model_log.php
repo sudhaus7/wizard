@@ -35,7 +35,6 @@ return [
         //'descriptionColumn'=>'message',
         'tstamp'            => 'tstamp',
         'crdate'            => 'crdate',
-        'searchFields' => 'creator,level,message,context',
         'dynamicConfigFile' => ExtensionManagementUtility::extPath('sudhaus7_wizard') . 'Configuration/TCA/tx_sudhaus7wizard_domain_model_log.php',
         'iconfile' => 'EXT:sudhaus7_wizard/Resources/Public/Icons/icon.svg',
     ],

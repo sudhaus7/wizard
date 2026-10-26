@@ -975,43 +975,33 @@ final class CreateProcess implements LoggerAwareInterface
         array $row,
         array $parameters
     ): array {
-        if (isset($columnConfig['config']['internal_type']) && $columnConfig['config']['internal_type'] == 'db') {
-            $this->log('Clean Group Column ' . $column);
-            $table = $parameters['table'];
-            $oldUid = $row['t3_origuid'] ?? $this->getTranslateUidReverse($table, $row['uid']);
+        $this->log('Clean Group Column ' . $column);
+        $table = $parameters['table'];
+        $oldUid = $row['t3_origuid'] ?? $this->getTranslateUidReverse($table, $row['uid']);
 
-            $newUid = $row['uid'];
+        $newUid = $row['uid'];
 
-            if (isset($columnConfig['config']['MM'])) {
-                if (isset($columnConfig['config']['foreign_table'])) {
-                    $tables = [$columnConfig['config']['foreign_table']];
-                } elseif ($columnConfig['config']['allowed'] == '*') {
-                    $tables = array_keys($GLOBALS['TCA']);
-                } else {
-                    $tables = GeneralUtility::trimExplode(',', $columnConfig['config']['allowed'], true);
-                }
-
-                foreach ($tables as $tbl) {
-                    $this->fixMMRelation($tbl, $columnConfig['config']['MM'], $oldUid, $newUid);
-                }
+        if (isset($columnConfig['config']['MM'])) {
+            if (isset($columnConfig['config']['foreign_table'])) {
+                $tables = [$columnConfig['config']['foreign_table']];
+            } elseif ($columnConfig['config']['allowed'] == '*') {
+                $tables = array_keys($GLOBALS['TCA']);
             } else {
-                $val = $row[$column];
-                $list = GeneralUtility::trimExplode(',', $val, true);
-                $newList = [];
-                foreach ($list as $tmpOldUid) {
-                    $tmp = GeneralUtility::trimExplode('_', $tmpOldUid, true);
-                    if (count($tmp) > 1) {
-                        $refTable = $tmp[0];
-                        $oldUid = $tmp[1];
-                    } else {
-                        $refTable = $columnConfig['config']['allowed'];
-                        $oldUid = $tmp[0];
-                    }
-                    $newList[] = count($tmp) > 1 ? $refTable . '_' . $this->getTranslateUid($refTable, $oldUid) : $this->getTranslateUid($refTable, $oldUid);
-                }
-                if ($newList !== []) {
-                    $row[$column] = implode(',', $newList);
-                }
+                $tables = GeneralUtility::trimExplode(',', $columnConfig['config']['allowed'], true);
+            }
+
+            foreach ($tables as $tbl) {
+                $this->fixMMRelation($tbl, $columnConfig['config']['MM'], $oldUid, $newUid);
+            }
+        } else {
+            $list = GeneralUtility::trimExplode(',', (string)($row[$column] ?? ''), true);
+            $newList = [];
+            foreach ($list as $tmpOldUid) {
+                // getTranslateUid() resolves the table itself for "<table>_<uid>" values
+                $newList[] = $this->getTranslateUid($columnConfig['config']['allowed'], $tmpOldUid);
+            }
+            if ($newList !== []) {
+                $row[$column] = implode(',', $newList);
             }
         }
         return $row;

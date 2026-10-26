@@ -40,6 +40,6 @@ class NotifyEmailEvaluation
         ) {
             return $GLOBALS['BE_USER']->user['email'];
         }
-        return $parameters['value'];
+        return $parameters['value'] ?? null;
     }
 }

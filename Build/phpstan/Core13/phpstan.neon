@@ -13,13 +13,15 @@ parameters:
 
   paths:
     - ../../../Classes/
+    - ../../../Core13/
     - ../../../Configuration/
     - ../../../Tests/
     - ../../../ext_emconf.php
     - ../../../ext_localconf.php
 
   excludePaths:
-    - ../../../.Build
+    - ../../../.Build/*
+    - ../../../Core14/*
 
   # @todo recheck rules.
   inferPrivatePropertyTypeFromConstructor: true
