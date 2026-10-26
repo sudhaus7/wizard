@@ -50,7 +50,9 @@
 	},
 	"autoload": {
 		"psr-4": {
-			"SUDHAUS7\\Sudhaus7Wizard\\": "Classes/"
+			"SUDHAUS7\\Sudhaus7Wizard\\": "Classes/",
+			"SUDHAUS7\\Sudhaus7Wizard\\Core13\\": "Core13/",
+			"SUDHAUS7\\Sudhaus7Wizard\\Core14\\": "Core14/"
 		}
 	},
 	"autoload-dev": {

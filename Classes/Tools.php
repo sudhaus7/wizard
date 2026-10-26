@@ -13,6 +13,7 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard;
 
+use SUDHAUS7\Sudhaus7Wizard\Backend\TCA\TcaConfigurationInterface;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardProcessInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\FlexForm\FlexFormTools;
@@ -52,12 +53,12 @@ final class Tools
         $config = $class::getWizardConfig();
 
         $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['Sudhaus7Wizard']['registeredTemplateExtentions'][$config->getExtension()] = $class;
-        if (is_array($GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']) && !isset($GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['columns']['flexinfo']['config']['ds'][$config->getExtension()])) {
+        $tcaConfiguration = self::getTcaConfiguration();
+        if (is_array($GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']) && !$tcaConfiguration->hasFlexDataStructure($GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator'], 'flexinfo', $config->getExtension())) {
             $GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['columns']['base']['config']['items'][] = [
                 'label' => $config->getDescription(),
                 'value' => $config->getExtension(),
             ];
-            $GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['columns']['flexinfo']['config']['ds'][$config->getExtension()] = $config->getFlexinfoFile();
             $GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['types'][$config->getExtension()] = [
                 'showitem' => '
                 status,base,sourceclass,sourcepid,site_sets,projektname,longname,shortname,domainname,contact,email,notify_email,--div--;Benutzer,reduser,redpass,redemail,--div--;Template Konfigurationen,flexinfo,--div--;Log,log,stacktrace
@@ -68,7 +69,21 @@ final class Tools
             $GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['columns']['sourcepid']['config']['default'] = $config->getSourcePid();
 
             $GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator'] = $config->modifyRecordTCA($GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']);
+            $GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator'] = $tcaConfiguration->addFlexDataStructure(
+                $GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator'],
+                'flexinfo',
+                $config->getExtension(),
+                $config->getFlexinfoFile()
+            );
         }
+    }
+
+    /**
+     * Returns the TCA writer matching the running core version, for use in TCA files.
+     */
+    public static function getTcaConfiguration(): TcaConfigurationInterface
+    {
+        return GeneralUtility::makeInstance(TcaConfigurationInterface::class);
     }
 
     public static function generateSlug(string $str): ?string
