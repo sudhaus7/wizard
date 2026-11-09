@@ -36,6 +36,7 @@ use Symfony\Contracts\Service\Attribute\Required;
 use Throwable;
 use TYPO3\CMS\Core\Core\Bootstrap;
 use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Mail\MailerInterface;
 use TYPO3\CMS\Core\Mail\MailMessage;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -46,11 +47,18 @@ final class RunCommand extends Command implements LoggerAwareInterface
 
     private CreatorRepository $creatorRepository;
     private CreateProcessFactoryInterface $createProcessFactory;
+    private MailerInterface $mailer;
 
     #[Required]
     public function injectProcessFactory(CreateProcessFactoryInterface $createProcessFactory): void
     {
         $this->createProcessFactory = $createProcessFactory;
+    }
+
+    #[Required]
+    public function injectMailer(MailerInterface $mailer): void
+    {
+        $this->mailer = $mailer;
     }
 
     #[Required]
@@ -253,7 +261,7 @@ final class RunCommand extends Command implements LoggerAwareInterface
                         //->setFrom($creator->getNotifyEmail())
                         ->setTo($creator->getNotifyEmail())
                         ->text(sprintf('Der neue Baukasten %s wurde angelegt', $creator->getProjektname()));
-                    $mail->send();
+                    $this->mailer->send($mail);
                     $output->write("E-Mail versendet\n");
                 }
 

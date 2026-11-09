@@ -37,8 +37,8 @@ jobs:
       - name: "Find duplicate exception codes"
         run: "Build/Scripts/runTests.sh -t 13 -p ${{ matrix.php-version }} -s checkExceptionCodes"
 
-#      - name: "Run PHPStan"
-#        run: "Build/Scripts/runTests.sh -t 13 -p ${{ matrix.php-version }} -s phpstan"
+      - name: "Run PHPStan"
+        run: "Build/Scripts/runTests.sh -t 13 -p ${{ matrix.php-version }} -s phpstan"
 
   testsuite:
     name: all tests with core v13

@@ -88,7 +88,6 @@ final class UpdateStatus
 
                 if (
                     $ret
-                    && ($row['base'] ?? null) !== null
                     && ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['Sudhaus7Wizard']['registeredTemplateExtentions'][$row['base']] ?? null) !== null
                 ) {
                     /** @var class-string $class */

@@ -36,12 +36,12 @@ use TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
 use TYPO3\CMS\Core\Database\Query\Restriction\StartTimeRestriction;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
-use TYPO3\CMS\Core\Resource\AbstractFile;
 use TYPO3\CMS\Core\Resource\Exception\ExistingTargetFolderException;
 use TYPO3\CMS\Core\Resource\Exception\FileDoesNotExistException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderAccessPermissionsException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderReadPermissionsException;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderWritePermissionsException;
+use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Site\SiteFinder;
@@ -164,6 +164,21 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         return $this->siteconfig;
     }
 
+    /**
+     * @return array<array-key, mixed>
+     */
+    public function getSiteSettings(mixed $id): array
+    {
+        $siteFinder = GeneralUtility::makeInstance(SiteFinder::class);
+        try {
+            $site = $siteFinder->getSiteByRootPageId((int)$id);
+            return $site->getSettings()->getAll();
+        } catch (SiteNotFoundException|\Exception $e) {
+            $this->logger?->debug($e->getMessage(), [$id]);
+        }
+        return [];
+    }
+
     public function ping(): void
     {
         $db = $this->connectionPool->getConnectionByName('Default');
@@ -269,14 +284,14 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
                     'sys_file',
                     ['identifier' => $newIdentifier]
                 );
-            return $res->fetchAssociative() ?: [];
+            return $res->fetchAssociative() ?: $sysFile;
         }
 
         $this->logger?->notice('cp ' . Environment::getPublicPath() . '/fileadmin' . $sysFile['identifier'] . ' ' . Environment::getPublicPath() . '/fileadmin' . $newIdentifier);
 
         try {
             $oldfile = $folder->getStorage()->getFileByIdentifier($sysFile['identifier']);
-            if (!$oldfile instanceof AbstractFile) {
+            if (!$oldfile instanceof File) {
                 throw new FileDoesNotExistException(
                     'File is not found',
                     1780324354

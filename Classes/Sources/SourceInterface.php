@@ -35,6 +35,15 @@ interface SourceInterface extends LoggerAwareInterface
     public function getSiteConfig(mixed $id): array;
 
     /**
+     * Returns the Site Settings as an array
+     *
+     * @param mixed $id
+     *
+     * @return array<array-key, mixed>
+     */
+    public function getSiteSettings(mixed $id): array;
+
+    /**
      * @param array<array-key, mixed> $where
      */
     public function getRow(string $table, array $where = []): mixed;

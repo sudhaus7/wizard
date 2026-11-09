@@ -34,7 +34,6 @@ return [
             'disabled' => 'hidden',
         ],
         'type' => 'base',
-        'searchFields' => 'projektname,longname,domainname,',
         'iconfile' => 'EXT:sudhaus7_wizard/Resources/Public/Icons/icon.svg',
         'subtype_value_field' => 'sourceclass',
     ],
@@ -239,10 +238,6 @@ return [
             'displayCond' => 'FIELD:status:<:' . Creator::STATUS_READY,
             'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.flexinfo',
             'config' => [
-                'ds' => [
-                    'default' => 'FILE:EXT:sudhaus7_wizard/Configuration/Flexforms/Wizard.xml',
-                ],
-                'ds_pointerField' => 'base',
                 'type' => 'flex',
             ],
         ],

@@ -12,15 +12,17 @@
  */
 
 call_user_func(function (): void {
-    \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addPlugin(
-        [
-            'Inline CSV Element',
-            'inlinecsvelement',
-            'EXT:template/Resources/Public/Icons/Extension.svg',
-        ],
+    \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTcaSelectItem(
+        'tt_content',
         'CType',
-        'template'
+        [
+            'label' => 'Inline CSV Element',
+            'value' => 'inlinecsvelement',
+            'icon' => 'EXT:template/Resources/Public/Icons/Extension.svg',
+            'group' => 'plugins',
+        ]
     );
+    $GLOBALS['TCA']['tt_content']['ctrl']['typeicon_classes']['inlinecsvelement'] = 'EXT:template/Resources/Public/Icons/Extension.svg';
 
     $GLOBALS['TCA']['tt_content']['columns']['myrelations'] = [
         'config' => [
