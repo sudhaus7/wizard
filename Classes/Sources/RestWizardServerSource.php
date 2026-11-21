@@ -118,7 +118,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
      */
     public function getSiteConfig(mixed $id): array
     {
-        $result = $this->getAPI()->request('/siteconfig/' . $id);
+        $result = $this->withRetry('getSiteConfig ' . $id, fn(): array => $this->getAPI()->request('/siteconfig/' . $id));
         if (isset($result['rootPageId'])) {
             return $result;
         }
@@ -131,7 +131,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
      */
     public function getSiteSettings(mixed $id): array
     {
-        return $this->getAPI()->request('/sitesettings/' . $id);
+        return $this->withRetry('getSiteSettings ' . $id, fn(): array => $this->getAPI()->request('/sitesettings/' . $id));
     }
 
     /**
@@ -154,13 +154,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $this->logger?->debug('getRow ' . $endpoint);
 
         if (!isset($this->rowCache[$endpoint])) {
-            try {
-                $content = $this->getAPI()->request($endpoint);
-            } catch (Throwable $e) {
-                $this->logger?->warning('getRow ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
-                sleep(5);
-                $content = $this->getAPI()->request($endpoint);
-            }
+            $content = $this->withRetry('getRow ' . $endpoint, fn(): array => $this->getAPI()->request($endpoint));
             if ($table === 'pages') {
                 $this->rowCache[$endpoint] = $content;
             } else {
@@ -191,25 +185,12 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
             $endpoint = sprintf('content/%s/%s/%s', $table, $key, $value);
             $this->logger?->debug('getRows ' . $endpoint);
 
-            try {
-                $content = $this->getAPI()->request($endpoint);
-            } catch (Throwable $e) {
-                $this->logger?->warning('getRows ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
-                sleep(5);
-                $content = $this->getAPI()->request($endpoint);
-            }
+            $content = $this->withRetry('getRows ' . $endpoint, fn(): array => $this->getAPI()->request($endpoint));
         } else {
             $endpoint = sprintf('content/%s', $table);
             $this->logger?->debug('getRows ' . $endpoint);
 
-            try {
-                $content = $this->getAPI()->post($endpoint, $where);
-                //$content = $this->getAPI()->request($endpoint);
-            } catch (Throwable $e) {
-                $this->logger?->warning('getRows ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
-                sleep(5);
-                $content = $this->getAPI()->request($endpoint);
-            }
+            $content = $this->withRetry('getRows ' . $endpoint, fn(): array => $this->getAPI()->post($endpoint, $where));
         }
         foreach ($content as $row) {
             $cacheendpoint = sprintf('content/%s/uid/%d', $table, $row['uid']);
@@ -228,13 +209,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     {
         $endpoint = sprintf('tree/%d', $start);
         $this->logger?->debug('getTree ' . $endpoint);
-        try {
-            $content = $this->getAPI()->request($endpoint);
-        } catch (Throwable $e) {
-            $this->logger?->warning('getTree ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
-            sleep(5);
-            $content = $this->getAPI()->request($endpoint);
-        }
+        $content = $this->withRetry('getTree ' . $endpoint, fn(): array => $this->getAPI()->request($endpoint));
         return $content;
     }
 
@@ -280,13 +255,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         $endpoint = sprintf('content/%s', $columnConfig['config']['foreign_table']);
 
         $this->logger?->debug('getIRRE ' . $endpoint . ' ' . json_encode($where));
-        try {
-            $content = $this->getAPI()->post($endpoint, $where);
-        } catch (Throwable $e) {
-            $this->logger?->warning('getIrre ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
-            sleep(5);
-            $content = $this->getAPI()->post($endpoint, $where);
-        }
+        $content = $this->withRetry('getIrre ' . $endpoint, fn(): array => $this->getAPI()->post($endpoint, $where));
         return $content;
     }
 
@@ -408,13 +377,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
             $endpoint = sprintf('content/%s/file/%d', 'sys_file_metadata', $olduid);
             $this->logger?->debug('FILE metadata fetching ' . $endpoint);
 
-            try {
-                $content  = $this->getAPI()->request($endpoint);
-            } catch (Throwable $e) {
-                $this->logger?->warning('handleFile ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
-                sleep(5);
-                $content  = $this->getAPI()->request($endpoint);
-            }
+            $content = $this->withRetry('handleFile ' . $endpoint, fn(): array => $this->getAPI()->request($endpoint));
             if (!empty($content) && !empty($content[0])) {
                 $sysFileMetadata = $content[0];
 
@@ -476,13 +439,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         }
         $endpoint = sprintf('content/%s/uid_local/%d', $mmTable, $uid);
         $this->logger?->debug('getMM ' . $endpoint);
-        try {
-            $content  = $this->getAPI()->request($endpoint);
-        } catch (Throwable $e) {
-            $this->logger?->warning('getMM ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
-            sleep(5);
-            $content = $this->getAPI()->request($endpoint);
-        }
+        $content = $this->withRetry('getMM ' . $endpoint, fn(): array => $this->getAPI()->request($endpoint));
         return $content;
     }
 
@@ -502,13 +459,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     {
         $this->logger?->debug('getTables');
         if (empty($this->remoteTables)) {
-            try {
-                $this->remoteTables = $this->getAPI()->request('tables');
-            } catch (Throwable $e) {
-                $this->logger?->warning('tables failed retrying in 5 seconds once ' . $e->getMessage());
-                sleep(5);
-                $this->remoteTables = $this->getAPI()->request('tables');
-            }
+            $this->remoteTables = $this->withRetry('tables', fn(): array => $this->getAPI()->request('tables'));
         }
         return array_intersect(array_keys($GLOBALS['TCA']), $this->remoteTables);
     }
@@ -521,13 +472,7 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
     {
         $endpoint = 'content/pages/is_siteroot/1';
         $this->logger?->debug('getSites ' . $endpoint);
-        try {
-            $content = $this->getAPI()->request($endpoint);
-        } catch (Throwable $e) {
-            $this->logger?->warning('getSites ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
-            sleep(5);
-            $content = $this->getAPI()->request($endpoint);
-        }
+        $content = $this->withRetry('getSites ' . $endpoint, fn(): array => $this->getAPI()->request($endpoint));
         return $content;
     }
 
@@ -553,15 +498,30 @@ Allow: /typo3/sysext/frontend/Resources/Public/*
         if (count($preList) > 0) {
             $endpoint = sprintf('filter/%s/pid', $table);
             $this->logger?->debug('filterByPid ' . $endpoint);
-            try {
-                $filteredList = $this->getAPI()->post($endpoint, [ 'values' => implode(',', $preList) ]);
-            } catch (Throwable $e) {
-                $this->logger?->warning('filterByPid ' . $endpoint . ' failed retrying in 5 seconds once ' . $e->getMessage());
-                sleep(5);
-                $filteredList = $this->getAPI()->post($endpoint, [ 'values' => implode(',', $preList) ]);
-            }
+            $filteredList = $this->withRetry('filterByPid ' . $endpoint, fn(): array => $this->getAPI()->post($endpoint, [ 'values' => implode(',', $preList) ]));
         }
         return $filteredList;
+    }
+
+    /**
+     * Runs a request against the wizard server and retries it on failure with
+     * growing pauses. The request is repeated unchanged: the former single retry
+     * sent a failed POST in getRows() as GET without its parameters.
+     *
+     * @param callable(): array<array-key, mixed> $request
+     * @return array<array-key, mixed>
+     */
+    protected function withRetry(string $label, callable $request): array
+    {
+        foreach ([5, 15, 30, 60, 120] as $attempt => $pause) {
+            try {
+                return $request();
+            } catch (Throwable $e) {
+                $this->logger?->warning(sprintf('%s failed (attempt %d), retrying in %d seconds: %s', $label, $attempt + 1, $pause, $e->getMessage()));
+                sleep($pause);
+            }
+        }
+        return $request();
     }
 
     public function getCreateProcess(): CreateProcess
