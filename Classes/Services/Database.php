@@ -25,6 +25,9 @@ class Database implements SingletonInterface
     ) {}
 
     /**
+     * Inserts a row and returns the number of affected rows and the new uid. Only TCA tables have a uid, so
+     * the uid is 0 for any other table, an MM table for example.
+     *
      * @param array<string, mixed> $data
      * @return int[]
      */
@@ -32,6 +35,9 @@ class Database implements SingletonInterface
     {
         $conn = $this->connectionPool->getConnectionForTable($table);
         $rows = $conn->insert($table, $data);
+        if (!isset($GLOBALS['TCA'][$table])) {
+            return [$rows, 0];
+        }
         $newid = (int)$conn->lastInsertId();
 
         $this->referenceIndexUpdater->registerForUpdate($table, $newid, 0);
