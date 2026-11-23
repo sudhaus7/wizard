@@ -1,0 +1,40 @@
+name: tests
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  functional:
+    name: "functional tests with core v${{ matrix.core }} (PHP ${{ matrix.php-version }})"
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - core: '12'
+            php-version: '8.1'
+          - core: '12'
+            php-version: '8.4'
+          - core: '13'
+            php-version: '8.2'
+          - core: '13'
+            php-version: '8.5'
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v6
+
+      - name: "Prepare dependencies for TYPO3 v${{ matrix.core }}"
+        run: "Build/Scripts/runTests.sh -t ${{ matrix.core }} -p ${{ matrix.php-version }} -s composerUpdate"
+
+      - name: "Run PHP lint"
+        run: "Build/Scripts/runTests.sh -t ${{ matrix.core }} -p ${{ matrix.php-version }} -s lintPhp"
+
+      - name: "Functional SQLite"
+        run: "Build/Scripts/runTests.sh -t ${{ matrix.core }} -p ${{ matrix.php-version }} -s functional -d sqlite"
+
+      - name: "Functional MariaDB mysqli"
+        run: "Build/Scripts/runTests.sh -t ${{ matrix.core }} -p ${{ matrix.php-version }} -s functional -d mariadb -a mysqli"
+
+      - name: "Functional PostgreSQL"
+        run: "Build/Scripts/runTests.sh -t ${{ matrix.core }} -p ${{ matrix.php-version }} -s functional -d postgres"
