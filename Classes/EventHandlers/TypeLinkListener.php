@@ -29,6 +29,9 @@ final class TypeLinkListener
         if ($event->getColumntype() === 'link') {
             $fieldName = $event->getColumn();
             $record = $event->getRecord();
+            if (!is_string($record[$fieldName] ?? null)) {
+                return;
+            }
             $record[$fieldName] = $event->getCreateProcess()->translateTypolinkString($record[$fieldName]);
             $event->setRecord($record);
         }

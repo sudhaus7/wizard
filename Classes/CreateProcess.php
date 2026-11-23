@@ -376,7 +376,7 @@ final class CreateProcess implements LoggerAwareInterface
 
         unset($templateBackendUserGroup['uid']);
         $templateBackendUserGroup['title'] = $groupName;
-        $templateMountPoints = GeneralUtility::trimExplode(',', $templateBackendUserGroup['file_mountpoints']);
+        $templateMountPoints = GeneralUtility::trimExplode(',', (string)($templateBackendUserGroup['file_mountpoints'] ?? ''), true);
         $newMountPoints = [];
         $newMountPoints[] = $this->filemount['uid'];
 
@@ -426,7 +426,7 @@ final class CreateProcess implements LoggerAwareInterface
         $test = $res->fetchAssociative();
 
         if (!empty($test)) {
-            $groups = GeneralUtility::trimExplode(',', $test['usergroup'], true);
+            $groups = GeneralUtility::trimExplode(',', (string)($test['usergroup'] ?? ''), true);
             array_unshift($groups, $this->group['uid']);
             foreach ($groups as $k => $gid) {
                 if ($gid == $this->tmplGroup) {
@@ -434,7 +434,7 @@ final class CreateProcess implements LoggerAwareInterface
                 }
             }
             $test['usergroup'] = implode(',', $groups);
-            $mountpoints = GeneralUtility::trimExplode(',', $test['file_mountpoints'], true);
+            $mountpoints = GeneralUtility::trimExplode(',', (string)($test['file_mountpoints'] ?? ''), true);
             $mountpoints[] = $this->filemount['uid'];
             $test['file_mountpoints'] = implode(',', $mountpoints);
             $test['tstamp'] = time();
@@ -487,7 +487,7 @@ final class CreateProcess implements LoggerAwareInterface
 
         $tmpl['deleted'] = 0;
         $tmpl['disable'] = 0;
-        $groups = GeneralUtility::trimExplode(',', $tmpl['usergroup'], true);
+        $groups = GeneralUtility::trimExplode(',', (string)($tmpl['usergroup'] ?? ''), true);
         array_unshift($groups, $this->group['uid']);
         foreach ($groups as $k => $gid) {
             if ($gid == $this->tmplGroup) {
@@ -848,8 +848,11 @@ final class CreateProcess implements LoggerAwareInterface
                     $row = $event->getRecord();
 
                     if (
-                        ($columnConfig['config']['renderType'] ?? '') === 'inputLink'
-                        || ($columnConfig['config']['softref'] ?? '') === 'typolink'
+                        is_string($row[$column] ?? null)
+                        && (
+                            ($columnConfig['config']['renderType'] ?? '') === 'inputLink'
+                            || ($columnConfig['config']['softref'] ?? '') === 'typolink'
+                        )
                     ) {
                         $row[$column] = $this->translateTypolinkString($row[$column]);
                     }

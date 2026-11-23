@@ -222,6 +222,16 @@ final class PageAndContentGenerationTest extends FunctionalTestCase
         self::assertSame((string)$childPage['uid'], (string)$hiddenElement['tx_template_related_pages']);
     }
 
+    #[Test]
+    public function emptyNullableLinkStaysEmpty(): void
+    {
+        $this->runWizard();
+
+        $textElement = $this->findClonedRecord('tt_content', 'header', 'Text with links', 100);
+
+        self::assertNull($textElement['tx_template_optional_link']);
+    }
+
     private function runWizard(): void
     {
         $tester = new CommandTester($this->get(RunCommand::class));
