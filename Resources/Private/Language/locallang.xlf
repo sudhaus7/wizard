@@ -69,6 +69,12 @@
 				<source>Source Filemount</source>
 			</trans-unit>
 
+			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.status.refused.fields" xml:space="preserve">
+				<source>The status was reset to "editing" because these fields are empty: %s</source>
+			</trans-unit>
+			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.status.refused.configuration" xml:space="preserve">
+				<source>The status was reset to "editing" because the template rejected the configuration.</source>
+			</trans-unit>
         </body>
     </file>
 </xliff>

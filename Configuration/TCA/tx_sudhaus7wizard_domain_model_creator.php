@@ -189,6 +189,7 @@ return [
             'label' => 'LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.contact',
             'config' => [
                 'type' => 'email',
+                'required' => true,
             ],
         ],
 

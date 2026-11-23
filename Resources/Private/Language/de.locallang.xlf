@@ -82,6 +82,14 @@
 				<source>Template/Sitepackage</source>
 				<target>Template/Vorlage</target>
 			</trans-unit>
+			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.status.refused.fields" xml:space="preserve">
+				<source>The status was reset to "editing" because these fields are empty: %s</source>
+				<target>Der Status wurde auf "editing" zurückgesetzt, weil diese Felder leer sind: %s</target>
+			</trans-unit>
+			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.status.refused.configuration" xml:space="preserve">
+				<source>The status was reset to "editing" because the template rejected the configuration.</source>
+				<target>Der Status wurde auf "editing" zurückgesetzt, weil die Vorlage die Konfiguration abgelehnt hat.</target>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>
