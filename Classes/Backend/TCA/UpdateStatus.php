@@ -13,12 +13,17 @@
 
 namespace SUDHAUS7\Sudhaus7Wizard\Backend\TCA;
 
+use SUDHAUS7\Sudhaus7Wizard\Domain\Model\Creator;
 use SUDHAUS7\Sudhaus7Wizard\Interfaces\WizardProcessInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
+use TYPO3\CMS\Core\Localization\LanguageService;
+use TYPO3\CMS\Core\Messaging\FlashMessage;
+use TYPO3\CMS\Core\Messaging\FlashMessageService;
+use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 final class UpdateStatus
@@ -40,13 +45,12 @@ final class UpdateStatus
             if ($status == 'new') {
                 $fieldArray['status'] = 0;
             } else {
-                $row = BackendUtility::getRecord($table, $id);
+                $row = BackendUtility::getRecord($table, $id) ?? [];
 
                 foreach ($fieldArray as $k => $v) {
                     $row[$k] = $v;
                 }
 
-                $ret = true;
                 $fields = [
                     'base',
                     'sourceclass',
@@ -56,11 +60,13 @@ final class UpdateStatus
                     'domainname',
                     'contact',
                 ];
+                $missingFields = [];
                 foreach ($fields as $f) {
                     if (empty($row[$f])) {
-                        $ret = false;
+                        $missingFields[] = $f;
                     }
                 }
+                $ret = $missingFields === [];
 
                 if (!empty($row['shortname'])) {
                     if ($globalConf['unifyshortname']) {
@@ -105,9 +111,41 @@ final class UpdateStatus
                     }
                 }
                 if (!$ret) {
+                    if ((int)($row['status'] ?? Creator::STATUS_EDITING) !== Creator::STATUS_EDITING) {
+                        $this->reportRefusedStatus($missingFields);
+                    }
                     $fieldArray['status'] = 0;
                 }
             }
         }
+    }
+
+    /**
+     * Tells the editor why the status they chose was not taken over.
+     *
+     * @param list<string> $missingFields
+     */
+    private function reportRefusedStatus(array $missingFields): void
+    {
+        $languageService = $GLOBALS['LANG'] ?? null;
+        if (!$languageService instanceof LanguageService) {
+            return;
+        }
+        if ($missingFields === []) {
+            $message = $languageService->sL('LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.status.refused.configuration');
+        } else {
+            $labels = [];
+            foreach ($missingFields as $field) {
+                $label = $languageService->sL($GLOBALS['TCA']['tx_sudhaus7wizard_domain_model_creator']['columns'][$field]['label'] ?? '');
+                $labels[] = $label !== '' ? $label : $field;
+            }
+            $message = sprintf(
+                $languageService->sL('LLL:EXT:sudhaus7_wizard/Resources/Private/Language/locallang.xlf:tx_sudhaus7wizard_domain_model_creator.status.refused.fields'),
+                implode(', ', $labels)
+            );
+        }
+        GeneralUtility::makeInstance(FlashMessageService::class)
+            ->getMessageQueueByIdentifier()
+            ->enqueue(new FlashMessage($message, '', ContextualFeedbackSeverity::WARNING, true));
     }
 }
