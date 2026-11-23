@@ -398,7 +398,7 @@ final class CreateProcess implements LoggerAwareInterface
 
         unset($tmpl['uid']);
         $tmpl['title'] = $groupName;
-        $tmp = GeneralUtility::trimExplode(',', $tmpl['file_mountpoints']);
+        $tmp = GeneralUtility::trimExplode(',', (string)($tmpl['file_mountpoints'] ?? ''), true);
         $tmp[] = $this->filemount['uid'];
         $tmpl['file_mountpoints'] = implode(',', $tmp);
         $tmpl['crdate'] = time();
@@ -440,7 +440,7 @@ final class CreateProcess implements LoggerAwareInterface
         $test = $res->fetchAssociative();
 
         if (!empty($test)) {
-            $groups = GeneralUtility::trimExplode(',', $test['usergroup'], true);
+            $groups = GeneralUtility::trimExplode(',', (string)($test['usergroup'] ?? ''), true);
             array_unshift($groups, $this->group['uid']);
             foreach ($groups as $k => $gid) {
                 if ($gid == $this->tmplGroup) {
@@ -448,7 +448,7 @@ final class CreateProcess implements LoggerAwareInterface
                 }
             }
             $test['usergroup'] = implode(',', $groups);
-            $mountpoints = GeneralUtility::trimExplode(',', $test['file_mountpoints'], true);
+            $mountpoints = GeneralUtility::trimExplode(',', (string)($test['file_mountpoints'] ?? ''), true);
             $mountpoints[] = $this->filemount['uid'];
             $test['file_mountpoints'] = implode(',', $mountpoints);
             $test['tstamp'] = time();
@@ -501,7 +501,7 @@ final class CreateProcess implements LoggerAwareInterface
 
         $tmpl['deleted'] = 0;
         $tmpl['disable'] = 0;
-        $groups = GeneralUtility::trimExplode(',', $tmpl['usergroup'], true);
+        $groups = GeneralUtility::trimExplode(',', (string)($tmpl['usergroup'] ?? ''), true);
         array_unshift($groups, $this->group['uid']);
         foreach ($groups as $k => $gid) {
             if ($gid == $this->tmplGroup) {
@@ -1086,8 +1086,7 @@ final class CreateProcess implements LoggerAwareInterface
             if (isset($columnConfig['config']['MM'])) {
                 $this->fixMMRelation($columnConfig['config']['foreign_table'], $columnConfig['config']['MM'], $oldUid, $newUid);
             } else {
-                $val = $row[$column];
-                $list = GeneralUtility::trimExplode(',', $val, true);
+                $list = GeneralUtility::trimExplode(',', (string)($row[$column] ?? ''), true);
                 $newList = [];
                 foreach ($list as $tmpOldUid) {
                     $tmp = GeneralUtility::trimExplode('_', $tmpOldUid, true);
