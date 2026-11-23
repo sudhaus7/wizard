@@ -6,13 +6,13 @@
 ,33,1,0,1,0,1,"Deleted page","/deleted-page",0,1792,31,10,28,21
 ,34,30,0,1,0,0,"Links Child","/links/child",0,256,31,10,28,21
 ,40,0,1,1,0,0,"Other site","/other-site",0,2048,31,10,28,21
-"tt_content",,,,,,,,,,,,,
-,"uid","pid","CType","colPos","sorting","hidden","deleted","header","header_link","bodytext","records","sys_language_uid","l18n_parent"
-,100,30,"text",0,256,0,0,"Text with links","t3://page?uid=34","<p><a href=""t3://page?uid=34"">Child</a> <a href=""t3://page?uid=40"">Other site</a></p>","",0,0
-,101,30,"text",1,512,1,0,"Hidden element","","","",0,0
-,102,30,"text",0,768,0,1,"Deleted element","","","",0,0
-,103,34,"shortcut",0,256,0,0,"Reference to text","","","tt_content_100",0,0
-,104,30,"text",0,256,0,0,"Translated text","","","",1,100
+"tt_content",,,,,,,,,,,,,,
+,"uid","pid","CType","colPos","sorting","hidden","deleted","header","header_link","bodytext","records","sys_language_uid","l18n_parent","tx_template_related_pages"
+,100,30,"text",0,256,0,0,"Text with links","t3://page?uid=34","<p><a href=""t3://page?uid=34"">Child</a> <a href=""t3://page?uid=40"">Other site</a></p>","",0,0,"\NULL"
+,101,30,"text",1,512,1,0,"Hidden element","","","",0,0,"34"
+,102,30,"text",0,768,0,1,"Deleted element","","","",0,0,""
+,103,34,"shortcut",0,256,0,0,"Reference to text","","","tt_content_100",0,0,""
+,104,30,"text",0,256,0,0,"Translated text","","","",1,100,""
 "tx_template_pages_related_mm",,,,
 ,"uid_local","uid_foreign","sorting","sorting_foreign"
 ,30,34,1,0
