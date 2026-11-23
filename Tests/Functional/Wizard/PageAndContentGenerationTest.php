@@ -180,6 +180,27 @@ final class PageAndContentGenerationTest extends FunctionalTestCase
         self::assertSame($textElement['uid'], $translation['l18n_parent']);
     }
 
+    #[Test]
+    public function mmRelationOfAClonedPagePointsToTheClonedTargetPage(): void
+    {
+        $this->runWizard();
+
+        $linksPage = $this->findClonedRecord('pages', 'slug', '/links', 30);
+        $childPage = $this->findClonedRecord('pages', 'slug', '/links/child', 34);
+
+        $queryBuilder = $this->get(ConnectionPool::class)->getQueryBuilderForTable('tx_template_pages_related_mm');
+        $foreignUids = $queryBuilder
+            ->select('uid_foreign')
+            ->from('tx_template_pages_related_mm')
+            ->where(
+                $queryBuilder->expr()->eq('uid_local', $queryBuilder->createNamedParameter($linksPage['uid'], Connection::PARAM_INT))
+            )
+            ->executeQuery()
+            ->fetchFirstColumn();
+
+        self::assertSame([$childPage['uid']], array_map(intval(...), $foreignUids));
+    }
+
     private function runWizard(): void
     {
         $tester = new CommandTester($this->get(RunCommand::class));

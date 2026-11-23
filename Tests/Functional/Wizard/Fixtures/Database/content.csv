@@ -13,3 +13,6 @@
 ,102,30,"text",0,768,0,1,"Deleted element","","","",0,0
 ,103,34,"shortcut",0,256,0,0,"Reference to text","","","tt_content_100",0,0
 ,104,30,"text",0,256,0,0,"Translated text","","","",1,100
+"tx_template_pages_related_mm",,,,
+,"uid_local","uid_foreign","sorting","sorting_foreign"
+,30,34,1,0
