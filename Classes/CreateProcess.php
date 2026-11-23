@@ -1092,8 +1092,7 @@ final class CreateProcess implements LoggerAwareInterface
             if (isset($columnConfig['config']['MM'])) {
                 $this->fixMMRelation($columnConfig['config']['foreign_table'], $columnConfig['config']['MM'], $oldUid, $newUid);
             } else {
-                $val = $row[$column];
-                $list = GeneralUtility::trimExplode(',', $val, true);
+                $list = GeneralUtility::trimExplode(',', (string)($row[$column] ?? ''), true);
                 $newList = [];
                 foreach ($list as $tmpOldUid) {
                     $tmp = GeneralUtility::trimExplode('_', $tmpOldUid, true);

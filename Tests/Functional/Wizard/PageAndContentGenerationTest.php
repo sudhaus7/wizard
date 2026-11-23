@@ -201,6 +201,27 @@ final class PageAndContentGenerationTest extends FunctionalTestCase
         self::assertSame([$childPage['uid']], array_map(intval(...), $foreignUids));
     }
 
+    #[Test]
+    public function emptySelectRelationWithoutMmStaysEmpty(): void
+    {
+        $this->runWizard();
+
+        $textElement = $this->findClonedRecord('tt_content', 'header', 'Text with links', 100);
+
+        self::assertNull($textElement['tx_template_related_pages']);
+    }
+
+    #[Test]
+    public function selectRelationWithoutMmPointsToTheClonedPage(): void
+    {
+        $this->runWizard();
+
+        $childPage = $this->findClonedRecord('pages', 'slug', '/links/child', 34);
+        $hiddenElement = $this->findClonedRecord('tt_content', 'header', 'Hidden element', 101);
+
+        self::assertSame((string)$childPage['uid'], (string)$hiddenElement['tx_template_related_pages']);
+    }
+
     private function runWizard(): void
     {
         $tester = new CommandTester($this->get(RunCommand::class));
