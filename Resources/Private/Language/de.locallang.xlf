@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <xliff version="1.0">
-	<file target-language="de" datatype="plaintext" original="messages" date="2023-03-18T13:49:12Z">
+	<file source-language="en" target-language="de" datatype="plaintext" original="messages" date="2023-03-18T13:49:12Z">
 		<header>
 			<generator>LFEditor</generator>
 		</header>
@@ -24,6 +24,7 @@
 			</trans-unit>
 
 			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.valuemapping" xml:space="preserve">
+				<source>Value Mapping Configuration File. - must be a path to a YAML file containing the table und field translation mapping. (Normaly only used in remote source with different content types)</source>
 				<target>Value Mapping Konfigurationsdatei. - Eine YAML Datei welche die value replacements von Feldern in Tabellen definiert. (Nur relevant bei Quellen ausserhalb der lokalen Datenbank)</target>
 			</trans-unit>
 			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.domainname" xml:space="preserve">
@@ -36,11 +37,11 @@
 				<target>E-Mail-Adresse zur Benachrichtigung wenn der Auftrag ausgeführt wurde</target>
 			</trans-unit>
 			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.contact" xml:space="preserve">
-				<target>Contact E-Mail (e.q. info@our-little-farm.com)</target>
+				<source>Contact E-Mail (e.q. info@our-little-farm.com)</source>
 				<target>Kontakt E-Mail (z.B. info@unsere-kleine-farm.de)</target>
 			</trans-unit>
 			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.reduser" xml:space="preserve">
-				<target>Editor username (z.B. ourlittlefarm - used for the backend login)</target>
+				<source>Editor username (z.B. ourlittlefarm - used for the backend login)</source>
 				<target>Redakteur Benutzername (z.B. unserekleinefarm - wird beim Anmelden verwendet)</target>
 			</trans-unit>
 			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.redpass" xml:space="preserve">
@@ -56,7 +57,7 @@
 				<target>Stil/Farbgebung</target>
 			</trans-unit>
 			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.flexinfo" xml:space="preserve">
-				<target>Theme specific configuration</target>
+				<source>Theme specific configuration</source>
 				<target>Weitere Konfiguration</target>
 			</trans-unit>
 			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.status" xml:space="preserve">
@@ -65,16 +66,20 @@
 			</trans-unit>
 
 			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.source" xml:space="preserve">
+				<source>Source Tree</source>
 				<target>Quellseite</target>
 			</trans-unit>
 			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.sourcetype" xml:space="preserve">
+				<source>Source Type</source>
 				<target>Art der Quelle</target>
 			</trans-unit>
 			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.sourcetype.localdb" xml:space="preserve">
+				<source>System/Local Database</source>
 				<target>System/Lokale Datenbank</target>
 			</trans-unit>
 
 			<trans-unit id="tx_sudhaus7wizard_domain_model_creator.base" xml:space="preserve">
+				<source>Template/Sitepackage</source>
 				<target>Template/Vorlage</target>
 			</trans-unit>
 		</body>
