@@ -120,7 +120,7 @@ class CreatorRepository
         $db = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getQueryBuilderForTable(self::$table);
         $statement = $db
-            ->select('*')
+            ->count('*')
             ->from(self::$table)
             ->where(
                 $db->expr()->eq(
@@ -132,7 +132,7 @@ class CreatorRepository
 
         $result = $statement->executeQuery();
 
-        return $result->rowCount() > 0;
+        return $result->fetchOne() > 0;
     }
 
     public function updateStatus(Creator $creator): void
